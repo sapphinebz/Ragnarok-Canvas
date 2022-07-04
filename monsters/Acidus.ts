@@ -1,5 +1,6 @@
 import { defer, EMPTY, Observable } from 'rxjs';
 import { takeWhile } from 'rxjs/operators';
+import { loadAcidusAttackSound } from '../sounds/acidus-attack';
 import { CropImage, Monster } from './Monster';
 
 export class Acidus extends Monster {
@@ -12,7 +13,7 @@ export class Acidus extends Monster {
   width = 119;
   height = 120;
 
-  attackAudio = new Audio();
+  attackAudio = loadAcidusAttackSound();
   //
 
   frames: CropImage[][] = [
@@ -44,9 +45,7 @@ export class Acidus extends Monster {
       'https://www.spriters-resource.com/resources/sheets/123/126281.png?updated=1582640793'
     );
 
-    this.attackAudio.volume = 0.3;
-    this.attackAudio.src =
-      'https://tcrf.net/images/d/d6/RagnarokOnline_UnusedGhoul_attack2.ogg';
+    this.attackAudio.volume = 0.05;
   }
 
   getFrameEntry(frameY: number, frameX: number) {
