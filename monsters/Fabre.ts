@@ -34,7 +34,7 @@ export class Fabre extends Monster {
       'https://www.spriters-resource.com/resources/sheets/124/127228.png?updated=1583523949'
     );
 
-    this.dyingAudio.volume = 0.2;
+    this.dyingAudio.volume = 0.05;
     this.dyingAudio.src =
       'https://tcrf.net/images/0/06/RagnarokOnline_UnusedCaramel_die.ogg';
   }

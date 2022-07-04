@@ -1,5 +1,6 @@
 import { defer, ignoreElements, merge, NEVER, Observable } from 'rxjs';
 import { concatMap, connect, filter, takeWhile, tap } from 'rxjs/operators';
+import { loadPoringDeadSound } from '../sounds/poring-dead';
 import { loadPoringWalkSound } from '../sounds/poring-walk';
 import { CropImage, Monster } from './Monster';
 
@@ -13,9 +14,7 @@ export class Poring extends Monster {
   width = 60;
   height = 60;
 
-  dyingAudio = new Audio(
-    'https://huds.tf/site/xthreads_attach.php/1323_1524949826_35999918/45820cab39b15ca17c08b3288af5f9ec/killsound.wav'
-  );
+  dyingAudio = loadPoringDeadSound();
 
   walkingAudio = loadPoringWalkSound();
 
@@ -77,8 +76,8 @@ export class Poring extends Monster {
       'https://www.spriters-resource.com/resources/sheets/124/126666.png?updated=1582904836'
     );
 
-    this.dyingAudio.volume = 0.2;
-    this.walkingAudio.volume = 0.2;
+    this.dyingAudio.volume = 0.05;
+    this.walkingAudio.volume = 0.05;
   }
 
   getFrameEntry(frameY: number, frameX: number) {
