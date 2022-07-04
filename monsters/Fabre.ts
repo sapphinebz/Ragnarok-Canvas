@@ -1,5 +1,6 @@
 import { defer, EMPTY, Observable, takeWhile, timer } from 'rxjs';
 import { onErrorResumeNext } from 'rxjs/operators';
+import { loadFabreDeadSound } from '../sounds/fabre-dead';
 import { CropImage, Monster } from './Monster';
 
 export class Fabre extends Monster {
@@ -12,7 +13,7 @@ export class Fabre extends Monster {
   width = 50;
   height = 40;
 
-  dyingAudio = new Audio();
+  dyingAudio = loadFabreDeadSound();
 
   frames: CropImage[][] = [
     [
@@ -35,8 +36,6 @@ export class Fabre extends Monster {
     );
 
     this.dyingAudio.volume = 0.05;
-    this.dyingAudio.src =
-      'https://tcrf.net/images/0/06/RagnarokOnline_UnusedCaramel_die.ogg';
   }
 
   getFrameEntry(frameY: number, frameX: number): CropImage {
