@@ -1,5 +1,6 @@
 import { defer, ignoreElements, merge, NEVER, Observable } from 'rxjs';
 import { concatMap, connect, filter, takeWhile, tap } from 'rxjs/operators';
+import { loadPoringWalkSound } from '../sounds/poring-walk';
 import { CropImage, Monster } from './Monster';
 
 export class Poring extends Monster {
@@ -16,9 +17,7 @@ export class Poring extends Monster {
     'https://huds.tf/site/xthreads_attach.php/1323_1524949826_35999918/45820cab39b15ca17c08b3288af5f9ec/killsound.wav'
   );
 
-  walkingAudio = new Audio(
-    'https://download1642.mediafire.com/nek0uebb00wg/jafv1pupj9iwvp1/Poring_Walk.mp3'
-  );
+  walkingAudio = loadPoringWalkSound();
 
   frames: CropImage[][] = [
     [
