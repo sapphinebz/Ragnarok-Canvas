@@ -6,14 +6,12 @@ import {
   tap,
   switchMap,
   animationFrameScheduler,
-  interval,
   share,
   filter,
   Subject,
   timer,
   from,
   AsyncSubject,
-  exhaustMap,
   merge,
   pipe,
   OperatorFunction,
@@ -30,7 +28,6 @@ import {
   map,
   mergeMap,
   onErrorResumeNext,
-  repeat,
   shareReplay,
   takeLast,
   takeUntil,
@@ -39,7 +36,6 @@ import {
 import { Acidus } from './monsters/Acidus';
 import { Poring } from './monsters/Poring';
 import { Monster } from './monsters/Monster';
-import { GeffenMonk } from './monsters/GeffenMonk';
 import { Fabre } from './monsters/Fabre';
 
 const canvas = document.querySelector<HTMLCanvasElement>('canvas');
@@ -118,11 +114,7 @@ onCanvasRender$.subscribe(() => {
     canvas.width - canvas.width * 0.1,
     canvas.height * 0.05
   );
-
-  // monk.drawImage();
 });
-
-// monk.standing().subscribe(() => tick());
 
 killCount$.subscribe(() => tick());
 
