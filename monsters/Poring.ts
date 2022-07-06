@@ -2,6 +2,7 @@ import { defer, ignoreElements, merge, NEVER, Observable } from 'rxjs';
 import { concatMap, connect, filter, takeWhile, tap } from 'rxjs/operators';
 import { loadPoringDeadSound } from '../sounds/poring-dead';
 import { loadPoringWalkSound } from '../sounds/poring-walk';
+import { tapAtXFrame } from '../utils/tap-at-x-frame';
 import { CropImage, Monster } from './Monster';
 
 export class Poring extends Monster {
@@ -95,14 +96,10 @@ export class Poring extends Monster {
       this.frameY = 3;
 
       return this.createForwardFrame(150, 0, 5).pipe(
-        connect((frameX$) => {
-          const sound$ = frameX$.pipe(
-            filter((frameX) => frameX === 2),
-            tap(() => {
-              this.dyingAudio.play();
-            })
-          );
-          return merge(frameX$, sound$.pipe(ignoreElements()));
+        tap((frameX) => {
+          if (frameX === 2) {
+            this.dyingAudio.play();
+          }
         }),
         takeWhile((frameX) => {
           return frameX + 1 <= 5;
