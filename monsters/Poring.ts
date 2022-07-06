@@ -93,8 +93,17 @@ export class Poring extends Monster {
   dying(): Observable<any> {
     return defer(() => {
       this.frameY = 3;
-      this.dyingAudio.play();
+
       return this.createForwardFrame(150, 0, 5).pipe(
+        connect((frameX$) => {
+          const sound$ = frameX$.pipe(
+            filter((frameX) => frameX === 2),
+            tap(() => {
+              this.dyingAudio.play();
+            })
+          );
+          return merge(frameX$, sound$.pipe(ignoreElements()));
+        }),
         takeWhile((frameX) => {
           return frameX + 1 <= 5;
         })
