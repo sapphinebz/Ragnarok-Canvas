@@ -2,7 +2,6 @@ import { defer, ignoreElements, merge, NEVER, Observable } from 'rxjs';
 import { concatMap, connect, filter, takeWhile, tap } from 'rxjs/operators';
 import { loadPoringDeadSound } from '../sounds/poring-dead';
 import { loadPoringWalkSound } from '../sounds/poring-walk';
-import { tapAtXFrame } from '../utils/tap-at-x-frame';
 import { CropImage, Monster } from './Monster';
 
 export class Poring extends Monster {
