@@ -94,7 +94,7 @@ export class Poring extends Monster {
     return defer(() => {
       this.frameY = 3;
 
-      return this.createForwardFrame(150, 0, 5).pipe(
+      return this.createForwardFrame(100, 0, 5).pipe(
         tap((frameX) => {
           if (frameX === 2) {
             this.dyingAudio.play();

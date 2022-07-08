@@ -146,9 +146,6 @@ export abstract class Monster {
 
   walkingDown() {
     return defer(() => {
-      if (this.canvas.height - this.y <= 80) {
-        return EMPTY;
-      }
       return this.walking().pipe(
         tap(() => {
           this.moveDown();
@@ -159,9 +156,6 @@ export abstract class Monster {
   }
 
   walkingUp() {
-    if (this.y <= 80) {
-      return EMPTY;
-    }
     return this.walking().pipe(
       tap(() => {
         this.moveUp();
@@ -171,9 +165,6 @@ export abstract class Monster {
   }
 
   walkingLeft() {
-    if (this.x <= 80) {
-      return EMPTY;
-    }
     return this.walking().pipe(
       tap(() => {
         this.moveLeft();
@@ -183,9 +174,6 @@ export abstract class Monster {
   }
 
   walkingRight() {
-    if (this.canvas.width - this.x <= 80) {
-      return EMPTY;
-    }
     return this.walking().pipe(
       tap(() => {
         this.moveRight();
@@ -195,9 +183,6 @@ export abstract class Monster {
   }
 
   walkingTopLeft() {
-    if (this.y <= 80 || this.x <= 80) {
-      return EMPTY;
-    }
     return this.walking().pipe(
       tap(() => {
         this.moveTopLeft();
@@ -207,9 +192,6 @@ export abstract class Monster {
   }
 
   walkingTopRight() {
-    if (this.y <= 80 || this.canvas.width - this.x <= 80) {
-      return EMPTY;
-    }
     return this.walking().pipe(
       tap(() => {
         this.moveTopRight();
@@ -219,9 +201,6 @@ export abstract class Monster {
   }
 
   walkingBottomLeft() {
-    if (this.canvas.height - this.y <= 80 || this.x <= 80) {
-      return EMPTY;
-    }
     return this.walking().pipe(
       tap(() => {
         this.moveBottomLeft();
@@ -231,9 +210,6 @@ export abstract class Monster {
   }
 
   walkingBottomRight() {
-    if (this.canvas.height - this.y <= 80 || this.canvas.width - this.x <= 80) {
-      return EMPTY;
-    }
     return this.walking().pipe(
       tap(() => {
         this.moveBottomRight();
