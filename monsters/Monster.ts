@@ -86,7 +86,7 @@ export abstract class Monster {
   drawImage() {
     const image$ =
       this.direction === 'left' ? this.leftImage$ : this.rightImage$;
-    image$.subscribe((image) => {
+    image$.pipe(take(1)).subscribe((image) => {
       const frameXEntry = this.getFrameEntry(this.frameY, this.frameX);
       if (frameXEntry) {
         let { offsetX, offsetY, width, height, marginHeight, marginWidth } =

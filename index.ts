@@ -51,7 +51,7 @@ const onWindowResize$ = fromEvent(window, 'resize').pipe(
 const acidus = new Acidus(canvas);
 // const monk = new GeffenMonk(canvas);
 
-const porings = Array.from({ length: 1 }, () => new Poring(canvas));
+const porings = Array.from({ length: 20 }, () => new Poring(canvas));
 const fabres = Array.from({ length: 0 }, () => new Fabre(canvas));
 const onRespawnMonster$ = new Subject<Monster>();
 
