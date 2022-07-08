@@ -4,6 +4,7 @@ import {
   defer,
   EMPTY,
   first,
+  forkJoin,
   from,
   fromEvent,
   interval,
@@ -46,7 +47,7 @@ export abstract class Monster {
   width: number;
   height: number;
   isDied$ = new BehaviorSubject<boolean>(false);
-  direction = 'right';
+  direction: 'left' | 'right' = 'right';
 
   get isDie() {
     return this.isDied$.value;
@@ -55,7 +56,8 @@ export abstract class Monster {
     this.isDied$.next(value);
   }
   onDied$ = this.isDied$.pipe(filter((isDied) => isDied === true));
-  image$ = new ReplaySubject<HTMLImageElement>(1);
+  leftImage$ = new ReplaySubject<HTMLImageElement>(1);
+  rightImage$ = new ReplaySubject<HTMLImageElement>(1);
 
   get ctx() {
     return this.canvas.getContext('2d');
@@ -63,31 +65,39 @@ export abstract class Monster {
 
   constructor(
     public canvas: HTMLCanvasElement,
-    public src: string | HTMLImageElement
+    public leftImage: HTMLImageElement,
+    public rightImage: HTMLImageElement
   ) {
-    let image: HTMLImageElement;
-    if (typeof src === 'string') {
-      image = new Image();
-      image.src = src;
-    } else {
-      image = src;
-    }
-    fromEvent(image, 'load')
-      .pipe(map(() => image))
+    fromEvent(leftImage, 'load')
       .pipe(take(1))
-      .subscribe((value) => {
-        this.image$.next(value);
+      .subscribe(() => {
+        this.leftImage$.next(leftImage);
+      });
+
+    fromEvent(rightImage, 'load')
+      .pipe(take(1))
+      .subscribe(() => {
+        this.rightImage$.next(rightImage);
       });
   }
 
   abstract getFrameEntry(frameY: number, frameX: number): CropImage;
 
   drawImage() {
-    this.image$.pipe(first()).subscribe((image) => {
+    const image$ =
+      this.direction === 'left' ? this.leftImage$ : this.rightImage$;
+    image$.subscribe((image) => {
       const frameXEntry = this.getFrameEntry(this.frameY, this.frameX);
       if (frameXEntry) {
         let { offsetX, offsetY, width, height, marginHeight, marginWidth } =
           frameXEntry;
+
+        if (this.direction === 'right') {
+          offsetX = image.width - offsetX - width;
+
+          marginHeight = (marginHeight ?? 0) * -1;
+          marginWidth = (marginWidth ?? 0) * -1;
+        }
         offsetY ??= this.height * this.frameY;
         height ??= this.height;
         marginHeight ??= 0;
@@ -156,6 +166,7 @@ export abstract class Monster {
 
   walkingDown() {
     return defer(() => {
+      this.direction = 'left';
       return this.walking().pipe(
         tap(() => {
           this.moveDown();
@@ -166,66 +177,87 @@ export abstract class Monster {
   }
 
   walkingUp() {
-    return this.walking().pipe(
-      tap(() => {
-        this.moveUp();
-      }),
-      this.takeWhileWithInCanvas()
-    );
+    return defer(() => {
+      this.direction = 'right';
+      return this.walking().pipe(
+        tap(() => {
+          this.moveUp();
+        }),
+        this.takeWhileWithInCanvas()
+      );
+    });
   }
 
   walkingLeft() {
-    return this.walking().pipe(
-      tap(() => {
-        this.moveLeft();
-      }),
-      this.takeWhileWithInCanvas()
-    );
+    return defer(() => {
+      this.direction = 'left';
+      return this.walking().pipe(
+        tap(() => {
+          this.moveLeft();
+        }),
+        this.takeWhileWithInCanvas()
+      );
+    });
   }
 
   walkingRight() {
-    return this.walking().pipe(
-      tap(() => {
-        this.moveRight();
-      }),
-      this.takeWhileWithInCanvas()
-    );
+    return defer(() => {
+      this.direction = 'right';
+      return this.walking().pipe(
+        tap(() => {
+          this.moveRight();
+        }),
+        this.takeWhileWithInCanvas()
+      );
+    });
   }
 
   walkingTopLeft() {
-    return this.walking().pipe(
-      tap(() => {
-        this.moveTopLeft();
-      }),
-      this.takeWhileWithInCanvas()
-    );
+    return defer(() => {
+      this.direction = 'left';
+      return this.walking().pipe(
+        tap(() => {
+          this.moveTopLeft();
+        }),
+        this.takeWhileWithInCanvas()
+      );
+    });
   }
 
   walkingTopRight() {
-    return this.walking().pipe(
-      tap(() => {
-        this.moveTopRight();
-      }),
-      this.takeWhileWithInCanvas()
-    );
+    return defer(() => {
+      this.direction = 'right';
+      return this.walking().pipe(
+        tap(() => {
+          this.moveTopRight();
+        }),
+        this.takeWhileWithInCanvas()
+      );
+    });
   }
 
   walkingBottomLeft() {
-    return this.walking().pipe(
-      tap(() => {
-        this.moveBottomLeft();
-      }),
-      this.takeWhileWithInCanvas()
-    );
+    return defer(() => {
+      this.direction = 'left';
+      return this.walking().pipe(
+        tap(() => {
+          this.moveBottomLeft();
+        }),
+        this.takeWhileWithInCanvas()
+      );
+    });
   }
 
   walkingBottomRight() {
-    return this.walking().pipe(
-      tap(() => {
-        this.moveBottomRight();
-      }),
-      this.takeWhileWithInCanvas()
-    );
+    return defer(() => {
+      this.direction = 'right';
+      return this.walking().pipe(
+        tap(() => {
+          this.moveBottomRight();
+        }),
+        this.takeWhileWithInCanvas()
+      );
+    });
   }
 
   randomAction() {

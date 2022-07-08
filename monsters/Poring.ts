@@ -2,6 +2,8 @@ import { defer, ignoreElements, merge, NEVER, Observable } from 'rxjs';
 import { concatMap, connect, filter, takeWhile, tap } from 'rxjs/operators';
 import { loadPoringDeadSound } from '../sounds/poring-dead';
 import { loadPoringWalkSound } from '../sounds/poring-walk';
+import { loadPoringSpriteLeft } from '../sprites/load-poring-left';
+import { loadPoringSpriteRight } from '../sprites/load-poring-right';
 import { CropImage, Monster } from './Monster';
 
 export class Poring extends Monster {
@@ -71,10 +73,7 @@ export class Poring extends Monster {
   ];
 
   constructor(canvas: HTMLCanvasElement) {
-    super(
-      canvas,
-      'https://www.spriters-resource.com/resources/sheets/124/126666.png?updated=1582904836'
-    );
+    super(canvas, loadPoringSpriteLeft(), loadPoringSpriteRight());
 
     this.dyingAudio.volume = 0.05;
     this.walkingAudio.volume = 0.05;

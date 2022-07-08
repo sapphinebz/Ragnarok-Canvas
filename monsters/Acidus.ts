@@ -1,6 +1,7 @@
 import { defer, EMPTY, Observable } from 'rxjs';
 import { takeWhile } from 'rxjs/operators';
 import { loadAcidusAttackSound } from '../sounds/acidus-attack';
+import { loadAcidusLeftSprite } from '../sprites/load-acidus-left';
 import { CropImage, Monster } from './Monster';
 
 export class Acidus extends Monster {
@@ -40,10 +41,7 @@ export class Acidus extends Monster {
     ],
   ];
   constructor(public canvas: HTMLCanvasElement) {
-    super(
-      canvas,
-      'https://www.spriters-resource.com/resources/sheets/123/126281.png?updated=1582640793'
-    );
+    super(canvas, loadAcidusLeftSprite(), loadAcidusLeftSprite());
 
     this.attackAudio.volume = 0.05;
   }
