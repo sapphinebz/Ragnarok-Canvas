@@ -46,6 +46,8 @@ export abstract class Monster {
   width: number;
   height: number;
   isDied$ = new BehaviorSubject<boolean>(false);
+  direction = 'right';
+
   get isDie() {
     return this.isDied$.value;
   }
@@ -59,9 +61,17 @@ export abstract class Monster {
     return this.canvas.getContext('2d');
   }
 
-  constructor(public canvas: HTMLCanvasElement, public src: string) {
-    const image = new Image();
-    image.src = src;
+  constructor(
+    public canvas: HTMLCanvasElement,
+    public src: string | HTMLImageElement
+  ) {
+    let image: HTMLImageElement;
+    if (typeof src === 'string') {
+      image = new Image();
+      image.src = src;
+    } else {
+      image = src;
+    }
     fromEvent(image, 'load')
       .pipe(map(() => image))
       .pipe(take(1))
