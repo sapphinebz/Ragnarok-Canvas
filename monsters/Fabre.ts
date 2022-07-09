@@ -26,8 +26,22 @@ export class Fabre extends Monster {
     ],
     [],
     [
-      { order: 0, offsetX: 12, height: 52, width: 55, offsetY: 90 },
-      { order: 1, offsetX: 67, height: 52, width: 56, offsetY: 90 },
+      {
+        order: 0,
+        offsetX: 12,
+        height: 52,
+        width: 55,
+        offsetY: 90,
+        marginRightWidth: -12,
+      },
+      {
+        order: 1,
+        offsetX: 67,
+        height: 52,
+        width: 56,
+        offsetY: 90,
+        marginRightWidth: -12,
+      },
     ],
   ];
 
