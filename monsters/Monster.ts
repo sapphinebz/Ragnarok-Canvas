@@ -38,7 +38,8 @@ export type CropImage = {
   width: number;
   height?: number;
   marginHeight?: number;
-  marginWidth?: number;
+  marginLeftWidth?: number;
+  marginRightWidth?: number;
 };
 
 export abstract class Monster {
@@ -102,20 +103,27 @@ export abstract class Monster {
     }).subscribe(({ direction, leftImage, rightImage }) => {
       const frameXEntry = this.getFrameEntry(this.frameY, this.frameX);
       if (frameXEntry) {
-        let { offsetX, offsetY, width, height, marginHeight, marginWidth } =
-          frameXEntry;
+        let {
+          offsetX,
+          offsetY,
+          width,
+          height,
+          marginHeight,
+          marginLeftWidth,
+          marginRightWidth,
+        } = frameXEntry;
 
-        if (direction === 'right') {
-          offsetX = rightImage.width - offsetX - width;
-
-          marginHeight = (marginHeight ?? 0) * -1;
-          marginWidth = (marginWidth ?? 0) * -1;
-        }
         let image = direction === 'right' ? rightImage : leftImage;
         offsetY ??= this.height * this.frameY;
         height ??= this.height;
         marginHeight ??= 0;
+        let marginWidth =
+          direction === 'right' ? marginRightWidth : marginLeftWidth;
         marginWidth ??= 0;
+
+        if (direction === 'right') {
+          offsetX = rightImage.width - (offsetX + width);
+        }
         this.ctx.drawImage(
           image,
           offsetX,

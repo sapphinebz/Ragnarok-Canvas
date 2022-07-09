@@ -39,9 +39,30 @@ export class Poring extends Monster {
     ],
     [],
     [
-      { order: 0, offsetX: 0, width: 50, offsetY: 200, height: 50 },
-      { order: 1, offsetX: 50, width: 50, offsetY: 200, height: 50 },
-      { order: 2, offsetX: 130, width: 90, offsetY: 200, height: 50 },
+      {
+        order: 0,
+        offsetX: 0,
+        width: 50,
+        offsetY: 200,
+        height: 50,
+        marginRightWidth: 5,
+      },
+      {
+        order: 1,
+        offsetX: 50,
+        width: 50,
+        offsetY: 200,
+        height: 50,
+        marginRightWidth: 5,
+      },
+      {
+        order: 2,
+        offsetX: 130,
+        width: 50,
+        offsetY: 200,
+        height: 50,
+        marginRightWidth: 5,
+      },
       {
         order: 3,
         offsetX: 240,
@@ -49,7 +70,8 @@ export class Poring extends Monster {
         width: 90,
         height: 80,
         marginHeight: -20,
-        marginWidth: 0,
+        marginLeftWidth: 0,
+        marginRightWidth: -35,
       },
       {
         order: 4,
@@ -57,7 +79,8 @@ export class Poring extends Monster {
         offsetY: 180,
         width: 130,
         height: 80,
-        marginWidth: -45,
+        marginLeftWidth: -45,
+        marginRightWidth: -30,
         marginHeight: -25,
       },
       {
@@ -66,7 +89,8 @@ export class Poring extends Monster {
         offsetY: 200,
         width: 120,
         height: 60,
-        marginWidth: -45,
+        marginLeftWidth: -45,
+        marginRightWidth: -20,
         marginHeight: -3,
       },
     ],
@@ -107,7 +131,6 @@ export class Poring extends Monster {
   }
 
   attack(): Observable<any> {
-    // throw new Error('Method not implemented.');
     return NEVER;
   }
 

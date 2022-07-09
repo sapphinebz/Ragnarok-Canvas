@@ -135,6 +135,10 @@ onCanvasMount$.pipe(switchMap(() => onLoadMonster$)).subscribe((monster) => {
   monster.randomSpawn();
 });
 
+// onLoadMonster$
+//   .pipe(mergeMap((monster) => monster.dying()))
+//   .subscribe(() => tick());
+
 onLoadMonster$
   .pipe(
     mergeMap((monster) =>
