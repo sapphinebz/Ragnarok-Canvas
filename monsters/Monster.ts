@@ -1,6 +1,7 @@
 import {
   animationFrameScheduler,
   BehaviorSubject,
+  combineLatest,
   defer,
   EMPTY,
   first,
@@ -13,6 +14,8 @@ import {
   NEVER,
   Observable,
   ReplaySubject,
+  Subject,
+  switchMap,
   take,
   tap,
   timer,
@@ -23,6 +26,7 @@ import {
   repeat,
   takeUntil,
   takeWhile,
+  withLatestFrom,
 } from 'rxjs/operators';
 import { shuffle } from '../utils/shuffle';
 
@@ -47,7 +51,15 @@ export abstract class Monster {
   width: number;
   height: number;
   isDied$ = new BehaviorSubject<boolean>(false);
-  direction: 'left' | 'right' = 'right';
+
+  direction$ = new BehaviorSubject<'left' | 'right'>('right');
+
+  set direction(value: 'left' | 'right') {
+    this.direction$.next(value);
+  }
+  get direction() {
+    return this.direction$.value;
+  }
 
   get isDie() {
     return this.isDied$.value;
@@ -58,6 +70,8 @@ export abstract class Monster {
   onDied$ = this.isDied$.pipe(filter((isDied) => isDied === true));
   leftImage$ = new ReplaySubject<HTMLImageElement>(1);
   rightImage$ = new ReplaySubject<HTMLImageElement>(1);
+
+  drawImage$ = new Subject<void>();
 
   get ctx() {
     return this.canvas.getContext('2d');
@@ -79,25 +93,25 @@ export abstract class Monster {
       .subscribe(() => {
         this.rightImage$.next(rightImage);
       });
-  }
 
-  abstract getFrameEntry(frameY: number, frameX: number): CropImage;
-
-  drawImage() {
-    const image$ =
-      this.direction === 'left' ? this.leftImage$ : this.rightImage$;
-    image$.pipe(take(1)).subscribe((image) => {
+    combineLatest({
+      direction: this.direction$,
+      leftImage: this.leftImage$,
+      rightImage: this.rightImage$,
+      drawImage: this.drawImage$,
+    }).subscribe(({ direction, leftImage, rightImage }) => {
       const frameXEntry = this.getFrameEntry(this.frameY, this.frameX);
       if (frameXEntry) {
         let { offsetX, offsetY, width, height, marginHeight, marginWidth } =
           frameXEntry;
 
-        if (this.direction === 'right') {
-          offsetX = image.width - offsetX - width;
+        if (direction === 'right') {
+          offsetX = rightImage.width - offsetX - width;
 
           marginHeight = (marginHeight ?? 0) * -1;
           marginWidth = (marginWidth ?? 0) * -1;
         }
+        let image = direction === 'right' ? rightImage : leftImage;
         offsetY ??= this.height * this.frameY;
         height ??= this.height;
         marginHeight ??= 0;
@@ -115,6 +129,12 @@ export abstract class Monster {
         );
       }
     });
+  }
+
+  abstract getFrameEntry(frameY: number, frameX: number): CropImage;
+
+  drawImage() {
+    this.drawImage$.next();
   }
 
   randomSpawn(): void;
@@ -305,13 +325,13 @@ export abstract class Monster {
   }
 
   moveBottomLeft() {
-    this.y -= this.speedY;
-    this.x += this.speedX;
+    this.y += this.speedY;
+    this.x -= this.speedX;
   }
 
   moveTopRight() {
-    this.y += this.speedY;
-    this.x -= this.speedX;
+    this.y -= this.speedY;
+    this.x += this.speedX;
   }
 
   moveBottomRight() {
