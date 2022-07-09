@@ -1,6 +1,8 @@
 import { defer, EMPTY, Observable, takeWhile, timer } from 'rxjs';
 import { onErrorResumeNext } from 'rxjs/operators';
 import { loadFabreDeadSound } from '../sounds/fabre-dead';
+import { loadFabreSpriteLeft } from '../sprites/load-fabre-left';
+import { loadFabreSpriteRight } from '../sprites/load-fabre-right';
 import { CropImage, Monster } from './Monster';
 
 export class Fabre extends Monster {
@@ -30,10 +32,7 @@ export class Fabre extends Monster {
   ];
 
   constructor(canvas: HTMLCanvasElement) {
-    super(
-      canvas,
-      'https://www.spriters-resource.com/resources/sheets/124/127228.png?updated=1583523949'
-    );
+    super(canvas, loadFabreSpriteLeft(), loadFabreSpriteRight());
 
     this.dyingAudio.volume = 0.05;
   }

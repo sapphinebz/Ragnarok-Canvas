@@ -52,7 +52,7 @@ export abstract class Monster {
   height: number;
   isDied$ = new BehaviorSubject<boolean>(false);
 
-  direction$ = new BehaviorSubject<'left' | 'right'>('right');
+  direction$ = new BehaviorSubject<'left' | 'right'>('left');
 
   set direction(value: 'left' | 'right') {
     this.direction$.next(value);

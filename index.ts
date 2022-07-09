@@ -49,10 +49,9 @@ const onWindowResize$ = fromEvent(window, 'resize').pipe(
 );
 
 const acidus = new Acidus(canvas);
-// const monk = new GeffenMonk(canvas);
 
 const porings = Array.from({ length: 20 }, () => new Poring(canvas));
-const fabres = Array.from({ length: 0 }, () => new Fabre(canvas));
+const fabres = Array.from({ length: 7 }, () => new Fabre(canvas));
 const onRespawnMonster$ = new Subject<Monster>();
 
 const killCount$ = new BehaviorSubject(0);
@@ -104,7 +103,7 @@ const onCanvasRender$ = onWindowResize$.pipe(
 onCanvasRender$.subscribe(() => {
   porings.forEach((poring) => poring.drawImage());
   fabres.forEach((fabre) => fabre.drawImage());
-  // acidus.drawImage();
+  acidus.drawImage();
 
   ctx.textAlign = 'center';
   ctx.font = 'bold 24px Arial';
