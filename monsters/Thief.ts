@@ -11,15 +11,17 @@ export class Thief extends Monster {
   speedY = 5;
   frameX = 0;
   frameY = 0;
-  width = 60;
-  height = 60;
+  width = 80;
+  height = 107;
 
   frames: CropImage[][] = [
     [
-      { order: 0, offsetX: 0, width: 60 },
-      { order: 1, offsetX: 60, width: 60 },
-      { order: 2, offsetX: 120, width: 60 },
-      { order: 3, offsetX: 185, width: 60 },
+      { order: 0, offsetX: 0, width: 80 },
+      { order: 1, offsetX: 100, width: 80, marginHeight: -1 },
+      { order: 2, offsetX: 201, width: 80, marginHeight: -1 },
+      { order: 3, offsetX: 301, width: 80, marginHeight: -1 },
+      { order: 4, offsetX: 401, width: 80, marginHeight: -1 },
+      { order: 5, offsetX: 500, width: 80 },
     ],
     [
       { order: 0, offsetX: 0, width: 50 },
@@ -100,7 +102,7 @@ export class Thief extends Monster {
   standing(): Observable<any> {
     return defer(() => {
       this.frameY = 0;
-      return this.createForwardFrame(250, 0, 3);
+      return this.createForwardFrame(150, 0, 5);
     });
   }
 

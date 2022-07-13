@@ -37,6 +37,7 @@ import { Acidus } from './monsters/Acidus';
 import { Poring } from './monsters/Poring';
 import { Monster } from './monsters/Monster';
 import { Fabre } from './monsters/Fabre';
+import { Thief } from './monsters/Thief';
 
 const canvas = document.querySelector<HTMLCanvasElement>('canvas');
 const ctx = canvas.getContext('2d');
@@ -50,8 +51,9 @@ const onWindowResize$ = fromEvent(window, 'resize').pipe(
 
 const acidus = new Acidus(canvas);
 
-const porings = Array.from({ length: 20 }, () => new Poring(canvas));
-const fabres = Array.from({ length: 7 }, () => new Fabre(canvas));
+const porings = Array.from({ length: 0 }, () => new Poring(canvas));
+const fabres = Array.from({ length: 0 }, () => new Fabre(canvas));
+const thief = new Thief(canvas);
 const onRespawnMonster$ = new Subject<Monster>();
 
 const killCount$ = new BehaviorSubject(0);
@@ -103,7 +105,8 @@ const onCanvasRender$ = onWindowResize$.pipe(
 onCanvasRender$.subscribe(() => {
   porings.forEach((poring) => poring.drawImage());
   fabres.forEach((fabre) => fabre.drawImage());
-  acidus.drawImage();
+  thief.drawImage();
+  // acidus.drawImage();
 
   ctx.textAlign = 'center';
   ctx.font = 'bold 24px Arial';
@@ -146,6 +149,8 @@ onLoadMonster$
     )
   )
   .subscribe(() => tick());
+
+thief.standing().subscribe(() => tick());
 
 // const keydown$ = fromEvent<KeyboardEvent>(document, 'keydown').pipe(
 //   tap((event) => event.preventDefault()),
