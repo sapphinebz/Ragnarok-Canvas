@@ -146,6 +146,7 @@ export abstract class Monster {
           height
         );
       }
+
       // this.testArea(this.x + this.width - 10, this.y + this.height / 2, 30, 50);
 
       // this.testArea(this.x - 20, this.y + this.height / 2, 30, 50);

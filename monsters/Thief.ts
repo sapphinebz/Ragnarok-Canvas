@@ -1,7 +1,23 @@
-import { defer, ignoreElements, merge, NEVER, Observable } from 'rxjs';
-import { concatMap, connect, filter, takeWhile, tap } from 'rxjs/operators';
+import {
+  defer,
+  ignoreElements,
+  merge,
+  NEVER,
+  Observable,
+  ReplaySubject,
+} from 'rxjs';
+import {
+  concatMap,
+  connect,
+  filter,
+  takeWhile,
+  tap,
+  withLatestFrom,
+} from 'rxjs/operators';
 import { loadThiefLeftSprite } from '../sprites/load-thief-left';
+import { loadLeftThiefDagger } from '../sprites/load-thief-left-dagger';
 import { loadThiefRightSprite } from '../sprites/load-thief-right';
+import { loadRightThiefDagger } from '../sprites/load-thief-right-dagger';
 import { CropImage, Monster } from './Monster';
 
 export class Thief extends Monster {
@@ -236,6 +252,9 @@ export class Thief extends Monster {
     ],
   ];
 
+  leftEffectDaggerImage = loadLeftThiefDagger();
+  rightEffectDaggerImage = loadRightThiefDagger();
+
   constructor(canvas: HTMLCanvasElement) {
     super(canvas, loadThiefLeftSprite(), loadThiefRightSprite());
   }
@@ -274,28 +293,114 @@ export class Thief extends Monster {
   }
 
   attack(): Observable<any> {
-    this.frameY = 4;
-    return this.createForwardFrame(100, 0, 6, { once: true }).pipe(
-      tap((frameX) => {
-        if (frameX >= 5) {
-          if (this.direction === 'left') {
-            this.onDamageArea$.next({
-              x: this.x - 20,
-              y: this.y + this.height / 2,
-              w: 30,
-              h: 50,
-            });
-          } else {
-            this.onDamageArea$.next({
-              x: this.x + this.width - 10,
-              y: this.y + this.height / 2,
-              w: 30,
-              h: 50,
-            });
-          }
-        }
-      })
-    );
+    return defer(() => {
+      this.frameY = 4;
+      return this.createForwardFrame(100, 0, 6, { once: true }).pipe(
+        connect((frameX$) => {
+          const damage$ = frameX$.pipe(
+            tap((frameX) => {
+              if (frameX >= 5) {
+                if (this.direction === 'left') {
+                  this.onDamageArea$.next({
+                    x: this.x - 20,
+                    y: this.y + this.height / 2,
+                    w: 30,
+                    h: 50,
+                  });
+                } else {
+                  this.onDamageArea$.next({
+                    x: this.x + this.width - 10,
+                    y: this.y + this.height / 2,
+                    w: 30,
+                    h: 50,
+                  });
+                }
+              }
+            })
+          );
+
+          const subscription = this.drawImage$
+            .pipe(
+              withLatestFrom(frameX$),
+              tap(([_, attackFrameX]) => {
+                if (attackFrameX === 2) {
+                  this.ctx.drawImage(
+                    this.leftEffectDaggerImage,
+                    0,
+                    650,
+                    30,
+                    30,
+                    this.x + 9,
+                    this.y + 40,
+                    30,
+                    30
+                  );
+                } else if (attackFrameX === 3) {
+                  this.ctx.drawImage(
+                    this.leftEffectDaggerImage,
+                    45,
+                    650,
+                    30,
+                    30,
+                    this.x + 6,
+                    this.y + 40,
+                    30,
+                    30
+                  );
+                } else if (attackFrameX === 4) {
+                  this.ctx.drawImage(
+                    this.leftEffectDaggerImage,
+                    85,
+                    650,
+                    30,
+                    30,
+                    this.x - 15,
+                    this.y + 50,
+                    30,
+                    30
+                  );
+                } else if (attackFrameX === 5) {
+                  this.ctx.drawImage(
+                    this.leftEffectDaggerImage,
+                    125,
+                    650,
+                    30,
+                    30,
+                    this.x - 17,
+                    this.y + 53,
+                    30,
+                    30
+                  );
+                } else if (attackFrameX === 6) {
+                  this.ctx.drawImage(
+                    this.leftEffectDaggerImage,
+                    142,
+                    650,
+                    30,
+                    30,
+                    this.x - 27,
+                    this.y + 60,
+                    30,
+                    30
+                  );
+                }
+              })
+            )
+            .subscribe();
+
+          return damage$.pipe(
+            tap({
+              complete: () => {
+                subscription.unsubscribe();
+              },
+              unsubscribe: () => {
+                subscription.unsubscribe();
+              },
+            })
+          );
+        })
+      );
+    });
   }
 
   playWalkingSound() {

@@ -145,6 +145,8 @@ onCanvasMount$.subscribe(() => {
   keyboardController.start(tick);
 });
 
+// thief.attack().subscribe(() => tick());
+
 onCanvasMount$.pipe(switchMap(() => onLoadMonster$)).subscribe((monster) => {
   monster.randomSpawn();
 });
