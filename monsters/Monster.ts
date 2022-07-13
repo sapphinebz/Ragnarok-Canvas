@@ -212,6 +212,9 @@ export abstract class Monster {
     );
   }
 
+  /**
+   * use for test only
+   */
   testSprites(frames: [number, number][], delay = 1000) {
     let index = 0;
     return interval(delay, animationFrameScheduler).pipe(
@@ -229,6 +232,9 @@ export abstract class Monster {
     );
   }
 
+  /**
+   * use for test only
+   */
   testArea(area: Area) {
     this.ctx.beginPath();
     this.ctx.fillStyle = 'red';
