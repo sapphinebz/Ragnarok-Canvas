@@ -38,6 +38,7 @@ import { Poring } from './monsters/Poring';
 import { Monster } from './monsters/Monster';
 import { Fabre } from './monsters/Fabre';
 import { Thief } from './monsters/Thief';
+import { KeyboardController } from './gamepad/keyboard-controller';
 
 const canvas = document.querySelector<HTMLCanvasElement>('canvas');
 const ctx = canvas.getContext('2d');
@@ -54,6 +55,9 @@ const acidus = new Acidus(canvas);
 const porings = Array.from({ length: 0 }, () => new Poring(canvas));
 const fabres = Array.from({ length: 0 }, () => new Fabre(canvas));
 const thief = new Thief(canvas);
+
+const keyboardController = new KeyboardController(canvas, thief);
+
 const onRespawnMonster$ = new Subject<Monster>();
 
 const killCount$ = new BehaviorSubject(0);
@@ -105,7 +109,7 @@ const onCanvasRender$ = onWindowResize$.pipe(
 onCanvasRender$.subscribe(() => {
   porings.forEach((poring) => poring.drawImage());
   fabres.forEach((fabre) => fabre.drawImage());
-  thief.drawImage();
+  keyboardController.drawPlayer();
   // acidus.drawImage();
 
   ctx.textAlign = 'center';
@@ -134,6 +138,10 @@ const onLoadMonster$ = merge(
   from(fabres)
 ).pipe(shareReplay());
 
+onCanvasMount$.subscribe(() => {
+  keyboardController.start(tick);
+});
+
 onCanvasMount$.pipe(switchMap(() => onLoadMonster$)).subscribe((monster) => {
   monster.randomSpawn();
 });
@@ -148,9 +156,9 @@ onLoadMonster$
       monster.randomAction().pipe(takeUntil(monster.onDied$))
     )
   )
-  .subscribe(() => tick());
-
-thief.attack().subscribe(() => tick());
+  .subscribe(() => {
+    tick();
+  });
 
 // const keydown$ = fromEvent<KeyboardEvent>(document, 'keydown').pipe(
 //   tap((event) => event.preventDefault()),
@@ -225,7 +233,11 @@ const onAcidusAttack$ = defer(() => {
           finalize(() => nextAction$.next('move'))
         );
       } else if (action === 'move') {
-        return acidus.standing().pipe(tap(() => tick()));
+        return acidus.standing().pipe(
+          tap(() => {
+            tick();
+          })
+        );
       }
       return EMPTY;
     })
@@ -250,63 +262,62 @@ const onAcidusAttack$ = defer(() => {
   );
 }).pipe(share());
 
-onAcidusAttack$
-  .pipe(
-    map((attackEvent) => {
-      let { x: sourceX, y: sourceY } = attackEvent;
-      sourceX = sourceX - acidus.width / 2;
+onAcidusAttack$.pipe(
+  map((attackEvent) => {
+    let { x: sourceX, y: sourceY } = attackEvent;
+    sourceX = sourceX - acidus.width / 2;
 
-      return [...fabres, ...porings].filter((monster) => {
-        if (!monster.isDie) {
-          const { x: targetX, y: targetY } = monster;
-          const distance = Math.sqrt(
-            (sourceX - targetX) ** 2 + (sourceY - targetY) ** 2
-          );
-          return distance <= 80;
-        }
-        return false;
-      });
-    }),
-    mergeMap((collision) => {
-      return from(collision).pipe(
-        mergeMap((monster) => {
-          killCount$.next(killCount$.value + 1);
-          return monster.die().pipe(
-            connect((animate$) => {
-              const render$ = animate$.pipe(tap(() => tick()));
-              const removeMonsterOffScreen$ = animate$.pipe(
-                onEndAnimationRemoveMonster(() => {
-                  if (monster instanceof Poring) {
-                    return porings;
-                  } else if (monster instanceof Fabre) {
-                    return fabres;
-                  }
-                  return [];
-                }, monster),
-                takeLast(1)
-              );
-              const respawnPoring$ = removeMonsterOffScreen$.pipe(
-                switchMap(() => {
-                  const respawnTime = Math.random() * 20000 + 5000;
-                  return timer(respawnTime);
-                }),
-                tap(() => {
-                  if (monster instanceof Poring) {
-                    onRespawnMonster$.next(new Poring(canvas));
-                  } else if (monster instanceof Fabre) {
-                    onRespawnMonster$.next(new Fabre(canvas));
-                  }
-                })
-              );
-              return merge(
-                render$,
-                removeMonsterOffScreen$.pipe(ignoreElements()),
-                respawnPoring$.pipe(ignoreElements())
-              );
-            })
-          );
-        })
-      );
-    })
-  )
-  .subscribe();
+    return [...fabres, ...porings].filter((monster) => {
+      if (!monster.isDie) {
+        const { x: targetX, y: targetY } = monster;
+        const distance = Math.sqrt(
+          (sourceX - targetX) ** 2 + (sourceY - targetY) ** 2
+        );
+        return distance <= 80;
+      }
+      return false;
+    });
+  }),
+  mergeMap((collision) => {
+    return from(collision).pipe(
+      mergeMap((monster) => {
+        killCount$.next(killCount$.value + 1);
+        return monster.die().pipe(
+          connect((animate$) => {
+            const render$ = animate$.pipe(tap(() => tick()));
+            const removeMonsterOffScreen$ = animate$.pipe(
+              onEndAnimationRemoveMonster(() => {
+                if (monster instanceof Poring) {
+                  return porings;
+                } else if (monster instanceof Fabre) {
+                  return fabres;
+                }
+                return [];
+              }, monster),
+              takeLast(1)
+            );
+            const respawnPoring$ = removeMonsterOffScreen$.pipe(
+              switchMap(() => {
+                const respawnTime = Math.random() * 20000 + 5000;
+                return timer(respawnTime);
+              }),
+              tap(() => {
+                if (monster instanceof Poring) {
+                  onRespawnMonster$.next(new Poring(canvas));
+                } else if (monster instanceof Fabre) {
+                  onRespawnMonster$.next(new Fabre(canvas));
+                }
+              })
+            );
+            return merge(
+              render$,
+              removeMonsterOffScreen$.pipe(ignoreElements()),
+              respawnPoring$.pipe(ignoreElements())
+            );
+          })
+        );
+      })
+    );
+  })
+);
+// .subscribe();

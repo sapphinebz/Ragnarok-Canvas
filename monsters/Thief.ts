@@ -7,8 +7,8 @@ import { CropImage, Monster } from './Monster';
 export class Thief extends Monster {
   x = 100;
   y = 100;
-  speedX = 5;
-  speedY = 5;
+  speedX = 8;
+  speedY = 8;
   frameX = 0;
   frameY = 0;
   width = 80;
@@ -232,9 +232,7 @@ export class Thief extends Monster {
 
   attack(): Observable<any> {
     this.frameY = 4;
-    return this.createForwardFrame(120, 0, 6, { once: true }).pipe(
-      tap(console.log)
-    );
+    return this.createForwardFrame(120, 0, 6, { once: true });
   }
 
   playWalkingSound() {
@@ -254,7 +252,7 @@ export class Thief extends Monster {
   walking(): Observable<any> {
     return defer(() => {
       this.frameY = 2;
-      return this.createForwardFrame(120, 0, 7);
+      return this.createForwardFrame(35, 0, 7);
     });
   }
 }
