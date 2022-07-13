@@ -16,6 +16,7 @@ export class Thief extends Monster {
 
   frames: CropImage[][] = [
     [
+      // stand left
       { order: 0, offsetX: 0, width: 80 },
       { order: 1, offsetX: 100, width: 80, marginHeight: -1 },
       { order: 2, offsetX: 201, width: 80, marginHeight: -1 },
@@ -23,6 +24,7 @@ export class Thief extends Monster {
       { order: 4, offsetX: 401, width: 80, marginHeight: -1 },
       { order: 5, offsetX: 500, width: 80 },
     ],
+    // stand right
     [
       { order: 0, offsetX: 0, width: 50 },
       { order: 1, offsetX: 50, width: 50 },
@@ -33,7 +35,66 @@ export class Thief extends Monster {
       { order: 6, offsetX: 310, width: 50 },
       { order: 7, offsetX: 365, width: 50 },
     ],
-    [],
+    // walk left
+    [
+      { order: 0, offsetY: 257, offsetX: 3, width: 80, height: 109 },
+      {
+        order: 1,
+        offsetY: 257,
+        offsetX: 77,
+        width: 80,
+        height: 111,
+        marginHeight: -1,
+      },
+      {
+        order: 2,
+        offsetY: 257,
+        offsetX: 154,
+        width: 80,
+        height: 111,
+        marginHeight: -2,
+      },
+      {
+        order: 3,
+        offsetY: 257,
+        offsetX: 235,
+        width: 80,
+        height: 111,
+        marginHeight: 1,
+      },
+      {
+        order: 4,
+        offsetY: 257,
+        offsetX: 323,
+        width: 80,
+        height: 111,
+        marginHeight: 1,
+      },
+      {
+        order: 5,
+        offsetY: 257,
+        offsetX: 404,
+        width: 80,
+        height: 111,
+        marginHeight: 3,
+      },
+      {
+        order: 6,
+        offsetY: 257,
+        offsetX: 484,
+        width: 80,
+        height: 111,
+        marginHeight: 3,
+      },
+      {
+        order: 7,
+        offsetY: 257,
+        offsetX: 556,
+        width: 80,
+        height: 111,
+        marginHeight: 1,
+      },
+    ],
     [
       {
         order: 0,
@@ -142,16 +203,8 @@ export class Thief extends Monster {
 
   walking(): Observable<any> {
     return defer(() => {
-      this.frameY = 1;
-      return this.createForwardFrame(100, 0, 7).pipe(
-        connect((xframe$) => {
-          const sound$ = xframe$.pipe(
-            filter((xframe) => xframe === 3),
-            concatMap(() => this.playWalkingSound())
-          );
-          return merge(xframe$, sound$.pipe(ignoreElements()));
-        })
-      );
+      this.frameY = 2;
+      return this.createForwardFrame(120, 0, 7);
     });
   }
 }

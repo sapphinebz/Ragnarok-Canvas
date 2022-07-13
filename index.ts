@@ -150,7 +150,7 @@ onLoadMonster$
   )
   .subscribe(() => tick());
 
-thief.standing().subscribe(() => tick());
+thief.walking().subscribe(() => tick());
 
 // const keydown$ = fromEvent<KeyboardEvent>(document, 'keydown').pipe(
 //   tap((event) => event.preventDefault()),

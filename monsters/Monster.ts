@@ -184,6 +184,23 @@ export abstract class Monster {
     );
   }
 
+  testSprites(frames: [number, number][],delay = 1000) {
+    let index = 0;
+    return interval(delay, animationFrameScheduler).pipe(
+      map(() => {
+        const [frameX, frameY] = frames[index];
+        this.frameX = frameX;
+        this.frameY = frameY;
+        if (index + 1 > frames.length - 1) {
+          index = 0;
+        } else {
+          index++;
+        }
+        return this.frameX;
+      })
+    );
+  }
+
   die() {
     if (this.isDied$.value === false) {
       this.isDied$.next(true);
