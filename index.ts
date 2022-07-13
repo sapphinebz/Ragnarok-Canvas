@@ -111,6 +111,7 @@ const onCanvasRender$ = onWindowResize$.pipe(
 onCanvasRender$.subscribe(() => {
   porings.forEach((poring) => poring.drawImage());
   fabres.forEach((fabre) => fabre.drawImage());
+
   keyboardController.drawPlayer();
   // acidus.drawImage();
 
@@ -140,10 +141,8 @@ const onLoadMonster$ = merge(
   from(fabres)
 ).pipe(shareReplay());
 
-thief.hurting().subscribe(() => tick());
-
 onCanvasMount$.subscribe(() => {
-  // keyboardController.start(tick);
+  keyboardController.start(tick);
 });
 
 onCanvasMount$.pipe(switchMap(() => onLoadMonster$)).subscribe((monster) => {
