@@ -19,6 +19,7 @@ import {
   ignoreElements,
   EMPTY,
   BehaviorSubject,
+  Operator,
 } from 'rxjs';
 import {
   connect,
@@ -39,6 +40,7 @@ import { Monster } from './monsters/Monster';
 import { Fabre } from './monsters/Fabre';
 import { Thief } from './monsters/Thief';
 import { KeyboardController } from './gamepad/keyboard-controller';
+import { collideWithArea, COLLISION_DIRECTION } from './utils/collision';
 
 const canvas = document.querySelector<HTMLCanvasElement>('canvas');
 const ctx = canvas.getContext('2d');
@@ -52,8 +54,8 @@ const onWindowResize$ = fromEvent(window, 'resize').pipe(
 
 const acidus = new Acidus(canvas);
 
-const porings = Array.from({ length: 0 }, () => new Poring(canvas));
-const fabres = Array.from({ length: 0 }, () => new Fabre(canvas));
+const porings = Array.from({ length: 20 }, () => new Poring(canvas));
+const fabres = Array.from({ length: 7 }, () => new Fabre(canvas));
 const thief = new Thief(canvas);
 
 const keyboardController = new KeyboardController(canvas, thief);
@@ -214,6 +216,65 @@ onLoadMonster$
 //   share()
 // );
 
+const monstersRecievedDamangeAndDie = (): OperatorFunction<Monster[], any> =>
+  mergeMap((collision) => {
+    return from(collision).pipe(
+      mergeMap((monster) => {
+        killCount$.next(killCount$.value + 1);
+        return monster.die().pipe(
+          connect((animate$) => {
+            const render$ = animate$.pipe(tap(() => tick()));
+            const removeMonsterOffScreen$ = animate$.pipe(
+              onEndAnimationRemoveMonster(() => {
+                if (monster instanceof Poring) {
+                  return porings;
+                } else if (monster instanceof Fabre) {
+                  return fabres;
+                }
+                return [];
+              }, monster),
+              takeLast(1)
+            );
+            const respawnPoring$ = removeMonsterOffScreen$.pipe(
+              switchMap(() => {
+                const respawnTime = Math.random() * 20000 + 5000;
+                return timer(respawnTime);
+              }),
+              tap(() => {
+                if (monster instanceof Poring) {
+                  onRespawnMonster$.next(new Poring(canvas));
+                } else if (monster instanceof Fabre) {
+                  onRespawnMonster$.next(new Fabre(canvas));
+                }
+              })
+            );
+            return merge(
+              render$,
+              removeMonsterOffScreen$.pipe(ignoreElements()),
+              respawnPoring$.pipe(ignoreElements())
+            );
+          })
+        );
+      })
+    );
+  });
+
+thief.onDamageArea$
+  .pipe(
+    map((area) => {
+      return [...fabres, ...porings].filter((monster) => {
+        if (!monster.isDie) {
+          // const { x: targetX, y: targetY,width,height } = monster;
+          const collision = collideWithArea(area, monster);
+          return collision !== COLLISION_DIRECTION.NOTHING;
+        }
+        return false;
+      });
+    }),
+    monstersRecievedDamangeAndDie()
+  )
+  .subscribe();
+
 const onAcidusAttack$ = defer(() => {
   canvas.style.cursor = 'none';
   const mousemove$ = fromEvent<MouseEvent>(canvas, 'mousemove').pipe(share());
@@ -278,46 +339,6 @@ onAcidusAttack$.pipe(
       return false;
     });
   }),
-  mergeMap((collision) => {
-    return from(collision).pipe(
-      mergeMap((monster) => {
-        killCount$.next(killCount$.value + 1);
-        return monster.die().pipe(
-          connect((animate$) => {
-            const render$ = animate$.pipe(tap(() => tick()));
-            const removeMonsterOffScreen$ = animate$.pipe(
-              onEndAnimationRemoveMonster(() => {
-                if (monster instanceof Poring) {
-                  return porings;
-                } else if (monster instanceof Fabre) {
-                  return fabres;
-                }
-                return [];
-              }, monster),
-              takeLast(1)
-            );
-            const respawnPoring$ = removeMonsterOffScreen$.pipe(
-              switchMap(() => {
-                const respawnTime = Math.random() * 20000 + 5000;
-                return timer(respawnTime);
-              }),
-              tap(() => {
-                if (monster instanceof Poring) {
-                  onRespawnMonster$.next(new Poring(canvas));
-                } else if (monster instanceof Fabre) {
-                  onRespawnMonster$.next(new Fabre(canvas));
-                }
-              })
-            );
-            return merge(
-              render$,
-              removeMonsterOffScreen$.pipe(ignoreElements()),
-              respawnPoring$.pipe(ignoreElements())
-            );
-          })
-        );
-      })
-    );
-  })
+  monstersRecievedDamangeAndDie()
 );
 // .subscribe();

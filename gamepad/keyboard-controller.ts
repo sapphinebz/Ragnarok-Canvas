@@ -46,13 +46,13 @@ export class KeyboardController {
   private attactAction() {
     const attackKeyMap = {
       KeyX: defer(() => {
-        this.monster.direction = 'right';
+        // this.monster.direction = 'right';
         return this.monster
           .attack()
           .pipe(onErrorResumeNext(this.monster.standing()));
       }),
       KeyZ: defer(() => {
-        this.monster.direction = 'left';
+        // this.monster.direction = 'left';
         return this.monster
           .attack()
           .pipe(onErrorResumeNext(this.monster.standing()));

@@ -232,7 +232,27 @@ export class Thief extends Monster {
 
   attack(): Observable<any> {
     this.frameY = 4;
-    return this.createForwardFrame(120, 0, 6, { once: true });
+    return this.createForwardFrame(100, 0, 6, { once: true }).pipe(
+      tap((frameX) => {
+        if (frameX >= 5) {
+          if (this.direction === 'left') {
+            this.onDamageArea$.next({
+              x: this.x - 20,
+              y: this.y + this.height / 2,
+              w: 30,
+              h: 50,
+            });
+          } else {
+            this.onDamageArea$.next({
+              x: this.x + this.width - 10,
+              y: this.y + this.height / 2,
+              w: 30,
+              h: 50,
+            });
+          }
+        }
+      })
+    );
   }
 
   playWalkingSound() {

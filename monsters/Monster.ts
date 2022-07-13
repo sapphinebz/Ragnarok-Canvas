@@ -31,6 +31,13 @@ import {
 } from 'rxjs/operators';
 import { shuffle } from '../utils/shuffle';
 
+export interface Area {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
 // [order, offsetX, width, offsetY, height]
 export type CropImage = {
   order: number;
@@ -53,6 +60,8 @@ export abstract class Monster {
   width: number;
   height: number;
   isDied$ = new BehaviorSubject<boolean>(false);
+
+  onDamageArea$ = new Subject<Area>();
 
   direction$ = new BehaviorSubject<'left' | 'right'>('left');
 
@@ -137,6 +146,9 @@ export abstract class Monster {
           height
         );
       }
+      // this.testArea(this.x + this.width - 10, this.y + this.height / 2, 30, 50);
+
+      // this.testArea(this.x - 20, this.y + this.height / 2, 30, 50);
     });
   }
 
@@ -213,6 +225,13 @@ export abstract class Monster {
         return this.frameX;
       })
     );
+  }
+
+  testArea(area: Area) {
+    this.ctx.beginPath();
+    this.ctx.fillStyle = 'red';
+    this.ctx.fillRect(area.x, area.y, area.w, area.h);
+    this.ctx.closePath();
   }
 
   die() {
