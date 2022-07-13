@@ -140,8 +140,10 @@ const onLoadMonster$ = merge(
   from(fabres)
 ).pipe(shareReplay());
 
+thief.hurting().subscribe(() => tick());
+
 onCanvasMount$.subscribe(() => {
-  keyboardController.start(tick);
+  // keyboardController.start(tick);
 });
 
 onCanvasMount$.pipe(switchMap(() => onLoadMonster$)).subscribe((monster) => {

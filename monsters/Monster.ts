@@ -183,6 +183,8 @@ export abstract class Monster {
 
   abstract attack(): Observable<any>;
 
+  abstract hurting(): Observable<any>;
+
   createForwardFrame(
     delay: number,
     minFrameX: number,

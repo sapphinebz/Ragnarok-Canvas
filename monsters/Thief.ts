@@ -198,6 +198,42 @@ export class Thief extends Monster {
         marginHeight: 6,
       },
     ],
+    [],
+    [
+      // hurting
+      {
+        order: 0,
+        offsetX: 3,
+        width: 80,
+        offsetY: 797,
+        height: 109,
+        marginHeight: 1,
+      },
+      {
+        order: 1,
+        offsetX: 110,
+        width: 80,
+        offsetY: 797,
+        height: 109,
+        marginHeight: -4,
+      },
+      {
+        order: 2,
+        offsetX: 205,
+        width: 80,
+        offsetY: 797,
+        height: 109,
+        marginHeight: -5,
+      },
+      {
+        order: 3,
+        offsetX: 299,
+        width: 80,
+        offsetY: 797,
+        height: 109,
+        marginHeight: -3,
+      },
+    ],
   ];
 
   constructor(canvas: HTMLCanvasElement) {
@@ -227,6 +263,13 @@ export class Thief extends Monster {
           return frameX + 1 <= 5;
         })
       );
+    });
+  }
+
+  hurting(): Observable<any> {
+    return defer(() => {
+      this.frameY = 6;
+      return this.createForwardFrame(150, 0, 3);
     });
   }
 
