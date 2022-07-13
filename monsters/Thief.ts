@@ -95,6 +95,8 @@ export class Thief extends Monster {
         marginHeight: 1,
       },
     ],
+
+    // walk top
     [
       {
         order: 0,
@@ -151,6 +153,51 @@ export class Thief extends Monster {
         marginHeight: -3,
       },
     ],
+    // attack left
+    [
+      { order: 0, offsetY: 534, offsetX: 1, width: 80, height: 109 },
+      { order: 1, offsetY: 534, offsetX: 110, width: 80, height: 109 },
+      {
+        order: 2,
+        offsetY: 534,
+        offsetX: 203,
+        width: 80,
+        height: 109,
+        marginHeight: 1,
+      },
+      {
+        order: 3,
+        offsetY: 534,
+        offsetX: 303,
+        width: 80,
+        height: 109,
+        marginHeight: 1,
+      },
+      {
+        order: 4,
+        offsetY: 534,
+        offsetX: 403,
+        width: 80,
+        height: 109,
+        marginHeight: 1,
+      },
+      {
+        order: 5,
+        offsetY: 534,
+        offsetX: 511,
+        width: 80,
+        height: 109,
+        marginHeight: 5,
+      },
+      {
+        order: 6,
+        offsetY: 534,
+        offsetX: 611,
+        width: 80,
+        height: 109,
+        marginHeight: 6,
+      },
+    ],
   ];
 
   constructor(canvas: HTMLCanvasElement) {
@@ -184,7 +231,10 @@ export class Thief extends Monster {
   }
 
   attack(): Observable<any> {
-    return NEVER;
+    this.frameY = 4;
+    return this.createForwardFrame(120, 0, 6, { once: true }).pipe(
+      tap(console.log)
+    );
   }
 
   playWalkingSound() {

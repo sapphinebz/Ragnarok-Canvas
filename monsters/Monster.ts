@@ -14,6 +14,7 @@ import {
   NEVER,
   Observable,
   ReplaySubject,
+  startWith,
   Subject,
   switchMap,
   take,
@@ -170,21 +171,34 @@ export abstract class Monster {
 
   abstract attack(): Observable<any>;
 
-  createForwardFrame(delay: number, minFrameX: number, maxFrameX: number) {
+  createForwardFrame(
+    delay: number,
+    minFrameX: number,
+    maxFrameX: number,
+    option: { once: boolean } = { once: false }
+  ) {
     this.frameX = minFrameX;
+    const { once } = option;
+    const stopAnimation = new ReplaySubject<void>(1);
     return interval(delay, animationFrameScheduler).pipe(
       map(() => {
         if (this.frameX + 1 <= maxFrameX) {
           this.frameX++;
         } else {
-          this.frameX = minFrameX;
+          if (once) {
+            stopAnimation.next();
+          } else {
+            this.frameX = minFrameX;
+          }
         }
         return this.frameX;
-      })
+      }),
+      takeUntil(stopAnimation),
+      startWith(0)
     );
   }
 
-  testSprites(frames: [number, number][],delay = 1000) {
+  testSprites(frames: [number, number][], delay = 1000) {
     let index = 0;
     return interval(delay, animationFrameScheduler).pipe(
       map(() => {
