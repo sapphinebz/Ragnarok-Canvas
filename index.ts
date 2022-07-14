@@ -33,6 +33,7 @@ import { Fabre } from './monsters/Fabre';
 import { Thief } from './monsters/Thief';
 import { KeyboardController } from './gamepad/keyboard-controller';
 import { COLLISION_DIRECTION, rectanglesIntersect } from './utils/collision';
+import { Acidus } from './monsters/Acidus';
 
 const canvas = document.querySelector<HTMLCanvasElement>('canvas');
 const ctx = canvas.getContext('2d');
@@ -44,8 +45,7 @@ const onWindowResize$ = fromEvent(window, 'resize').pipe(
   })
 );
 
-// const acidus = new Acidus(canvas);
-
+const aciduss = Array.from({ length: 2 }, () => new Acidus(canvas));
 const porings = Array.from({ length: 10 }, () => new Poring(canvas));
 const fabres = Array.from({ length: 7 }, () => new Fabre(canvas));
 const thief = new Thief(canvas);
@@ -103,9 +103,9 @@ const onCanvasRender$ = onWindowResize$.pipe(
 onCanvasRender$.subscribe(() => {
   porings.forEach((poring) => poring.drawImage());
   fabres.forEach((fabre) => fabre.drawImage());
+  aciduss.forEach((acidus) => acidus.drawImage());
 
   keyboardController.drawPlayer();
-  // acidus.drawImage();
 
   ctx.textAlign = 'center';
   ctx.font = 'bold 24px Arial';
@@ -130,7 +130,8 @@ const onLoadMonster$ = merge(
     })
   ),
   from(porings),
-  from(fabres)
+  from(fabres),
+  from(aciduss)
 ).pipe(shareReplay());
 
 onCanvasMount$.subscribe(() => {

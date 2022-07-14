@@ -3,31 +3,29 @@ import { takeWhile } from 'rxjs/operators';
 import { loadAcidusAttackSound } from '../sounds/acidus-attack';
 import { loadAcidusLeftSprite } from '../sprites/load-acidus-left';
 import { loadAcidusSpriteRight } from '../sprites/load-acidus-right';
-import { CropImage, Monster } from './Monster';
+import { CropImage, DIRECTION, Monster } from './Monster';
 
 export class Acidus extends Monster {
   x = 200;
   y = 200;
-  speedX = 15;
-  speedY = 15;
+  speedX = 5;
+  speedY = 5;
   frameX = 0;
   frameY = 0;
   width = 119;
   height = 120;
 
   attackAudio = loadAcidusAttackSound();
-  //
 
   frames: CropImage[][] = [
     [
       { order: 0, offsetX: 119, width: 119 },
-      { order: 1, offsetX: 240, width: 135 },
-      { order: 2, offsetX: 392, width: 135 },
-      { order: 3, offsetX: 527, width: 120 },
-      { order: 4, offsetX: 653, width: 130 },
-      { order: 5, offsetX: 783, width: 135 },
-      { order: 6, offsetX: 930, width: 110 },
-      { order: 7, offsetX: 1075, width: 135 },
+      { order: 1, offsetX: 240, width: 135, marginRightWidth: -16 },
+      { order: 2, offsetX: 392, width: 135, marginRightWidth: -16 },
+      { order: 3, offsetX: 527, width: 120, marginRightWidth: -2 },
+      { order: 4, offsetX: 653, width: 130, marginRightWidth: -12 },
+      { order: 5, offsetX: 783, width: 135, marginRightWidth: -14 },
+      { order: 6, offsetX: 930, width: 110, marginRightWidth: 9 },
     ],
     [],
     [
@@ -64,15 +62,21 @@ export class Acidus extends Monster {
   walking() {
     return defer(() => {
       this.frameY = 0;
-      return this.createForwardFrame(150, 0, 6);
+      return this.createForwardFrame(60, 0, 6);
     });
   }
 
   standing() {
     return defer(() => {
       this.frameY = 0;
-      return this.createForwardFrame(100, 0, 6);
+      return this.createForwardFrame(60, 0, 6);
     });
+  }
+
+  drawEffect(): void {}
+
+  hurting(): Observable<any> {
+    return EMPTY;
   }
 
   dying() {
