@@ -27,6 +27,7 @@ import { loadThiefLeftSprite } from '../sprites/load-thief-left';
 import { loadLeftThiefDagger } from '../sprites/load-thief-left-dagger';
 import { loadThiefRightSprite } from '../sprites/load-thief-right';
 import { loadRightThiefDagger } from '../sprites/load-thief-right-dagger';
+import { playAudio } from '../utils/play-audio';
 import { CropImage, DIRECTION, Monster } from './Monster';
 
 export class Thief extends Monster {
@@ -287,7 +288,7 @@ export class Thief extends Monster {
   constructor(canvas: HTMLCanvasElement) {
     super(canvas, loadThiefLeftSprite(), loadThiefRightSprite());
 
-    this.daggerHitSound.volume = 0.02;
+    this.daggerHitSound.volume = 0.05;
 
     this.onEffectAttack
       .pipe(switchMap(() => this.playDaggerHitSound()))
@@ -365,26 +366,7 @@ export class Thief extends Monster {
   }
 
   playDaggerHitSound() {
-    return new Observable((subscriber) => {
-      this.daggerHitSound.play();
-
-      const playHandler = (event) => {
-        subscriber.next(event);
-      };
-      const endHandler = (event) => {
-        subscriber.complete();
-      };
-      this.daggerHitSound.addEventListener('playing', playHandler);
-      this.daggerHitSound.addEventListener('ended', endHandler);
-
-      subscriber.next();
-      return () => {
-        this.daggerHitSound.removeEventListener('playing', playHandler);
-        this.daggerHitSound.removeEventListener('ended', endHandler);
-        this.daggerHitSound.pause();
-        this.daggerHitSound.currentTime = 0;
-      };
-    });
+    return playAudio(this.daggerHitSound);
   }
 
   drawEffect() {

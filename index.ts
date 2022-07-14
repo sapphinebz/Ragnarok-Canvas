@@ -270,22 +270,23 @@ thief.onDamageArea$
 //   );
 // }).pipe(share());
 
-// onAcidusAttack$.pipe(
-//   map((attackEvent) => {
-//     let { x: sourceX, y: sourceY } = attackEvent;
-//     sourceX = sourceX - acidus.width / 2;
+// onAcidusAttack$
+//   .pipe(
+//     map((attackEvent) => {
+//       let { x: sourceX, y: sourceY } = attackEvent;
+//       sourceX = sourceX - acidus.width / 2;
 
-//     return [...fabres, ...porings].filter((monster) => {
-//       if (!monster.isDie) {
-//         const { x: targetX, y: targetY } = monster;
-//         const distance = Math.sqrt(
-//           (sourceX - targetX) ** 2 + (sourceY - targetY) ** 2
-//         );
-//         return distance <= 80;
-//       }
-//       return false;
-//     });
-//   }),
-//   monstersRecievedDamangeAndDie()
-// );
-// .subscribe();
+//       return [...fabres, ...porings].filter((monster) => {
+//         if (!monster.isDie) {
+//           const { x: targetX, y: targetY } = monster;
+//           const distance = Math.sqrt(
+//             (sourceX - targetX) ** 2 + (sourceY - targetY) ** 2
+//           );
+//           return distance <= 80;
+//         }
+//         return false;
+//       });
+//     }),
+//     monstersRecievedDamageAndDie()
+//   )
+//   .subscribe();
