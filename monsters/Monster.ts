@@ -155,6 +155,8 @@ export abstract class Monster {
 
   abstract getFrameEntry(frameY: number, frameX: number): CropImage;
 
+  abstract drawEffect():void;
+
   drawImage() {
     this.drawImage$.next();
   }

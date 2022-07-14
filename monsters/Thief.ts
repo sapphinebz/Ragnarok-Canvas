@@ -7,7 +7,9 @@ import {
   NEVER,
   Observable,
   ReplaySubject,
+  Subject,
   switchMap,
+  timer,
 } from 'rxjs';
 import {
   concatMap,
@@ -262,15 +264,41 @@ export class Thief extends Monster {
   rightEffectDaggerImage = loadRightThiefDagger();
 
   attackEffectFrames = [
-    [0, 650, 30, 30, 22, 37, 30, 30],
-    [45, 650, 30, 30, 20, 36, 30, 30],
-    [85, 650, 30, 30, 13, 36, 30, 30],
-    [125, 650, 30, 30, -9, 54, 30, 30],
-    [142, 650, 30, 30, -18, 57, 30, 30],
+    [0, 650, 30, 30, -18, 51, 30, 30],
+    [45, 650, 30, 30, -18, 51, 30, 30],
+    [85, 650, 30, 30, -18, 51, 30, 30],
+    [125, 650, 30, 30, -18, 51, 30, 30],
+    [145, 650, 30, 30, -18, 51, 30, 30],
   ];
+
+  hasEffect = false;
+  effectFrame: number[];
+  onEffectAttack = new Subject<{ x: number; y: number }>();
 
   constructor(canvas: HTMLCanvasElement) {
     super(canvas, loadThiefLeftSprite(), loadThiefRightSprite());
+
+    this.onEffectAttack
+      .pipe(
+        switchMap(({ x, y }) => {
+          return timer(0, 100, animationFrameScheduler).pipe(
+            map((_, index) => index),
+            takeWhile((frameX) => {
+              if (this.attackEffectFrames[frameX] !== undefined) {
+                this.hasEffect = true;
+                this.effectFrame = [...this.attackEffectFrames[frameX]];
+                // fix x,y
+                this.effectFrame[4] = x + this.effectFrame[4];
+                this.effectFrame[5] = y + this.effectFrame[5];
+                return true;
+              }
+              this.hasEffect = false;
+              return false;
+            })
+          );
+        })
+      )
+      .subscribe();
   }
 
   getFrameEntry(frameY: number, frameX: number) {
@@ -307,28 +335,51 @@ export class Thief extends Monster {
     });
   }
 
+  drawEffect() {
+    if (this.hasEffect) {
+      const [sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight] =
+        this.effectFrame;
+      this.ctx.drawImage(
+        this.leftEffectDaggerImage,
+        sx,
+        sy,
+        sWidth,
+        sHeight,
+        dx,
+        dy,
+        dWidth,
+        dHeight
+      );
+    }
+  }
+
   attack(): Observable<any> {
     return defer(() => {
       this.frameY = 4;
       return this.createForwardFrame(100, 0, 6, { once: true }).pipe(
-        tap((frameX) => {
-          if (frameX >= 5) {
-            if (this.direction === 'left') {
-              this.onDamageArea$.next({
-                x: this.x - 20,
-                y: this.y + this.height / 2,
-                w: 30,
-                h: 50,
-              });
-            } else {
-              this.onDamageArea$.next({
-                x: this.x + this.width - 10,
-                y: this.y + this.height / 2,
-                w: 30,
-                h: 50,
-              });
+        tap({
+          next: (frameX) => {
+            if (frameX === 5) {
+              this.onEffectAttack.next({ x: this.x, y: this.y });
             }
-          }
+            if (frameX >= 5) {
+              if (this.direction === 'left') {
+                this.onDamageArea$.next({
+                  x: this.x - 20,
+                  y: this.y + this.height / 2,
+                  w: 30,
+                  h: 50,
+                });
+              } else {
+                this.onDamageArea$.next({
+                  x: this.x + this.width - 10,
+                  y: this.y + this.height / 2,
+                  w: 30,
+                  h: 50,
+                });
+              }
+            }
+          },
         })
       );
     });

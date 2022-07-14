@@ -41,6 +41,10 @@ export class KeyboardController {
 
   drawPlayer() {
     this.monster.drawImage();
+    if(this.monster.drawEffect){
+      this.monster.drawEffect();
+
+    }
   }
 
   private attactAction() {
