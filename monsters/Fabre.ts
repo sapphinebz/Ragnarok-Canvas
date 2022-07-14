@@ -66,6 +66,12 @@ export class Fabre extends Monster {
       return this.createForwardFrame(150, 0, 3);
     });
   }
+
+  drawEffect(): void {}
+  hurting(): Observable<any> {
+    return EMPTY;
+  }
+
   dying(): Observable<any> {
     return defer(() => {
       this.frameY = 2;

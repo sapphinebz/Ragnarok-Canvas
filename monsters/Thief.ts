@@ -378,7 +378,7 @@ export class Thief extends Monster {
   attack(): Observable<any> {
     return defer(() => {
       this.frameY = 4;
-      const attackSpeed = 50;
+      const attackSpeed = 80;
       return this.createForwardFrame(attackSpeed, 0, 6, { once: true }).pipe(
         tap({
           next: (frameX) => {

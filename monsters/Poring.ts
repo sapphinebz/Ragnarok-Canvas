@@ -1,4 +1,4 @@
-import { defer, ignoreElements, merge, NEVER, Observable } from 'rxjs';
+import { defer, EMPTY, ignoreElements, merge, NEVER, Observable } from 'rxjs';
 import { concatMap, connect, filter, takeWhile, tap } from 'rxjs/operators';
 import { loadPoringDeadSound } from '../sounds/poring-dead';
 import { loadPoringWalkSound } from '../sounds/poring-walk';
@@ -132,6 +132,12 @@ export class Poring extends Monster {
 
   attack(): Observable<any> {
     return NEVER;
+  }
+
+  drawEffect(): void {}
+
+  hurting(): Observable<any> {
+    return EMPTY;
   }
 
   playWalkingSound() {
