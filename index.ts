@@ -161,7 +161,7 @@ onLoadMonster$
     tick();
   });
 
-const monstersRecievedDamangeAndDie = (): OperatorFunction<Monster[], any> =>
+const monstersRecievedDamageAndDie = (): OperatorFunction<Monster[], any> =>
   mergeMap((collision) => {
     return from(collision).pipe(
       mergeMap((monster) => {
@@ -216,7 +216,7 @@ thief.onDamageArea$
         return false;
       });
     }),
-    monstersRecievedDamangeAndDie()
+    monstersRecievedDamageAndDie()
   )
   .subscribe();
 
