@@ -8,7 +8,6 @@ export function playAudio(audio: HTMLAudioElement) {
       subscriber.next(event);
     };
     const endHandler = (event: Event) => {
-      console.log(event);
       subscriber.complete();
     };
     audio.addEventListener('playing', playHandler);
