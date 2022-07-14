@@ -25,6 +25,7 @@ import {
   takeUntil,
   takeWhile,
 } from 'rxjs/operators';
+import { randomMinMax } from '../utils/random-minmax';
 import { shuffle } from '../utils/shuffle';
 
 export const enum DIRECTION {
@@ -168,12 +169,12 @@ export abstract class Monster {
     maxHeight: number;
   }): void {
     if (config === undefined) {
-      this.x = Math.random() * this.canvas.width - this.width;
-      this.y = Math.random() * this.canvas.height - this.height;
+      this.x = randomMinMax(0, this.canvas.width - this.width);
+      this.y = randomMinMax(0, this.canvas.height - this.height);
     } else {
       const { minWidth, maxWidth, minHeight, maxHeight } = config;
-      this.x = Math.random() * maxWidth + minWidth;
-      this.y = Math.random() * maxHeight + minHeight;
+      this.x = randomMinMax(minWidth, maxWidth - this.width);
+      this.y = randomMinMax(minHeight, maxHeight - this.height);
     }
   }
 
