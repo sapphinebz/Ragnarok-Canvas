@@ -111,6 +111,7 @@ export class KeyboardController {
         return movementKeys.indexOf(keyboardCode) !== -1;
       }),
       comboResetWith(keyup$),
+
       map((keys) => {
         if (keys.length === 1) {
           return keys[0];

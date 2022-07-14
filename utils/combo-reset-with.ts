@@ -7,8 +7,11 @@ export function comboResetWith<T>(
     new Observable((subscriber) => {
       let combo: T[] = [];
 
-      const cleanupSubscription = reset$.subscribe(() => {
-        combo = [];
+      const cleanupSubscription = reset$.subscribe((event) => {
+        const index = combo.findIndex((key) => key === event.code);
+        if (index >= -1) {
+          combo.splice(index, 1);
+        }
       });
 
       const bufferSubscription = source.subscribe({
