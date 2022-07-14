@@ -26,7 +26,7 @@ import { loadThiefLeftSprite } from '../sprites/load-thief-left';
 import { loadLeftThiefDagger } from '../sprites/load-thief-left-dagger';
 import { loadThiefRightSprite } from '../sprites/load-thief-right';
 import { loadRightThiefDagger } from '../sprites/load-thief-right-dagger';
-import { CropImage, Monster } from './Monster';
+import { CropImage, DIRECTION, Monster } from './Monster';
 
 export class Thief extends Monster {
   x = 100;
@@ -265,11 +265,11 @@ export class Thief extends Monster {
 
   // 0 = left, 1 = right
   attackEffectFrames = [
-    [0, 650, 30, 30, -18, 51, 30, 30, 0],
-    [45, 650, 30, 30, -18, 51, 30, 30, 0],
-    [85, 650, 30, 30, -18, 51, 30, 30, 0],
-    [125, 650, 30, 30, -18, 51, 30, 30, 0],
-    [145, 650, 30, 30, -18, 51, 30, 30, 0],
+    [0, 650, 30, 30, -18, 51, 30, 30, DIRECTION.LEFT],
+    [45, 650, 30, 30, -18, 51, 30, 30, DIRECTION.LEFT],
+    [85, 650, 30, 30, -18, 51, 30, 30, DIRECTION.LEFT],
+    [125, 650, 30, 30, -18, 51, 30, 30, DIRECTION.LEFT],
+    [145, 650, 30, 30, -18, 51, 30, 30, DIRECTION.LEFT],
   ];
 
   hasEffect = false;
@@ -277,7 +277,7 @@ export class Thief extends Monster {
   onEffectAttack = new Subject<{
     x: number;
     y: number;
-    direction: 'left' | 'right';
+    direction: DIRECTION;
   }>();
 
   constructor(canvas: HTMLCanvasElement) {
@@ -297,18 +297,17 @@ export class Thief extends Monster {
                 let offsetX = this.effectFrame[0];
                 const sWidth = this.effectFrame[3];
 
-                if (direction === 'right') {
+                if (direction === DIRECTION.RIGHT) {
                   this.effectFrame[0] =
                     this.rightEffectDaggerImage.width - (offsetX + sWidth);
                   this.effectFrame[4] = x + 50 - this.effectFrame[4];
                   this.effectFrame[5] = y + 103 - this.effectFrame[5];
                   // direction
-                  this.effectFrame[8] = 1;
-                } else if (direction === 'left') {
+                } else if (direction === DIRECTION.LEFT) {
                   this.effectFrame[4] = x + this.effectFrame[4];
                   this.effectFrame[5] = y + this.effectFrame[5];
-                  this.effectFrame[8] = 0;
                 }
+                this.effectFrame[8] = direction;
 
                 return true;
               }
@@ -389,7 +388,7 @@ export class Thief extends Monster {
               });
             }
             if (frameX >= 5) {
-              if (this.direction === 'left') {
+              if (this.direction === DIRECTION.LEFT) {
                 this.onDamageArea$.next({
                   x: this.x - 20,
                   y: this.y + this.height / 2,

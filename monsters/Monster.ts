@@ -31,6 +31,11 @@ import {
 } from 'rxjs/operators';
 import { shuffle } from '../utils/shuffle';
 
+export const enum DIRECTION {
+  LEFT,
+  RIGHT
+}
+
 export interface Area {
   x: number;
   y: number;
@@ -63,9 +68,9 @@ export abstract class Monster {
 
   onDamageArea$ = new Subject<Area>();
 
-  direction$ = new BehaviorSubject<'left' | 'right'>('left');
+  direction$ = new BehaviorSubject<DIRECTION>(DIRECTION.LEFT);
 
-  set direction(value: 'left' | 'right') {
+  set direction(value: DIRECTION) {
     this.direction$.next(value);
   }
   get direction() {
@@ -123,15 +128,15 @@ export abstract class Monster {
           marginRightWidth,
         } = frameXEntry;
 
-        let image = direction === 'right' ? rightImage : leftImage;
+        let image = direction === DIRECTION.RIGHT ? rightImage : leftImage;
         offsetY ??= this.height * this.frameY;
         height ??= this.height;
         marginHeight ??= 0;
         let marginWidth =
-          direction === 'right' ? marginRightWidth : marginLeftWidth;
+          direction === DIRECTION.RIGHT ? marginRightWidth : marginLeftWidth;
         marginWidth ??= 0;
 
-        if (direction === 'right') {
+        if (direction === DIRECTION.RIGHT) {
           offsetX = rightImage.width - (offsetX + width);
         }
         this.ctx.drawImage(
@@ -255,7 +260,7 @@ export abstract class Monster {
 
   walkingDown() {
     return defer(() => {
-      this.direction = 'left';
+      this.direction = DIRECTION.LEFT;
       return this.walking().pipe(
         tap(() => {
           this.moveDown();
@@ -267,7 +272,7 @@ export abstract class Monster {
 
   walkingUp() {
     return defer(() => {
-      this.direction = 'right';
+      this.direction = DIRECTION.RIGHT;
       return this.walking().pipe(
         tap(() => {
           this.moveUp();
@@ -279,7 +284,7 @@ export abstract class Monster {
 
   walkingLeft() {
     return defer(() => {
-      this.direction = 'left';
+      this.direction = DIRECTION.LEFT;
       return this.walking().pipe(
         tap(() => {
           this.moveLeft();
@@ -291,7 +296,7 @@ export abstract class Monster {
 
   walkingRight() {
     return defer(() => {
-      this.direction = 'right';
+      this.direction = DIRECTION.RIGHT;
       return this.walking().pipe(
         tap(() => {
           this.moveRight();
@@ -303,7 +308,7 @@ export abstract class Monster {
 
   walkingTopLeft() {
     return defer(() => {
-      this.direction = 'left';
+      this.direction = DIRECTION.LEFT;
       return this.walking().pipe(
         tap(() => {
           this.moveTopLeft();
@@ -315,7 +320,7 @@ export abstract class Monster {
 
   walkingTopRight() {
     return defer(() => {
-      this.direction = 'right';
+      this.direction = DIRECTION.RIGHT;
       return this.walking().pipe(
         tap(() => {
           this.moveTopRight();
@@ -327,7 +332,7 @@ export abstract class Monster {
 
   walkingBottomLeft() {
     return defer(() => {
-      this.direction = 'left';
+      this.direction = DIRECTION.LEFT;
       return this.walking().pipe(
         tap(() => {
           this.moveBottomLeft();
@@ -339,7 +344,7 @@ export abstract class Monster {
 
   walkingBottomRight() {
     return defer(() => {
-      this.direction = 'right';
+      this.direction = DIRECTION.RIGHT;
       return this.walking().pipe(
         tap(() => {
           this.moveBottomRight();
