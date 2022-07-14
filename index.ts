@@ -151,10 +151,6 @@ onCanvasMount$.pipe(switchMap(() => onLoadMonster$)).subscribe((monster) => {
   monster.randomSpawn();
 });
 
-// onLoadMonster$
-//   .pipe(mergeMap((monster) => monster.dying()))
-//   .subscribe(() => tick());
-
 onLoadMonster$
   .pipe(
     mergeMap((monster) =>
@@ -164,60 +160,6 @@ onLoadMonster$
   .subscribe(() => {
     tick();
   });
-
-// const keydown$ = fromEvent<KeyboardEvent>(document, 'keydown').pipe(
-//   tap((event) => event.preventDefault()),
-//   share()
-// );
-
-// keydown$
-//   .pipe(
-//     mergeMap(() =>
-//       from(porings).pipe(
-//         mergeMap((poring) => {
-//           return poring.forceDie().pipe(
-//             tap(() => tick()),
-//             removeMonster(porings, poring)
-//           );
-//         })
-//       )
-//     )
-//   )
-//   .subscribe();
-
-// const keyup$ = fromEvent<KeyboardEvent>(document, 'keyup').pipe(
-//   tap((event) => event.preventDefault()),
-//   share()
-// );
-
-// const onKeydown = (
-//   key: 'ArrowRight' | 'ArrowLeft' | 'ArrowUp' | 'ArrowDown',
-//   updater: () => void
-// ) => {
-//   return keydown$.pipe(
-//     filter((event) => event.key === key),
-//     exhaustMap(() => {
-//       return interval(80, animationFrameScheduler).pipe(
-//         tap(() => {
-//           updater();
-//           tick();
-//         }),
-//         takeUntil(keyup$)
-//       );
-//     }),
-//     share()
-//   );
-// };
-
-// const arrowRight$ = onKeydown('ArrowRight', () => acidus.moveRight());
-// const arrowLeft$ = onKeydown('ArrowLeft', () => acidus.moveLeft());
-// const arrowUp$ = onKeydown('ArrowUp', () => acidus.moveUp());
-// const arrowDown$ = onKeydown('ArrowDown', () => acidus.moveDown());
-
-// const acidusMove$ = merge(arrowRight$, arrowLeft$, arrowUp$, arrowDown$).pipe(
-//   map(() => acidus),
-//   share()
-// );
 
 const monstersRecievedDamangeAndDie = (): OperatorFunction<Monster[], any> =>
   mergeMap((collision) => {
@@ -278,70 +220,72 @@ thief.onDamageArea$
   )
   .subscribe();
 
-const onAcidusAttack$ = defer(() => {
-  canvas.style.cursor = 'none';
-  const mousemove$ = fromEvent<MouseEvent>(canvas, 'mousemove').pipe(share());
-  const mousedown$ = fromEvent<MouseEvent>(canvas, 'mousedown').pipe(share());
-  const nextAction$ = new BehaviorSubject<string>('move');
+// FOR ACIDUS MOUSE ATTACK
 
-  const actions$ = merge(
-    mousedown$.pipe(map(() => 'attack')),
-    nextAction$
-  ).pipe(distinctUntilChanged(), shareReplay(1));
+// const onAcidusAttack$ = defer(() => {
+//   canvas.style.cursor = 'none';
+//   const mousemove$ = fromEvent<MouseEvent>(canvas, 'mousemove').pipe(share());
+//   const mousedown$ = fromEvent<MouseEvent>(canvas, 'mousedown').pipe(share());
+//   const nextAction$ = new BehaviorSubject<string>('move');
 
-  const onAnimiationAsAction$ = actions$.pipe(
-    switchMap((action) => {
-      if (action === 'attack') {
-        return acidus.attack().pipe(
-          tap(() => tick()),
-          finalize(() => nextAction$.next('move'))
-        );
-      } else if (action === 'move') {
-        return acidus.standing().pipe(
-          tap(() => {
-            tick();
-          })
-        );
-      }
-      return EMPTY;
-    })
-  );
+//   const actions$ = merge(
+//     mousedown$.pipe(map(() => 'attack')),
+//     nextAction$
+//   ).pipe(distinctUntilChanged(), shareReplay(1));
 
-  const onAttackEmitCurrentPosition$ = actions$.pipe(
-    filter((action) => action === 'attack'),
-    withLatestFrom(mousemove$),
-    map(([action, event]) => event)
-  );
-  const onMoveAcidusToMouse$ = mousemove$.pipe(
-    tap((event) => {
-      acidus.x = event.x - acidus.width / 2;
-      acidus.y = event.y - acidus.height / 2;
-      tick();
-    })
-  );
-  return merge(
-    onMoveAcidusToMouse$.pipe(ignoreElements()),
-    onAttackEmitCurrentPosition$,
-    onAnimiationAsAction$.pipe(ignoreElements())
-  );
-}).pipe(share());
+//   const onAnimiationAsAction$ = actions$.pipe(
+//     switchMap((action) => {
+//       if (action === 'attack') {
+//         return acidus.attack().pipe(
+//           tap(() => tick()),
+//           finalize(() => nextAction$.next('move'))
+//         );
+//       } else if (action === 'move') {
+//         return acidus.standing().pipe(
+//           tap(() => {
+//             tick();
+//           })
+//         );
+//       }
+//       return EMPTY;
+//     })
+//   );
 
-onAcidusAttack$.pipe(
-  map((attackEvent) => {
-    let { x: sourceX, y: sourceY } = attackEvent;
-    sourceX = sourceX - acidus.width / 2;
+//   const onAttackEmitCurrentPosition$ = actions$.pipe(
+//     filter((action) => action === 'attack'),
+//     withLatestFrom(mousemove$),
+//     map(([action, event]) => event)
+//   );
+//   const onMoveAcidusToMouse$ = mousemove$.pipe(
+//     tap((event) => {
+//       acidus.x = event.x - acidus.width / 2;
+//       acidus.y = event.y - acidus.height / 2;
+//       tick();
+//     })
+//   );
+//   return merge(
+//     onMoveAcidusToMouse$.pipe(ignoreElements()),
+//     onAttackEmitCurrentPosition$,
+//     onAnimiationAsAction$.pipe(ignoreElements())
+//   );
+// }).pipe(share());
 
-    return [...fabres, ...porings].filter((monster) => {
-      if (!monster.isDie) {
-        const { x: targetX, y: targetY } = monster;
-        const distance = Math.sqrt(
-          (sourceX - targetX) ** 2 + (sourceY - targetY) ** 2
-        );
-        return distance <= 80;
-      }
-      return false;
-    });
-  }),
-  monstersRecievedDamangeAndDie()
-);
+// onAcidusAttack$.pipe(
+//   map((attackEvent) => {
+//     let { x: sourceX, y: sourceY } = attackEvent;
+//     sourceX = sourceX - acidus.width / 2;
+
+//     return [...fabres, ...porings].filter((monster) => {
+//       if (!monster.isDie) {
+//         const { x: targetX, y: targetY } = monster;
+//         const distance = Math.sqrt(
+//           (sourceX - targetX) ** 2 + (sourceY - targetY) ** 2
+//         );
+//         return distance <= 80;
+//       }
+//       return false;
+//     });
+//   }),
+//   monstersRecievedDamangeAndDie()
+// );
 // .subscribe();
