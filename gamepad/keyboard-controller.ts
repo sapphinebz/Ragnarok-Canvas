@@ -18,6 +18,7 @@ import {
   tap,
 } from 'rxjs/operators';
 import { Monster } from '../monsters/Monster';
+import { comboResetWith } from '../utils/combo-reset-with';
 
 export class KeyboardController {
   onCleanup$ = new ReplaySubject<void>(1);
@@ -89,6 +90,10 @@ export class KeyboardController {
       ArrowRight: this.monster.walkingRight(),
       ArrowUp: this.monster.walkingUp(),
       ArrowDown: this.monster.walkingDown(),
+      ArrowTopRight: this.monster.walkingTopRight(),
+      ArrowTopLeft: this.monster.walkingTopLeft(),
+      ArrowBottomRight: this.monster.walkingBottomRight(),
+      ArrowBottomLeft: this.monster.walkingBottomLeft(),
     };
 
     const movementKeys = Object.keys(movementKeyMap);
@@ -104,6 +109,35 @@ export class KeyboardController {
       map((event) => event.code),
       filter((keyboardCode) => {
         return movementKeys.indexOf(keyboardCode) !== -1;
+      }),
+      distinctUntilChanged(),
+      comboResetWith(keyup$),
+      map((keys) => {
+        if (keys.length === 1) {
+          return keys[0];
+        }
+        if (
+          keys.indexOf('ArrowRight') !== -1 &&
+          keys.indexOf('ArrowUp') !== -1
+        ) {
+          return 'ArrowTopRight';
+        } else if (
+          keys.indexOf('ArrowRight') !== -1 &&
+          keys.indexOf('ArrowDown') !== -1
+        ) {
+          return 'ArrowBottomRight';
+        } else if (
+          keys.indexOf('ArrowLeft') !== -1 &&
+          keys.indexOf('ArrowUp') !== -1
+        ) {
+          return 'ArrowTopLeft';
+        } else if (
+          keys.indexOf('ArrowLeft') !== -1 &&
+          keys.indexOf('ArrowDown') !== -1
+        ) {
+          return 'ArrowBottomLeft';
+        }
+        return 'KeyUp';
       })
     );
     const keyboardCodeCanceller$ = keyboardCode$
