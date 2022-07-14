@@ -11,6 +11,9 @@ export function comboResetWith<T>(
         const index = combo.findIndex((key) => key === event.code);
         if (index >= -1) {
           combo.splice(index, 1);
+          if (combo.length === 0) {
+            subscriber.next(combo);
+          }
         }
       });
 

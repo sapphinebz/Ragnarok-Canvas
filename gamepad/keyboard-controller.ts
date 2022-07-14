@@ -111,9 +111,10 @@ export class KeyboardController {
         return movementKeys.indexOf(keyboardCode) !== -1;
       }),
       comboResetWith(keyup$),
-
       map((keys) => {
-        if (keys.length === 1) {
+        if (keys.length === 0) {
+          return 'KeyUp';
+        } else if (keys.length === 1) {
           return keys[0];
         }
         if (
@@ -141,11 +142,8 @@ export class KeyboardController {
       }),
       share()
     );
-    const keyboardCodeCanceller$ = keyboardCode$
-      .pipe(switchMap(() => keyup$.pipe(take(1))))
-      .pipe(map(() => 'KeyUp'));
 
-    return merge(keyboardCode$, keyboardCodeCanceller$).pipe(
+    return keyboardCode$.pipe(
       distinctUntilChanged(),
       startWith('KeyUp'),
       map((key) => movementKeyMap[key])
