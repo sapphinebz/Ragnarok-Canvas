@@ -276,6 +276,7 @@ export class Thief extends Monster {
   getFrameEntry(frameY: number, frameX: number) {
     return this.frames[frameY][frameX];
   }
+
   standing(): Observable<any> {
     return defer(() => {
       this.frameY = 0;
@@ -330,20 +331,6 @@ export class Thief extends Monster {
           }
         })
       );
-    });
-  }
-
-  playWalkingSound() {
-    return new Observable((subscriber) => {
-      const stopAudio = () => {
-        subscriber.next();
-        subscriber.complete();
-      };
-      const timeoutIndex = setTimeout(stopAudio, 270);
-      return () => {
-        clearTimeout(timeoutIndex);
-        stopAudio();
-      };
     });
   }
 
