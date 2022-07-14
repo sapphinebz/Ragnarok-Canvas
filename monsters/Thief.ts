@@ -1,18 +1,24 @@
 import {
+  animationFrameScheduler,
   defer,
   ignoreElements,
+  interval,
   merge,
   NEVER,
   Observable,
   ReplaySubject,
+  switchMap,
 } from 'rxjs';
 import {
   concatMap,
   connect,
   filter,
+  map,
+  mergeMap,
   takeWhile,
   tap,
   withLatestFrom,
+  zipWith,
 } from 'rxjs/operators';
 import { loadThiefLeftSprite } from '../sprites/load-thief-left';
 import { loadLeftThiefDagger } from '../sprites/load-thief-left-dagger';
@@ -255,6 +261,14 @@ export class Thief extends Monster {
   leftEffectDaggerImage = loadLeftThiefDagger();
   rightEffectDaggerImage = loadRightThiefDagger();
 
+  attackEffectFrames = [
+    [0, 650, 30, 30, 22, 37, 30, 30],
+    [45, 650, 30, 30, 20, 36, 30, 30],
+    [85, 650, 30, 30, 13, 36, 30, 30],
+    [125, 650, 30, 30, -9, 54, 30, 30],
+    [142, 650, 30, 30, -18, 57, 30, 30],
+  ];
+
   constructor(canvas: HTMLCanvasElement) {
     super(canvas, loadThiefLeftSprite(), loadThiefRightSprite());
   }
@@ -296,108 +310,24 @@ export class Thief extends Monster {
     return defer(() => {
       this.frameY = 4;
       return this.createForwardFrame(100, 0, 6, { once: true }).pipe(
-        connect((frameX$) => {
-          const damage$ = frameX$.pipe(
-            tap((frameX) => {
-              if (frameX >= 5) {
-                if (this.direction === 'left') {
-                  this.onDamageArea$.next({
-                    x: this.x - 20,
-                    y: this.y + this.height / 2,
-                    w: 30,
-                    h: 50,
-                  });
-                } else {
-                  this.onDamageArea$.next({
-                    x: this.x + this.width - 10,
-                    y: this.y + this.height / 2,
-                    w: 30,
-                    h: 50,
-                  });
-                }
-              }
-            })
-          );
-
-          const subscription = this.drawImage$
-            .pipe(
-              withLatestFrom(frameX$),
-              tap(([_, attackFrameX]) => {
-                if (attackFrameX === 2) {
-                  this.ctx.drawImage(
-                    this.leftEffectDaggerImage,
-                    0,
-                    650,
-                    30,
-                    30,
-                    this.x + 9,
-                    this.y + 40,
-                    30,
-                    30
-                  );
-                } else if (attackFrameX === 3) {
-                  this.ctx.drawImage(
-                    this.leftEffectDaggerImage,
-                    45,
-                    650,
-                    30,
-                    30,
-                    this.x + 6,
-                    this.y + 40,
-                    30,
-                    30
-                  );
-                } else if (attackFrameX === 4) {
-                  this.ctx.drawImage(
-                    this.leftEffectDaggerImage,
-                    85,
-                    650,
-                    30,
-                    30,
-                    this.x - 15,
-                    this.y + 50,
-                    30,
-                    30
-                  );
-                } else if (attackFrameX === 5) {
-                  this.ctx.drawImage(
-                    this.leftEffectDaggerImage,
-                    125,
-                    650,
-                    30,
-                    30,
-                    this.x - 17,
-                    this.y + 53,
-                    30,
-                    30
-                  );
-                } else if (attackFrameX === 6) {
-                  this.ctx.drawImage(
-                    this.leftEffectDaggerImage,
-                    142,
-                    650,
-                    30,
-                    30,
-                    this.x - 27,
-                    this.y + 60,
-                    30,
-                    30
-                  );
-                }
-              })
-            )
-            .subscribe();
-
-          return damage$.pipe(
-            tap({
-              complete: () => {
-                subscription.unsubscribe();
-              },
-              unsubscribe: () => {
-                subscription.unsubscribe();
-              },
-            })
-          );
+        tap((frameX) => {
+          if (frameX >= 5) {
+            if (this.direction === 'left') {
+              this.onDamageArea$.next({
+                x: this.x - 20,
+                y: this.y + this.height / 2,
+                w: 30,
+                h: 50,
+              });
+            } else {
+              this.onDamageArea$.next({
+                x: this.x + this.width - 10,
+                y: this.y + this.height / 2,
+                w: 30,
+                h: 50,
+              });
+            }
+          }
         })
       );
     });
