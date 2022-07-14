@@ -40,7 +40,11 @@ import { Monster } from './monsters/Monster';
 import { Fabre } from './monsters/Fabre';
 import { Thief } from './monsters/Thief';
 import { KeyboardController } from './gamepad/keyboard-controller';
-import { collideWithArea, COLLISION_DIRECTION } from './utils/collision';
+import {
+  collideWithArea,
+  COLLISION_DIRECTION,
+  rectanglesIntersect,
+} from './utils/collision';
 
 const canvas = document.querySelector<HTMLCanvasElement>('canvas');
 const ctx = canvas.getContext('2d');
@@ -210,7 +214,7 @@ thief.onDamageArea$
       return [...fabres, ...porings].filter((monster) => {
         if (!monster.isDie) {
           // const { x: targetX, y: targetY,width,height } = monster;
-          const collision = collideWithArea(area, monster);
+          const collision = rectanglesIntersect(area, monster);
           return collision !== COLLISION_DIRECTION.NOTHING;
         }
         return false;

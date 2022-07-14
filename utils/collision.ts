@@ -38,3 +38,14 @@ export function collideWithArea(area: Area, monster: Monster) {
   }
   return COLLISION_DIRECTION.NOTHING;
 }
+
+export function rectanglesIntersect(area: Area, monster: Monster) {
+  const aLeftOfB = area.x + area.w < monster.x;
+  const aRightOfB = area.x > monster.x + monster.width;
+  const aAboveB = area.y > monster.y + monster.height;
+  const aBelowB = area.y + area.h < monster.y;
+  if (!(aLeftOfB || aRightOfB || aAboveB || aBelowB)) {
+    return COLLISION_DIRECTION.RIGHT;
+  }
+  return COLLISION_DIRECTION.NOTHING;
+}

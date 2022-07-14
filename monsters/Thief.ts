@@ -304,7 +304,6 @@ export class Thief extends Monster {
                 this.hasEffect = true;
                 this.effectFrame = [...this.attackEffectFrames[frameX]];
 
-                // fix x,y
                 let offsetX = this.effectFrame[0];
                 const sWidth = this.effectFrame[3];
 
@@ -313,7 +312,6 @@ export class Thief extends Monster {
                     this.rightEffectDaggerImage.width - (offsetX + sWidth);
                   this.effectFrame[4] = x + 50 - this.effectFrame[4];
                   this.effectFrame[5] = y + 103 - this.effectFrame[5];
-                  // direction
                 } else if (direction === DIRECTION.LEFT) {
                   this.effectFrame[4] = x + this.effectFrame[4];
                   this.effectFrame[5] = y + this.effectFrame[5];
@@ -407,17 +405,17 @@ export class Thief extends Monster {
             if (frameX >= 5) {
               if (this.direction === DIRECTION.LEFT) {
                 this.onDamageArea$.next({
-                  x: this.x - 20,
+                  x: this.x - 25,
                   y: this.y + this.height / 2,
-                  w: 30,
-                  h: 50,
+                  w: 50,
+                  h: 40,
                 });
               } else {
                 this.onDamageArea$.next({
-                  x: this.x + this.width - 10,
+                  x: this.x + this.width - 25,
                   y: this.y + this.height / 2,
-                  w: 30,
-                  h: 50,
+                  w: 50,
+                  h: 40,
                 });
               }
             }

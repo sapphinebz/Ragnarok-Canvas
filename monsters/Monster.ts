@@ -4,8 +4,6 @@ import {
   combineLatest,
   defer,
   EMPTY,
-  first,
-  forkJoin,
   from,
   fromEvent,
   interval,
@@ -16,7 +14,6 @@ import {
   ReplaySubject,
   startWith,
   Subject,
-  switchMap,
   take,
   tap,
   timer,
@@ -27,13 +24,12 @@ import {
   repeat,
   takeUntil,
   takeWhile,
-  withLatestFrom,
 } from 'rxjs/operators';
 import { shuffle } from '../utils/shuffle';
 
 export const enum DIRECTION {
   LEFT,
-  RIGHT
+  RIGHT,
 }
 
 export interface Area {
@@ -151,16 +147,12 @@ export abstract class Monster {
           height
         );
       }
-
-      // this.testArea(this.x + this.width - 10, this.y + this.height / 2, 30, 50);
-
-      // this.testArea(this.x - 20, this.y + this.height / 2, 30, 50);
     });
   }
 
   abstract getFrameEntry(frameY: number, frameX: number): CropImage;
 
-  abstract drawEffect():void;
+  abstract drawEffect(): void;
 
   drawImage() {
     this.drawImage$.next();
