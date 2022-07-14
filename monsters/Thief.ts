@@ -17,6 +17,7 @@ import {
   filter,
   map,
   mergeMap,
+  takeUntil,
   takeWhile,
   tap,
   withLatestFrom,
@@ -291,7 +292,10 @@ export class Thief extends Monster {
     this.daggerHitSound.volume = 0.05;
 
     this.onEffectAttack
-      .pipe(switchMap(() => this.playDaggerHitSound()))
+      .pipe(
+        switchMap(() => this.playDaggerHitSound()),
+        takeUntil(this.onCleanup$)
+      )
       .subscribe();
 
     this.onEffectAttack
@@ -324,7 +328,8 @@ export class Thief extends Monster {
               return false;
             })
           );
-        })
+        }),
+        takeUntil(this.onCleanup$)
       )
       .subscribe();
   }

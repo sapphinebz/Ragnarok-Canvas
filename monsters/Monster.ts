@@ -62,8 +62,8 @@ export abstract class Monster {
   height: number;
   isDied$ = new BehaviorSubject<boolean>(false);
 
+  onCleanup$ = new ReplaySubject<void>(1);
   onDamageArea$ = new Subject<Area>();
-
   direction$ = new BehaviorSubject<DIRECTION>(DIRECTION.LEFT);
 
   set direction(value: DIRECTION) {
@@ -95,13 +95,13 @@ export abstract class Monster {
     public rightImage: HTMLImageElement
   ) {
     fromEvent(leftImage, 'load')
-      .pipe(take(1))
+      .pipe(take(1), takeUntil(this.onCleanup$))
       .subscribe(() => {
         this.leftImage$.next(leftImage);
       });
 
     fromEvent(rightImage, 'load')
-      .pipe(take(1))
+      .pipe(take(1), takeUntil(this.onCleanup$))
       .subscribe(() => {
         this.rightImage$.next(rightImage);
       });
@@ -111,43 +111,45 @@ export abstract class Monster {
       leftImage: this.leftImage$,
       rightImage: this.rightImage$,
       drawImage: this.drawImage$,
-    }).subscribe(({ direction, leftImage, rightImage }) => {
-      const frameXEntry = this.getFrameEntry(this.frameY, this.frameX);
-      if (frameXEntry) {
-        let {
-          offsetX,
-          offsetY,
-          width,
-          height,
-          marginHeight,
-          marginLeftWidth,
-          marginRightWidth,
-        } = frameXEntry;
+    })
+      .pipe(takeUntil(this.onCleanup$))
+      .subscribe(({ direction, leftImage, rightImage }) => {
+        const frameXEntry = this.getFrameEntry(this.frameY, this.frameX);
+        if (frameXEntry) {
+          let {
+            offsetX,
+            offsetY,
+            width,
+            height,
+            marginHeight,
+            marginLeftWidth,
+            marginRightWidth,
+          } = frameXEntry;
 
-        let image = direction === DIRECTION.RIGHT ? rightImage : leftImage;
-        offsetY ??= this.height * this.frameY;
-        height ??= this.height;
-        marginHeight ??= 0;
-        let marginWidth =
-          direction === DIRECTION.RIGHT ? marginRightWidth : marginLeftWidth;
-        marginWidth ??= 0;
+          let image = direction === DIRECTION.RIGHT ? rightImage : leftImage;
+          offsetY ??= this.height * this.frameY;
+          height ??= this.height;
+          marginHeight ??= 0;
+          let marginWidth =
+            direction === DIRECTION.RIGHT ? marginRightWidth : marginLeftWidth;
+          marginWidth ??= 0;
 
-        if (direction === DIRECTION.RIGHT) {
-          offsetX = rightImage.width - (offsetX + width);
+          if (direction === DIRECTION.RIGHT) {
+            offsetX = rightImage.width - (offsetX + width);
+          }
+          this.ctx.drawImage(
+            image,
+            offsetX,
+            offsetY,
+            width,
+            height,
+            this.x + marginWidth,
+            this.y + marginHeight,
+            width,
+            height
+          );
         }
-        this.ctx.drawImage(
-          image,
-          offsetX,
-          offsetY,
-          width,
-          height,
-          this.x + marginWidth,
-          this.y + marginHeight,
-          width,
-          height
-        );
-      }
-    });
+      });
   }
 
   abstract getFrameEntry(frameY: number, frameX: number): CropImage;
@@ -403,6 +405,11 @@ export abstract class Monster {
   moveBottomRight() {
     this.y += this.speedY;
     this.x += this.speedX;
+  }
+
+  cleanup() {
+    this.onCleanup$.next();
+    this.onCleanup$.complete();
   }
 
   takeWhileWithInCanvas<T>(): MonoTypeOperatorFunction<T> {
