@@ -110,7 +110,6 @@ export class KeyboardController {
       filter((keyboardCode) => {
         return movementKeys.indexOf(keyboardCode) !== -1;
       }),
-      distinctUntilChanged(),
       comboResetWith(keyup$),
       map((keys) => {
         if (keys.length === 1) {
@@ -137,8 +136,9 @@ export class KeyboardController {
         ) {
           return 'ArrowBottomLeft';
         }
-        return 'KeyUp';
-      })
+        return keys[keys.length - 1];
+      }),
+      share()
     );
     const keyboardCodeCanceller$ = keyboardCode$
       .pipe(switchMap(() => keyup$.pipe(take(1))))

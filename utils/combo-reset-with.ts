@@ -16,6 +16,9 @@ export function comboResetWith<T>(
           combo.push(value);
           if (combo.length <= 2) {
             subscriber.next(combo);
+          } else {
+            combo = [combo[1], combo[2]];
+            subscriber.next(combo);
           }
         },
         error: (err) => {
