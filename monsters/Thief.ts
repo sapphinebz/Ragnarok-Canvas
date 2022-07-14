@@ -278,6 +278,7 @@ export class Thief extends Monster {
     x: number;
     y: number;
     direction: DIRECTION;
+    attackSpeed: number;
   }>();
 
   constructor(canvas: HTMLCanvasElement) {
@@ -377,7 +378,8 @@ export class Thief extends Monster {
   attack(): Observable<any> {
     return defer(() => {
       this.frameY = 4;
-      return this.createForwardFrame(100, 0, 6, { once: true }).pipe(
+      const attackSpeed = 50;
+      return this.createForwardFrame(attackSpeed, 0, 6, { once: true }).pipe(
         tap({
           next: (frameX) => {
             if (frameX === 5) {
@@ -385,6 +387,7 @@ export class Thief extends Monster {
                 x: this.x,
                 y: this.y,
                 direction: this.direction,
+                attackSpeed,
               });
             }
             if (frameX >= 5) {
