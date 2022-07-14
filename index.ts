@@ -126,6 +126,8 @@ const onLoadMonster$ = merge(
         porings.push(monster);
       } else if (monster instanceof Fabre) {
         fabres.push(monster);
+      } else if (monster instanceof Acidus) {
+        aciduss.push(monster);
       }
     })
   ),
@@ -166,6 +168,8 @@ const monstersRecievedDamageAndDie = (): OperatorFunction<Monster[], any> =>
                   return porings;
                 } else if (monster instanceof Fabre) {
                   return fabres;
+                } else if (monster instanceof Acidus) {
+                  return aciduss;
                 }
                 return [];
               }, monster),
@@ -181,6 +185,8 @@ const monstersRecievedDamageAndDie = (): OperatorFunction<Monster[], any> =>
                   onRespawnMonster$.next(new Poring(canvas));
                 } else if (monster instanceof Fabre) {
                   onRespawnMonster$.next(new Fabre(canvas));
+                } else if (monster instanceof Acidus) {
+                  onRespawnMonster$.next(new Acidus(canvas));
                 }
               })
             );
@@ -198,7 +204,7 @@ const monstersRecievedDamageAndDie = (): OperatorFunction<Monster[], any> =>
 thief.onDamageArea$
   .pipe(
     map((area) => {
-      return [...fabres, ...porings].filter((monster) => {
+      return [...fabres, ...porings, ...aciduss].filter((monster) => {
         if (!monster.isDie) {
           // const { x: targetX, y: targetY,width,height } = monster;
           const collision = rectanglesIntersect(area, monster);

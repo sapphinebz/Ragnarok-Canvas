@@ -120,7 +120,7 @@ export class Acidus extends Monster {
   dying() {
     return defer(() => {
       this.frameY = 5;
-      return this.createForwardFrame(120, 0, 2);
+      return this.createForwardFrame(120, 0, 2, { once: true });
     });
   }
 }
