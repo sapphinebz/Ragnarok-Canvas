@@ -263,33 +263,53 @@ export class Thief extends Monster {
   leftEffectDaggerImage = loadLeftThiefDagger();
   rightEffectDaggerImage = loadRightThiefDagger();
 
+  // 0 = left, 1 = right
   attackEffectFrames = [
-    [0, 650, 30, 30, -18, 51, 30, 30],
-    [45, 650, 30, 30, -18, 51, 30, 30],
-    [85, 650, 30, 30, -18, 51, 30, 30],
-    [125, 650, 30, 30, -18, 51, 30, 30],
-    [145, 650, 30, 30, -18, 51, 30, 30],
+    [0, 650, 30, 30, -18, 51, 30, 30, 0],
+    [45, 650, 30, 30, -18, 51, 30, 30, 0],
+    [85, 650, 30, 30, -18, 51, 30, 30, 0],
+    [125, 650, 30, 30, -18, 51, 30, 30, 0],
+    [145, 650, 30, 30, -18, 51, 30, 30, 0],
   ];
 
   hasEffect = false;
   effectFrame: number[];
-  onEffectAttack = new Subject<{ x: number; y: number }>();
+  onEffectAttack = new Subject<{
+    x: number;
+    y: number;
+    direction: 'left' | 'right';
+  }>();
 
   constructor(canvas: HTMLCanvasElement) {
     super(canvas, loadThiefLeftSprite(), loadThiefRightSprite());
 
     this.onEffectAttack
       .pipe(
-        switchMap(({ x, y }) => {
+        switchMap(({ x, y, direction }) => {
           return timer(0, 100, animationFrameScheduler).pipe(
             map((_, index) => index),
             takeWhile((frameX) => {
               if (this.attackEffectFrames[frameX] !== undefined) {
                 this.hasEffect = true;
                 this.effectFrame = [...this.attackEffectFrames[frameX]];
+
                 // fix x,y
-                this.effectFrame[4] = x + this.effectFrame[4];
-                this.effectFrame[5] = y + this.effectFrame[5];
+                let offsetX = this.effectFrame[0];
+                const sWidth = this.effectFrame[3];
+
+                if (direction === 'right') {
+                  this.effectFrame[0] =
+                    this.rightEffectDaggerImage.width - (offsetX + sWidth);
+                  this.effectFrame[4] = x + 50 - this.effectFrame[4];
+                  this.effectFrame[5] = y + 103 - this.effectFrame[5];
+                  // direction
+                  this.effectFrame[8] = 1;
+                } else if (direction === 'left') {
+                  this.effectFrame[4] = x + this.effectFrame[4];
+                  this.effectFrame[5] = y + this.effectFrame[5];
+                  this.effectFrame[8] = 0;
+                }
+
                 return true;
               }
               this.hasEffect = false;
@@ -337,10 +357,12 @@ export class Thief extends Monster {
 
   drawEffect() {
     if (this.hasEffect) {
-      const [sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight] =
+      const [sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight, directionEnum] =
         this.effectFrame;
       this.ctx.drawImage(
-        this.leftEffectDaggerImage,
+        directionEnum === 0
+          ? this.leftEffectDaggerImage
+          : this.rightEffectDaggerImage,
         sx,
         sy,
         sWidth,
@@ -360,7 +382,11 @@ export class Thief extends Monster {
         tap({
           next: (frameX) => {
             if (frameX === 5) {
-              this.onEffectAttack.next({ x: this.x, y: this.y });
+              this.onEffectAttack.next({
+                x: this.x,
+                y: this.y,
+                direction: this.direction,
+              });
             }
             if (frameX >= 5) {
               if (this.direction === 'left') {
