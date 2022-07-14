@@ -171,7 +171,7 @@ const monstersRecievedDamageAndDie = (): OperatorFunction<Monster[], any> =>
               }, monster),
               takeLast(1)
             );
-            const respawnPoring$ = removeMonsterOffScreen$.pipe(
+            const respawnMonster$ = removeMonsterOffScreen$.pipe(
               switchMap(() => {
                 const respawnTime = Math.random() * 20000 + 5000;
                 return timer(respawnTime);
@@ -187,7 +187,7 @@ const monstersRecievedDamageAndDie = (): OperatorFunction<Monster[], any> =>
             return merge(
               render$,
               removeMonsterOffScreen$.pipe(ignoreElements()),
-              respawnPoring$.pipe(ignoreElements())
+              respawnMonster$.pipe(ignoreElements())
             );
           })
         );
