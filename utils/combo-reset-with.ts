@@ -13,7 +13,9 @@ export function comboResetWith<T>(
 
       const bufferSubscription = source.subscribe({
         next: (value) => {
-          combo.push(value);
+          if (combo.length === 0 || combo[combo.length - 1] !== value) {
+            combo.push(value);
+          }
           if (combo.length <= 2) {
             subscriber.next(combo);
           } else {
