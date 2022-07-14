@@ -1,4 +1,12 @@
-import { defer, fromEvent, merge, startWith, switchAll, switchMap } from 'rxjs';
+import {
+  defer,
+  fromEvent,
+  merge,
+  ReplaySubject,
+  startWith,
+  switchAll,
+  switchMap,
+} from 'rxjs';
 import {
   distinctUntilChanged,
   filter,
@@ -6,11 +14,13 @@ import {
   onErrorResumeNext,
   share,
   take,
+  takeUntil,
   tap,
 } from 'rxjs/operators';
 import { Monster } from '../monsters/Monster';
 
 export class KeyboardController {
+  onCleanup$ = new ReplaySubject<void>(1);
   keydown$ = fromEvent<KeyboardEvent>(document, 'keydown').pipe(
     tap((event) => {
       event.preventDefault();
@@ -34,8 +44,8 @@ export class KeyboardController {
   constructor(private canvas: HTMLCanvasElement, private monster: Monster) {}
 
   start(tick: () => void) {
-    merge(this.movementAction(), this.attactAction())
-      .pipe(switchAll())
+    merge(this.movementAction(), this.attackAction())
+      .pipe(switchAll(), takeUntil(this.onCleanup$))
       .subscribe(() => tick());
   }
 
@@ -46,20 +56,19 @@ export class KeyboardController {
     }
   }
 
-  private attactAction() {
+  cleanup() {
+    this.onCleanup$.next();
+    this.onCleanup$.complete();
+  }
+
+  private attackAction() {
     const attackKeyMap = {
-      KeyX: defer(() => {
-        // this.monster.direction = 'right';
-        return this.monster
-          .attack()
-          .pipe(onErrorResumeNext(this.monster.standing()));
-      }),
-      KeyZ: defer(() => {
-        // this.monster.direction = 'left';
-        return this.monster
-          .attack()
-          .pipe(onErrorResumeNext(this.monster.standing()));
-      }),
+      KeyX: this.monster
+        .attack()
+        .pipe(onErrorResumeNext(this.monster.standing())),
+      KeyZ: this.monster
+        .attack()
+        .pipe(onErrorResumeNext(this.monster.standing())),
     };
 
     const attackKeys = Object.keys(attackKeyMap);

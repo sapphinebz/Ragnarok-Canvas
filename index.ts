@@ -56,7 +56,7 @@ const onWindowResize$ = fromEvent(window, 'resize').pipe(
   })
 );
 
-const acidus = new Acidus(canvas);
+// const acidus = new Acidus(canvas);
 
 const porings = Array.from({ length: 20 }, () => new Poring(canvas));
 const fabres = Array.from({ length: 7 }, () => new Fabre(canvas));
