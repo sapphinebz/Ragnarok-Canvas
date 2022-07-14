@@ -1,28 +1,12 @@
 import {
   animationFrameScheduler,
   defer,
-  ignoreElements,
-  interval,
-  merge,
-  NEVER,
   Observable,
-  ReplaySubject,
   Subject,
   switchMap,
   timer,
 } from 'rxjs';
-import {
-  concatMap,
-  connect,
-  filter,
-  map,
-  mergeMap,
-  takeUntil,
-  takeWhile,
-  tap,
-  withLatestFrom,
-  zipWith,
-} from 'rxjs/operators';
+import { map, mergeMap, takeUntil, takeWhile, tap } from 'rxjs/operators';
 import { loadDaggerHitSound } from '../sounds/dagger-hit-sound';
 import { loadThiefLeftSprite } from '../sprites/load-thief-left';
 import { loadLeftThiefDagger } from '../sprites/load-thief-left-dagger';
@@ -368,10 +352,6 @@ export class Thief extends Monster {
     });
   }
 
-  playDaggerHitSound() {
-    return playAudio(this.daggerHitSound);
-  }
-
   drawEffect() {
     if (this.hasEffect) {
       const [sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight, directionEnum] =
@@ -435,5 +415,9 @@ export class Thief extends Monster {
       this.frameY = 2;
       return this.createForwardFrame(35, 0, 7);
     });
+  }
+
+  private playDaggerHitSound() {
+    return playAudio(this.daggerHitSound);
   }
 }
