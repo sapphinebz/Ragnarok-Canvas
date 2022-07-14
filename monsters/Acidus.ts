@@ -1,6 +1,7 @@
 import { defer, EMPTY, Observable } from 'rxjs';
-import { takeWhile } from 'rxjs/operators';
+import { takeWhile, tap } from 'rxjs/operators';
 import { loadAcidusAttackSound } from '../sounds/acidus-attack';
+import { loadAcidusDeadSound } from '../sounds/acidus-dead';
 import { loadAcidusLeftSprite } from '../sprites/load-acidus-left';
 import { loadAcidusSpriteRight } from '../sprites/load-acidus-right';
 import { CropImage, DIRECTION, Monster } from './Monster';
@@ -16,6 +17,7 @@ export class Acidus extends Monster {
   height = 120;
 
   attackAudio = loadAcidusAttackSound();
+  deadAudio = loadAcidusDeadSound();
 
   frames: CropImage[][] = [
     [
@@ -76,7 +78,7 @@ export class Acidus extends Monster {
   ];
   constructor(public canvas: HTMLCanvasElement) {
     super(canvas, loadAcidusLeftSprite(), loadAcidusSpriteRight());
-
+    this.deadAudio.volume = 0.05;
     this.attackAudio.volume = 0.05;
   }
 
@@ -120,7 +122,13 @@ export class Acidus extends Monster {
   dying() {
     return defer(() => {
       this.frameY = 5;
-      return this.createForwardFrame(120, 0, 2, { once: true });
+      return this.createForwardFrame(120, 0, 2, { once: true }).pipe(
+        tap((frameX) => {
+          if (frameX === 1) {
+            this.deadAudio.play();
+          }
+        })
+      );
     });
   }
 }
