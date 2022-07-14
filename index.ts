@@ -46,8 +46,8 @@ const onWindowResize$ = fromEvent(window, 'resize').pipe(
 
 // const acidus = new Acidus(canvas);
 
-const porings = Array.from({ length: 20 }, () => new Poring(canvas));
-const fabres = Array.from({ length: 7 }, () => new Fabre(canvas));
+const porings = Array.from({ length: 50 }, () => new Poring(canvas));
+const fabres = Array.from({ length: 20 }, () => new Fabre(canvas));
 const thief = new Thief(canvas);
 
 const keyboardController = new KeyboardController(canvas, thief);
