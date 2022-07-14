@@ -8,6 +8,9 @@ export const enum COLLISION_DIRECTION {
   BOTTOM,
 }
 
+/**
+ * @deprecated
+ */
 export function collideWithArea(area: Area, monster: Monster) {
   if (
     area.x > monster.x &&

@@ -7,7 +7,6 @@ import {
   switchMap,
   animationFrameScheduler,
   share,
-  filter,
   Subject,
   timer,
   from,
@@ -15,36 +14,25 @@ import {
   merge,
   pipe,
   OperatorFunction,
-  defer,
   ignoreElements,
-  EMPTY,
   BehaviorSubject,
-  Operator,
 } from 'rxjs';
 import {
   connect,
   debounceTime,
-  distinctUntilChanged,
-  finalize,
   map,
   mergeMap,
   onErrorResumeNext,
   shareReplay,
   takeLast,
   takeUntil,
-  withLatestFrom,
 } from 'rxjs/operators';
-import { Acidus } from './monsters/Acidus';
 import { Poring } from './monsters/Poring';
 import { Monster } from './monsters/Monster';
 import { Fabre } from './monsters/Fabre';
 import { Thief } from './monsters/Thief';
 import { KeyboardController } from './gamepad/keyboard-controller';
-import {
-  collideWithArea,
-  COLLISION_DIRECTION,
-  rectanglesIntersect,
-} from './utils/collision';
+import { COLLISION_DIRECTION, rectanglesIntersect } from './utils/collision';
 
 const canvas = document.querySelector<HTMLCanvasElement>('canvas');
 const ctx = canvas.getContext('2d');
