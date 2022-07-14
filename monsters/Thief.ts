@@ -285,7 +285,7 @@ export class Thief extends Monster {
 
     this.onEffectAttack
       .pipe(
-        switchMap(({ x, y, direction }) => {
+        mergeMap(({ x, y, direction }) => {
           return timer(0, 100, animationFrameScheduler).pipe(
             map((_, index) => index),
             takeWhile((frameX) => {
