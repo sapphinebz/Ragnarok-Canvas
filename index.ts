@@ -46,7 +46,7 @@ const onWindowResize$ = fromEvent(window, 'resize').pipe(
 );
 
 const aciduss = Array.from({ length: 2 }, () => new Acidus(canvas));
-const porings = Array.from({ length: 10 }, () => new Poring(canvas));
+const porings = Array.from({ length: 20 }, () => new Poring(canvas));
 const fabres = Array.from({ length: 7 }, () => new Fabre(canvas));
 const thief = new Thief(canvas);
 
@@ -137,8 +137,6 @@ const onLoadMonster$ = merge(
 onCanvasMount$.subscribe(() => {
   keyboardController.start(tick);
 });
-
-// thief.attack().subscribe(() => tick());
 
 onCanvasMount$.pipe(switchMap(() => onLoadMonster$)).subscribe((monster) => {
   monster.randomSpawn();
