@@ -1,3 +1,4 @@
+// credit https://www.spriters-resource.com/search/?q=ragnarok
 export const loadThiefLeftSprite = () => {
   const image = new Image();
   image.src =
