@@ -18,7 +18,7 @@ import { CropImage, DIRECTION, Monster } from './Monster';
 export class Thief extends Monster {
   maxHp = 500;
   hp = this.maxHp;
-  atk = 50;
+  atk = 25;
   x = 100;
   y = 100;
   speedX = 8;
