@@ -146,7 +146,7 @@ const showAnimationDieAndRespawn = (monster: Monster) => {
 //   return monster.hurting().pipe()
 // }
 
-const monstersRecievedDamageAndDie = (): OperatorFunction<Monster[], any> =>
+const monstersBeHurtOrDie = (): OperatorFunction<Monster[], any> =>
   mergeMap((collision) => {
     return from(collision).pipe(
       mergeMap((monster) => {
@@ -195,7 +195,7 @@ thief.onDamageArea$
   .pipe(
     findMonsterBeAttacked(),
     reduceMonstersHpFromAttacker(thief),
-    monstersRecievedDamageAndDie()
+    monstersBeHurtOrDie()
   )
   .subscribe();
 
