@@ -16,6 +16,8 @@ import {
   OperatorFunction,
   ignoreElements,
   BehaviorSubject,
+  Observable,
+  ReplaySubject,
 } from 'rxjs';
 import {
   connect,
@@ -34,6 +36,8 @@ import { Thief } from './monsters/Thief';
 import { KeyboardController } from './gamepad/keyboard-controller';
 import { COLLISION_DIRECTION, rectanglesIntersect } from './utils/collision';
 import { Acidus } from './monsters/Acidus';
+import { OperatorSubscriber } from 'rxjs/internal/operators/OperatorSubscriber';
+import { randomMinMax } from './utils/random-minmax';
 
 const canvas = document.querySelector<HTMLCanvasElement>('canvas');
 const ctx = canvas.getContext('2d');
@@ -45,14 +49,121 @@ const onWindowResize$ = fromEvent(window, 'resize').pipe(
   })
 );
 
-const aciduss = Array.from({ length: 2 }, () => new Acidus(canvas));
-const porings = Array.from({ length: 20 }, () => new Poring(canvas));
-const fabres = Array.from({ length: 7 }, () => new Fabre(canvas));
+/**
+ * MONSTERS ON FIELD
+ */
+// number monster in field & class
+const monstersClass: [any, number][] = [
+  [Acidus, 2],
+  [Poring, 20],
+  [Fabre, 7],
+];
+
+const onRespawnMonster$ = new Subject<Monster>();
+
+const getMonsterClass = (monster: Monster) => {
+  const fentry = monstersClass.find(
+    (entry) => entry[0].name === monster.constructor.name
+  );
+  return fentry[0];
+};
+
+const generateMonsters = () =>
+  monstersClass.reduce((mons, entry) => {
+    const Class = entry[0];
+    const amount = entry[1];
+    Array.from({ length: amount }, () => {
+      mons.push(new Class(canvas));
+    });
+    return mons;
+  }, [] as Monster[]);
+
+const corpseDisappearAfterAnimation = <T>(
+  monster: Monster
+): OperatorFunction<T, any> => {
+  return (source: Observable<T>) =>
+    new Observable<any>((subscriber) => {
+      const unsubscribe$ = new ReplaySubject<void>(1);
+      source.pipe(takeUntil(unsubscribe$)).subscribe({
+        error: (err) => {
+          subscriber.error(err);
+        },
+        complete: () => {
+          timer(1500)
+            .pipe(takeUntil(unsubscribe$))
+            .subscribe(() => {
+              const index = monsters.findIndex((p) => p === monster);
+              if (index > -1) {
+                monsters.splice(index, 1);
+                tick();
+              }
+              subscriber.next(monsters);
+              subscriber.complete();
+            });
+        },
+      });
+      return {
+        unsubscribe: () => {
+          unsubscribe$.next();
+          unsubscribe$.complete();
+        },
+      };
+    });
+};
+
+const respawnMonsterRandomTime = (
+  monster: Monster,
+  min: number,
+  max: number
+) => {
+  return switchMap(() => {
+    const respawnTime = randomMinMax(min, max);
+    return timer(respawnTime).pipe(
+      tap(() => {
+        const Class = getMonsterClass(monster);
+        onRespawnMonster$.next(new Class(canvas));
+      })
+    );
+  });
+};
+
+const monsterDieAndRespawn = (monster: Monster) => {
+  return monster.die().pipe(
+    connect((dieAnimation$) => {
+      const renderAnimation$ = dieAnimation$.pipe(tap(() => tick()));
+      const onMonsterRemovedFromField$ = dieAnimation$.pipe(
+        corpseDisappearAfterAnimation(monster)
+      );
+      const respawnMonster$ = onMonsterRemovedFromField$.pipe(
+        respawnMonsterRandomTime(monster, 5000, 20000)
+      );
+      return merge(
+        renderAnimation$,
+        onMonsterRemovedFromField$.pipe(ignoreElements()),
+        respawnMonster$.pipe(ignoreElements())
+      );
+    })
+  );
+};
+
+const monstersRecievedDamageAndDie = (): OperatorFunction<Monster[], any> =>
+  mergeMap((collision) => {
+    return from(collision).pipe(
+      mergeMap((monster) => {
+        killCount$.next(killCount$.value + 1);
+        return monsterDieAndRespawn(monster);
+      })
+    );
+  });
+
+const monsters = generateMonsters();
+
+/**
+ * PLAYER
+ */
 const thief = new Thief(canvas);
 
 const keyboardController = new KeyboardController(canvas, thief);
-
-const onRespawnMonster$ = new Subject<Monster>();
 
 const killCount$ = new BehaviorSubject(0);
 
@@ -61,26 +172,6 @@ const render$ = new Subject<void>();
 // call this function to make render canvas
 const tick = () => {
   render$.next();
-};
-
-const onEndAnimationRemoveMonster = <T>(
-  findMonsters: () => Monster[],
-  monster: Monster
-): OperatorFunction<T, any> => {
-  return pipe(
-    onErrorResumeNext(
-      timer(1500).pipe(
-        tap(() => {
-          const monsters = findMonsters();
-          const index = monsters.findIndex((p) => p === monster);
-          if (index > -1) {
-            monsters.splice(index, 1);
-            // tick();
-          }
-        })
-      )
-    )
-  );
 };
 
 const onCanvasMount$ = new AsyncSubject<void>();
@@ -101,9 +192,9 @@ const onCanvasRender$ = onWindowResize$.pipe(
 );
 
 onCanvasRender$.subscribe(() => {
-  porings.forEach((poring) => poring.drawImage());
-  fabres.forEach((fabre) => fabre.drawImage());
-  aciduss.forEach((acidus) => acidus.drawImage());
+  for (const monster of monsters) {
+    monster.drawImage();
+  }
 
   keyboardController.drawPlayer();
 
@@ -122,18 +213,10 @@ killCount$.subscribe(() => tick());
 const onLoadMonster$ = merge(
   onRespawnMonster$.pipe(
     tap((monster) => {
-      if (monster instanceof Poring) {
-        porings.push(monster);
-      } else if (monster instanceof Fabre) {
-        fabres.push(monster);
-      } else if (monster instanceof Acidus) {
-        aciduss.push(monster);
-      }
+      monsters.push(monster);
     })
   ),
-  from(porings),
-  from(fabres),
-  from(aciduss)
+  from(monsters)
 ).pipe(shareReplay());
 
 onCanvasMount$.subscribe(() => {
@@ -154,59 +237,11 @@ onLoadMonster$
     tick();
   });
 
-const monstersRecievedDamageAndDie = (): OperatorFunction<Monster[], any> =>
-  mergeMap((collision) => {
-    return from(collision).pipe(
-      mergeMap((monster) => {
-        killCount$.next(killCount$.value + 1);
-        return monster.die().pipe(
-          connect((animate$) => {
-            const render$ = animate$.pipe(tap(() => tick()));
-            const removeMonsterOffScreen$ = animate$.pipe(
-              onEndAnimationRemoveMonster(() => {
-                if (monster instanceof Poring) {
-                  return porings;
-                } else if (monster instanceof Fabre) {
-                  return fabres;
-                } else if (monster instanceof Acidus) {
-                  return aciduss;
-                }
-                return [];
-              }, monster),
-              takeLast(1)
-            );
-            const respawnMonster$ = removeMonsterOffScreen$.pipe(
-              switchMap(() => {
-                const respawnTime = Math.random() * 20000 + 5000;
-                return timer(respawnTime);
-              }),
-              tap(() => {
-                if (monster instanceof Poring) {
-                  onRespawnMonster$.next(new Poring(canvas));
-                } else if (monster instanceof Fabre) {
-                  onRespawnMonster$.next(new Fabre(canvas));
-                } else if (monster instanceof Acidus) {
-                  onRespawnMonster$.next(new Acidus(canvas));
-                }
-              })
-            );
-            return merge(
-              render$,
-              removeMonsterOffScreen$.pipe(ignoreElements()),
-              respawnMonster$.pipe(ignoreElements())
-            );
-          })
-        );
-      })
-    );
-  });
-
 thief.onDamageArea$
   .pipe(
     map((area) => {
-      return [...fabres, ...porings, ...aciduss].filter((monster) => {
+      return monsters.filter((monster) => {
         if (!monster.isDie) {
-          // const { x: targetX, y: targetY,width,height } = monster;
           const collision = rectanglesIntersect(area, monster);
           return collision !== COLLISION_DIRECTION.NOTHING;
         }
