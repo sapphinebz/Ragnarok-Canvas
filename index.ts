@@ -28,7 +28,7 @@ import {
   takeUntil,
 } from 'rxjs/operators';
 import { Poring } from './monsters/Poring';
-import { Area, Monster } from './monsters/Monster';
+import { Area, DIRECTION, Monster } from './monsters/Monster';
 import { Fabre } from './monsters/Fabre';
 import { Thief } from './monsters/Thief';
 import { KeyboardController } from './gamepad/keyboard-controller';
@@ -197,6 +197,20 @@ const reduceMonstersHpFromAttacker = (
   });
 };
 
+const monstersFaceToAttacker = (
+  attacker: Monster
+): OperatorFunction<Monster[], Monster[]> => {
+  return tap((monsters) => {
+    for (const monster of monsters) {
+      if (monster.x > attacker.x) {
+        monster.direction = DIRECTION.LEFT;
+      } else if (monster.x < attacker.x) {
+        monster.direction = DIRECTION.RIGHT;
+      }
+    }
+  });
+};
+
 const monsters = generateMonsters();
 
 /**
@@ -208,6 +222,7 @@ thief.onDamageArea$
   .pipe(
     findMonstersBeAttacked(),
     reduceMonstersHpFromAttacker(thief),
+    monstersFaceToAttacker(thief),
     monstersBeHurtOrDie()
   )
   .subscribe();
