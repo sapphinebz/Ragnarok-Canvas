@@ -12,7 +12,6 @@ import {
   from,
   AsyncSubject,
   merge,
-  pipe,
   OperatorFunction,
   ignoreElements,
   BehaviorSubject,
@@ -24,9 +23,7 @@ import {
   debounceTime,
   map,
   mergeMap,
-  onErrorResumeNext,
   shareReplay,
-  takeLast,
   takeUntil,
 } from 'rxjs/operators';
 import { Poring } from './monsters/Poring';
@@ -36,7 +33,6 @@ import { Thief } from './monsters/Thief';
 import { KeyboardController } from './gamepad/keyboard-controller';
 import { COLLISION_DIRECTION, rectanglesIntersect } from './utils/collision';
 import { Acidus } from './monsters/Acidus';
-import { OperatorSubscriber } from 'rxjs/internal/operators/OperatorSubscriber';
 import { randomMinMax } from './utils/random-minmax';
 
 const canvas = document.querySelector<HTMLCanvasElement>('canvas');
