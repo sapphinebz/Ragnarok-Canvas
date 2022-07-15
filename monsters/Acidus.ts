@@ -7,6 +7,8 @@ import { loadAcidusSpriteRight } from '../sprites/load-acidus-right';
 import { CropImage, DIRECTION, Monster } from './Monster';
 
 export class Acidus extends Monster {
+  maxHp = 500;
+  hp = this.maxHp;
   x = 200;
   y = 200;
   speedX = 8;
@@ -115,7 +117,7 @@ export class Acidus extends Monster {
   hurting(): Observable<any> {
     return defer(() => {
       this.frameY = 5;
-      return this.createForwardFrame(120, 0, 1);
+      return this.createForwardFrame(120, 0, 1,{once:true});
     });
   }
 

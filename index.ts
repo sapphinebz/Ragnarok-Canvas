@@ -27,7 +27,7 @@ import {
   takeUntil,
 } from 'rxjs/operators';
 import { Poring } from './monsters/Poring';
-import { Monster } from './monsters/Monster';
+import { Area, Monster } from './monsters/Monster';
 import { Fabre } from './monsters/Fabre';
 import { Thief } from './monsters/Thief';
 import { KeyboardController } from './gamepad/keyboard-controller';
@@ -46,7 +46,7 @@ const onWindowResize$ = fromEvent(window, 'resize').pipe(
 );
 
 /**
- * MONSTERS ON FIELD
+ * MONSTERS
  */
 // number monster in field & class
 const monstersClass: [any, number][] = [
@@ -123,7 +123,7 @@ const respawnMonsterRandomTime = (
   });
 };
 
-const monsterDieAndRespawn = (monster: Monster) => {
+const showAnimationDieAndRespawn = (monster: Monster) => {
   return monster.die().pipe(
     connect((dieAnimation$) => {
       const renderAnimation$ = dieAnimation$.pipe(tap(() => tick()));
@@ -142,15 +142,47 @@ const monsterDieAndRespawn = (monster: Monster) => {
   );
 };
 
+// const showAnimationHurt = (monster: Monster) =>{
+//   return monster.hurting().pipe()
+// }
+
 const monstersRecievedDamageAndDie = (): OperatorFunction<Monster[], any> =>
   mergeMap((collision) => {
     return from(collision).pipe(
       mergeMap((monster) => {
-        killCount$.next(killCount$.value + 1);
-        return monsterDieAndRespawn(monster);
+        if (monster.hp <= 0) {
+          killCount$.next(killCount$.value + 1);
+          return showAnimationDieAndRespawn(monster);
+        }
+        return monster.hurting();
       })
     );
   });
+
+const findMonsterBeAttacked = (): OperatorFunction<Area, Monster[]> => {
+  return map((area) => {
+    return monsters.filter((monster) => {
+      if (!monster.isDie) {
+        const collision = rectanglesIntersect(area, monster);
+        return collision !== COLLISION_DIRECTION.NOTHING;
+      }
+      return false;
+    });
+  });
+};
+
+const reduceMonstersHpFromAttacker = (
+  attacker: Monster
+): OperatorFunction<Monster[], Monster[]> => {
+  return tap((monsters) => {
+    for (const monster of monsters) {
+      monster.hp -= attacker.atk;
+      if (monster.hp < 0) {
+        monster.hp = 0;
+      }
+    }
+  });
+};
 
 const monsters = generateMonsters();
 
@@ -158,6 +190,10 @@ const monsters = generateMonsters();
  * PLAYER
  */
 const thief = new Thief(canvas);
+
+/**
+ * GAME
+ */
 
 const keyboardController = new KeyboardController(canvas, thief);
 
@@ -235,15 +271,8 @@ onLoadMonster$
 
 thief.onDamageArea$
   .pipe(
-    map((area) => {
-      return monsters.filter((monster) => {
-        if (!monster.isDie) {
-          const collision = rectanglesIntersect(area, monster);
-          return collision !== COLLISION_DIRECTION.NOTHING;
-        }
-        return false;
-      });
-    }),
+    findMonsterBeAttacked(),
+    reduceMonstersHpFromAttacker(thief),
     monstersRecievedDamageAndDie()
   )
   .subscribe();

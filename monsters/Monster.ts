@@ -54,7 +54,7 @@ export type CropImage = {
 
 export abstract class Monster {
   atk = 1;
-  maxHp = 100;
+  maxHp = 50;
   hp = this.maxHp;
   x: number;
   y: number;
