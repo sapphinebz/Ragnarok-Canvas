@@ -191,6 +191,14 @@ const monsters = generateMonsters();
  */
 const thief = new Thief(canvas);
 
+thief.onDamageArea$
+  .pipe(
+    findMonsterBeAttacked(),
+    reduceMonstersHpFromAttacker(thief),
+    monstersRecievedDamageAndDie()
+  )
+  .subscribe();
+
 /**
  * GAME
  */
@@ -268,14 +276,6 @@ onLoadMonster$
   .subscribe(() => {
     tick();
   });
-
-thief.onDamageArea$
-  .pipe(
-    findMonsterBeAttacked(),
-    reduceMonstersHpFromAttacker(thief),
-    monstersRecievedDamageAndDie()
-  )
-  .subscribe();
 
 // FOR ACIDUS MOUSE ATTACK
 
