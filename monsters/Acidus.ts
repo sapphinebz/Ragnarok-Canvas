@@ -1,9 +1,10 @@
-import { defer, EMPTY, Observable } from 'rxjs';
-import { takeWhile, tap } from 'rxjs/operators';
+import { defer, EMPTY, Observable, Subject, switchMap } from 'rxjs';
+import { takeUntil, takeWhile, tap } from 'rxjs/operators';
 import { loadAcidusAttackSound } from '../sounds/acidus-attack';
 import { loadAcidusDeadSound } from '../sounds/acidus-dead';
 import { loadAcidusLeftSprite } from '../sprites/load-acidus-left';
 import { loadAcidusSpriteRight } from '../sprites/load-acidus-right';
+import { playAudio } from '../utils/play-audio';
 import { CropImage, DIRECTION, Monster } from './Monster';
 
 export class Acidus extends Monster {
@@ -20,6 +21,8 @@ export class Acidus extends Monster {
 
   attackAudio = loadAcidusAttackSound();
   deadAudio = loadAcidusDeadSound();
+
+  onPlayDeadAudio$ = new Subject<void>();
 
   frames: CropImage[][] = [
     [
@@ -82,6 +85,13 @@ export class Acidus extends Monster {
     super(canvas, loadAcidusLeftSprite(), loadAcidusSpriteRight());
     this.deadAudio.volume = 0.05;
     this.attackAudio.volume = 0.05;
+
+    this.onPlayDeadAudio$
+      .pipe(
+        switchMap(() => playAudio(this.deadAudio)),
+        takeUntil(this.onCleanup$)
+      )
+      .subscribe();
   }
 
   getFrameEntry(frameY: number, frameX: number) {
@@ -117,7 +127,13 @@ export class Acidus extends Monster {
   hurting(): Observable<any> {
     return defer(() => {
       this.frameY = 5;
-      return this.createForwardFrame(120, 0, 1, { once: true });
+      return this.createForwardFrame(120, 0, 1, { once: true }).pipe(
+        tap((frameX) => {
+          if (frameX === 0) {
+            this.onPlayDeadAudio$.next();
+          }
+        })
+      );
     });
   }
 
@@ -126,8 +142,8 @@ export class Acidus extends Monster {
       this.frameY = 5;
       return this.createForwardFrame(120, 0, 2, { once: true }).pipe(
         tap((frameX) => {
-          if (frameX === 1) {
-            this.deadAudio.play();
+          if (frameX === 0) {
+            this.onPlayDeadAudio$.next();
           }
         })
       );
