@@ -178,7 +178,15 @@ const reduceMonstersHpFromAttacker = (
 ): OperatorFunction<Monster[], Monster[]> => {
   return tap((monsters) => {
     for (const monster of monsters) {
-      monster.hp -= attacker.atk;
+      const randomNumber = randomMinMax(0, 100);
+      const criticalRate = 10;
+      let damage = attacker.atk;
+      if (randomNumber <= criticalRate) {
+        monster.playCriticalAttack();
+        damage += damage;
+      }
+
+      monster.hp -= damage;
       if (monster.hp < 0) {
         monster.hp = 0;
       }

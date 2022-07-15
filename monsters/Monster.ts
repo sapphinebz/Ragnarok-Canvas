@@ -27,6 +27,8 @@ import {
   takeUntil,
   takeWhile,
 } from 'rxjs/operators';
+import { loadCriticalAttack } from '../sounds/critical-attack';
+import { playAudio } from '../utils/play-audio';
 import { randomMinMax } from '../utils/random-minmax';
 import { shuffle } from '../utils/shuffle';
 
@@ -63,7 +65,7 @@ export type CropImage = {
 
 export abstract class Monster {
   atk = 1;
-  maxHp = 50;
+  maxHp = 20;
   hp = this.maxHp;
   x: number;
   y: number;
@@ -104,6 +106,9 @@ export abstract class Monster {
   onActionTick$ = new Subject<void>();
   drawImage$ = new Subject<void>();
 
+  criticalAttackSound = loadCriticalAttack();
+  onPlayCriticalAttack$ = new Subject<void>();
+
   get ctx() {
     return this.canvas.getContext('2d');
   }
@@ -124,6 +129,14 @@ export abstract class Monster {
       .subscribe(() => {
         this.rightImage$.next(rightImage);
       });
+
+    this.criticalAttackSound.volume = 0.05;
+    this.onPlayCriticalAttack$
+      .pipe(
+        switchMap(() => playAudio(this.criticalAttackSound)),
+        takeUntil(this.onCleanup$)
+      )
+      .subscribe();
 
     this.actionChange$
       .pipe(
@@ -493,6 +506,10 @@ export abstract class Monster {
   cleanup() {
     this.onCleanup$.next();
     this.onCleanup$.complete();
+  }
+
+  playCriticalAttack() {
+    this.onPlayCriticalAttack$.next();
   }
 
   takeWhileWithInCanvas<T>(): MonoTypeOperatorFunction<T> {
