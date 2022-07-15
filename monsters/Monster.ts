@@ -191,6 +191,33 @@ export abstract class Monster {
 
   abstract hurting(): Observable<any>;
 
+  // createForwardFrame(
+  //   delay: number,
+  //   minFrameX: number,
+  //   maxFrameX: number,
+  //   option: { once: boolean } = { once: false }
+  // ) {
+  //   this.frameX = minFrameX;
+  //   const { once } = option;
+  //   const stopAnimation = new ReplaySubject<void>(1);
+  //   return interval(delay, animationFrameScheduler).pipe(
+  //     map(() => {
+  //       if (this.frameX + 1 <= maxFrameX) {
+  //         this.frameX++;
+  //       } else {
+  //         if (once) {
+  //           stopAnimation.next();
+  //         } else {
+  //           this.frameX = minFrameX;
+  //         }
+  //       }
+  //       return this.frameX;
+  //     }),
+  //     takeUntil(stopAnimation),
+  //     startWith(0)
+  //   );
+  // }
+
   createForwardFrame(
     delay: number,
     minFrameX: number,
@@ -199,22 +226,24 @@ export abstract class Monster {
   ) {
     this.frameX = minFrameX;
     const { once } = option;
-    const stopAnimation = new ReplaySubject<void>(1);
     return interval(delay, animationFrameScheduler).pipe(
-      map(() => {
-        if (this.frameX + 1 <= maxFrameX) {
-          this.frameX++;
-        } else {
-          if (once) {
-            stopAnimation.next();
-          } else {
-            this.frameX = minFrameX;
-          }
+      map(() => this.frameX + 1),
+      takeWhile((nextFrame) => {
+        if (once && nextFrame > maxFrameX) {
+          return false;
         }
-        return this.frameX;
+        return true;
       }),
-      takeUntil(stopAnimation),
-      startWith(0)
+      map((nextFrame) => {
+        if (nextFrame > maxFrameX) {
+          return minFrameX;
+        }
+        return nextFrame;
+      }),
+      tap((nextFrame) => {
+        this.frameX = nextFrame;
+      }),
+      startWith(this.frameX)
     );
   }
 
