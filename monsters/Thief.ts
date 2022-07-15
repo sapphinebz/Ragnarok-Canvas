@@ -18,7 +18,7 @@ import { CropImage, DIRECTION, Monster } from './Monster';
 export class Thief extends Monster {
   maxHp = 500;
   hp = this.maxHp;
-  atk = 25;
+  atk = 15;
   x = 100;
   y = 100;
   speedX = 8;
@@ -281,7 +281,7 @@ export class Thief extends Monster {
 
     this.onSoundEffectAttackPlay
       .pipe(
-        switchMap(() => this.playDaggerHitSound()),
+        switchMap(() => playAudio(this.daggerHitSound)),
         takeUntil(this.onCleanup$)
       )
       .subscribe();
@@ -422,9 +422,5 @@ export class Thief extends Monster {
       this.frameY = 2;
       return this.createForwardFrame(35, 0, 7);
     });
-  }
-
-  private playDaggerHitSound() {
-    return playAudio(this.daggerHitSound);
   }
 }

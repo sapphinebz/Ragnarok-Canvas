@@ -1,14 +1,34 @@
-import { defer, EMPTY, ignoreElements, merge, NEVER, Observable } from 'rxjs';
-import { concatMap, connect, filter, takeWhile, tap } from 'rxjs/operators';
+import {
+  defer,
+  EMPTY,
+  ignoreElements,
+  merge,
+  NEVER,
+  Observable,
+  Subject,
+} from 'rxjs';
+import {
+  concatMap,
+  connect,
+  filter,
+  switchMap,
+  takeUntil,
+  takeWhile,
+  tap,
+} from 'rxjs/operators';
+import { loadPoringDamage } from '../sounds/poring-damage';
 import { loadPoringDeadSound } from '../sounds/poring-dead';
 import { loadPoringWalkSound } from '../sounds/poring-walk';
 import { loadPoringSpriteLeft } from '../sprites/load-poring-left';
 import { loadPoringSpriteRight } from '../sprites/load-poring-right';
+import { playAudio } from '../utils/play-audio';
 import { CropImage, Monster } from './Monster';
 
 export class Poring extends Monster {
   x = 100;
   y = 100;
+  hp = 50;
+  maxHp = this.hp;
   speedX = 5;
   speedY = 5;
   frameX = 0;
@@ -17,6 +37,9 @@ export class Poring extends Monster {
   height = 60;
 
   dyingAudio = loadPoringDeadSound();
+
+  damageAudio = loadPoringDamage();
+  onPlayDamageAudio$ = new Subject<void>();
 
   walkingAudio = loadPoringWalkSound();
 
@@ -101,6 +124,14 @@ export class Poring extends Monster {
 
     this.dyingAudio.volume = 0.05;
     this.walkingAudio.volume = 0.02;
+    this.damageAudio.volume = 0.05;
+
+    this.onPlayDamageAudio$
+      .pipe(
+        switchMap(() => playAudio(this.damageAudio)),
+        takeUntil(this.onCleanup$)
+      )
+      .subscribe();
   }
 
   getFrameEntry(frameY: number, frameX: number) {
@@ -137,7 +168,16 @@ export class Poring extends Monster {
   drawEffect(): void {}
 
   hurting(): Observable<any> {
-    return EMPTY;
+    return defer(() => {
+      this.frameY = 3;
+      return this.createForwardFrame(120, 0, 1, { once: true }).pipe(
+        tap((frameX) => {
+          if (frameX === 0) {
+            this.onPlayDamageAudio$.next();
+          }
+        })
+      );
+    });
   }
 
   playWalkingSound() {
