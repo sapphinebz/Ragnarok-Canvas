@@ -74,7 +74,7 @@ const generateMonsters = () =>
     return mons;
   }, [] as Monster[]);
 
-const corpseDisappearAfterAnimation = <T>(
+const corpseDisappearAfterAnimationEnd = <T>(
   monster: Monster
 ): OperatorFunction<T, any> => {
   return (source: Observable<T>) =>
@@ -127,15 +127,15 @@ const showAnimationDieAndRespawn = (monster: Monster) => {
   return monster.die().pipe(
     connect((dieAnimation$) => {
       const renderAnimation$ = dieAnimation$.pipe(tap(() => tick()));
-      const onMonsterRemovedFromField$ = dieAnimation$.pipe(
-        corpseDisappearAfterAnimation(monster)
+      const onRemoveMonsterFromField$ = dieAnimation$.pipe(
+        corpseDisappearAfterAnimationEnd(monster)
       );
-      const respawnMonster$ = onMonsterRemovedFromField$.pipe(
+      const respawnMonster$ = onRemoveMonsterFromField$.pipe(
         respawnMonsterRandomTime(monster, 5000, 20000)
       );
       return merge(
         renderAnimation$,
-        onMonsterRemovedFromField$.pipe(ignoreElements()),
+        onRemoveMonsterFromField$.pipe(ignoreElements()),
         respawnMonster$.pipe(ignoreElements())
       );
     })
