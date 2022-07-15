@@ -159,7 +159,7 @@ const monstersBeHurtOrDie = (): OperatorFunction<Monster[], any> =>
     );
   });
 
-const findMonsterBeAttacked = (): OperatorFunction<Area, Monster[]> => {
+const findMonstersBeAttacked = (): OperatorFunction<Area, Monster[]> => {
   return map((area) => {
     return monsters.filter((monster) => {
       if (!monster.isDie) {
@@ -193,7 +193,7 @@ const thief = new Thief(canvas);
 
 thief.onDamageArea$
   .pipe(
-    findMonsterBeAttacked(),
+    findMonstersBeAttacked(),
     reduceMonstersHpFromAttacker(thief),
     monstersBeHurtOrDie()
   )
