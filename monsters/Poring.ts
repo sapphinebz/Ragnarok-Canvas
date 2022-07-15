@@ -100,7 +100,7 @@ export class Poring extends Monster {
     super(canvas, loadPoringSpriteLeft(), loadPoringSpriteRight());
 
     this.dyingAudio.volume = 0.05;
-    this.walkingAudio.volume = 0.05;
+    this.walkingAudio.volume = 0.02;
   }
 
   getFrameEntry(frameY: number, frameX: number) {

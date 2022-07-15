@@ -263,6 +263,7 @@ export class Thief extends Monster {
 
   hasEffect = false;
   effectFrame: number[];
+  onSoundEffectAttackPlay = new Subject<void>();
   onEffectAttack = new Subject<{
     x: number;
     y: number;
@@ -275,7 +276,7 @@ export class Thief extends Monster {
 
     this.daggerHitSound.volume = 0.05;
 
-    this.onEffectAttack
+    this.onSoundEffectAttackPlay
       .pipe(
         switchMap(() => this.playDaggerHitSound()),
         takeUntil(this.onCleanup$)
@@ -379,6 +380,9 @@ export class Thief extends Monster {
       return this.createForwardFrame(attackSpeed, 0, 6, { once: true }).pipe(
         tap({
           next: (frameX) => {
+            if (frameX === 4) {
+              this.onSoundEffectAttackPlay.next();
+            }
             if (frameX === 5) {
               this.onEffectAttack.next({
                 x: this.x,
