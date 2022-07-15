@@ -1,5 +1,6 @@
 import {
   animationFrameScheduler,
+  AsyncSubject,
   BehaviorSubject,
   combineLatest,
   defer,
@@ -9,24 +10,32 @@ import {
   interval,
   map,
   MonoTypeOperatorFunction,
-  NEVER,
   Observable,
+  pairwise,
   ReplaySubject,
   startWith,
   Subject,
+  switchMap,
   take,
   tap,
   timer,
 } from 'rxjs';
 import {
   concatAll,
-  filter,
+  distinctUntilChanged,
   repeat,
   takeUntil,
   takeWhile,
 } from 'rxjs/operators';
 import { randomMinMax } from '../utils/random-minmax';
 import { shuffle } from '../utils/shuffle';
+
+export const enum ACTION {
+  IDLE,
+  RANDOM,
+  DIE,
+  HURT,
+}
 
 export const enum DIRECTION {
   LEFT,
@@ -64,7 +73,7 @@ export abstract class Monster {
   frameY = 0;
   width: number;
   height: number;
-  isDied$ = new BehaviorSubject<boolean>(false);
+  // isDied$ = new BehaviorSubject<boolean>(false);
 
   onCleanup$ = new ReplaySubject<void>(1);
   onDamageArea$ = new Subject<Area>();
@@ -77,16 +86,22 @@ export abstract class Monster {
     return this.direction$.value;
   }
 
-  get isDie() {
-    return this.isDied$.value;
-  }
-  set isDie(value: boolean) {
-    this.isDied$.next(value);
-  }
-  onDied$ = this.isDied$.pipe(filter((isDied) => isDied === true));
+  // get isDie() {
+  //   return this.isDied$.value;
+  // }
+  // set isDie(value: boolean) {
+  //   this.isDied$.next(value);
+  // }
+  // onDied$ = this.isDied$.pipe(filter((isDied) => isDied === true));
+
   leftImage$ = new ReplaySubject<HTMLImageElement>(1);
   rightImage$ = new ReplaySubject<HTMLImageElement>(1);
 
+  actionChange$ = new BehaviorSubject<ACTION>(ACTION.IDLE);
+
+  onDied$ = new AsyncSubject<void>();
+  isDied = false;
+  onActionTick$ = new Subject<void>();
   drawImage$ = new Subject<void>();
 
   get ctx() {
@@ -109,6 +124,54 @@ export abstract class Monster {
       .subscribe(() => {
         this.rightImage$.next(rightImage);
       });
+
+    this.actionChange$
+      .pipe(
+        distinctUntilChanged(),
+        pairwise(),
+        switchMap(([preAction, action]) => {
+          if (this.isDied === true) {
+            return EMPTY;
+          } else if (action === ACTION.IDLE) {
+            return EMPTY;
+          } else if (action === ACTION.RANDOM) {
+            return defer(() => {
+              const randomTime = () => Math.random() * 3000 + 1000;
+              const randomEndAction = () => takeUntil(timer(randomTime()));
+              const actions = [
+                this.walkingLeft().pipe(randomEndAction()),
+                this.standing().pipe(randomEndAction()),
+                this.walkingRight().pipe(randomEndAction()),
+                this.standing().pipe(randomEndAction()),
+                this.walkingUp().pipe(randomEndAction()),
+                this.walkingDown().pipe(randomEndAction()),
+                this.walkingTopLeft().pipe(randomEndAction()),
+                this.walkingTopRight().pipe(randomEndAction()),
+                this.walkingBottomLeft().pipe(randomEndAction()),
+                this.walkingBottomRight().pipe(randomEndAction()),
+              ];
+              return from(shuffle(actions)).pipe(concatAll());
+            }).pipe(repeat());
+          } else if (action === ACTION.DIE) {
+            this.isDied = true;
+            return this.dying().pipe(
+              tap({
+                complete: () => {
+                  this.onDied$.next();
+                  this.onDied$.complete();
+                },
+              })
+            );
+          } else if (action === ACTION.HURT) {
+            return this.hurting().pipe(
+              tap({ complete: () => this.actionChange$.next(preAction) })
+            );
+          }
+          return EMPTY;
+        }),
+        takeUntil(this.onCleanup$)
+      )
+      .subscribe(() => this.onActionTick$.next());
 
     combineLatest({
       direction: this.direction$,
@@ -278,11 +341,15 @@ export abstract class Monster {
   }
 
   die() {
-    if (this.isDied$.value === false) {
-      this.isDied$.next(true);
-      return this.dying();
-    }
-    return EMPTY;
+    this.actionChange$.next(ACTION.DIE);
+    // return this.onActionTick$;
+    // return this.nextAction(ACTION.DIE);
+  }
+
+  hurt() {
+    this.actionChange$.next(ACTION.HURT);
+    // return this.onActionTick$;
+    // return this.nextAction(ACTION.HURT);
   }
 
   walkingDown() {
@@ -382,26 +449,9 @@ export abstract class Monster {
   }
 
   randomAction() {
-    if (this.isDied$.value === true) {
-      return NEVER;
-    }
-    return defer(() => {
-      const randomTime = () => Math.random() * 3000 + 1000;
-      const randomEndAction = () => takeUntil(timer(randomTime()));
-      const actions = [
-        this.walkingLeft().pipe(randomEndAction()),
-        this.standing().pipe(randomEndAction()),
-        this.walkingRight().pipe(randomEndAction()),
-        this.standing().pipe(randomEndAction()),
-        this.walkingUp().pipe(randomEndAction()),
-        this.walkingDown().pipe(randomEndAction()),
-        this.walkingTopLeft().pipe(randomEndAction()),
-        this.walkingTopRight().pipe(randomEndAction()),
-        this.walkingBottomLeft().pipe(randomEndAction()),
-        this.walkingBottomRight().pipe(randomEndAction()),
-      ];
-      return from(shuffle(actions)).pipe(concatAll());
-    }).pipe(repeat());
+    this.actionChange$.next(ACTION.RANDOM);
+    // return this.onActionTick$;
+    // return this.nextAction(ACTION.RANDOM);
   }
 
   moveRight() {

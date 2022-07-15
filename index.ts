@@ -17,6 +17,7 @@ import {
   BehaviorSubject,
   Observable,
   ReplaySubject,
+  EMPTY,
 } from 'rxjs';
 import {
   connect,
@@ -124,9 +125,9 @@ const respawnMonsterRandomTime = (
 };
 
 const showAnimationDieAndRespawn = (monster: Monster) => {
-  return monster.die().pipe(
+  monster.die();
+  return monster.onDied$.pipe(
     connect((dieAnimation$) => {
-      const renderAnimation$ = dieAnimation$.pipe(tap(() => tick()));
       const onRemoveMonsterFromField$ = dieAnimation$.pipe(
         corpseDisappearAfterAnimationEnd(monster)
       );
@@ -134,7 +135,6 @@ const showAnimationDieAndRespawn = (monster: Monster) => {
         respawnMonsterRandomTime(monster, 5000, 20000)
       );
       return merge(
-        renderAnimation$,
         onRemoveMonsterFromField$.pipe(ignoreElements()),
         respawnMonster$.pipe(ignoreElements())
       );
@@ -154,7 +154,9 @@ const monstersBeHurtOrDie = (): OperatorFunction<Monster[], any> =>
           killCount$.next(killCount$.value + 1);
           return showAnimationDieAndRespawn(monster);
         }
-        return monster.hurting();
+        monster.hurt();
+        return EMPTY;
+        // return monster.hurt();
       })
     );
   });
@@ -162,7 +164,7 @@ const monstersBeHurtOrDie = (): OperatorFunction<Monster[], any> =>
 const findMonstersBeAttacked = (): OperatorFunction<Area, Monster[]> => {
   return map((area) => {
     return monsters.filter((monster) => {
-      if (!monster.isDie) {
+      if (!monster.isDied) {
         const collision = rectanglesIntersect(area, monster);
         return collision !== COLLISION_DIRECTION.NOTHING;
       }
@@ -269,13 +271,15 @@ onCanvasMount$.pipe(switchMap(() => onLoadMonster$)).subscribe((monster) => {
 
 onLoadMonster$
   .pipe(
-    mergeMap((monster) =>
-      monster.randomAction().pipe(takeUntil(monster.onDied$))
-    )
+    // mergeMap((monster) =>
+    //   monster.randomAction().pipe(takeUntil(monster.onDied$))
+    // )
+    mergeMap((monster) => {
+      monster.randomAction();
+      return monster.onActionTick$.pipe(takeUntil(monster.onDied$));
+    })
   )
-  .subscribe(() => {
-    tick();
-  });
+  .subscribe(() => tick());
 
 // FOR ACIDUS MOUSE ATTACK
 
