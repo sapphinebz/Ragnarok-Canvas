@@ -35,6 +35,9 @@ import { KeyboardController } from './gamepad/keyboard-controller';
 import { COLLISION_DIRECTION, rectanglesIntersect } from './utils/collision';
 import { Acidus } from './monsters/Acidus';
 import { randomMinMax } from './utils/random-minmax';
+import { loadDamageNumbers } from './sprites/load-damage-numbers';
+
+// const damageNumberImage = loadDamageNumbers();
 
 const canvas = document.querySelector<HTMLCanvasElement>('canvas');
 const ctx = canvas.getContext('2d');
@@ -245,6 +248,18 @@ onCanvasRender$.subscribe(() => {
   for (const monster of monsters) {
     monster.drawImage();
   }
+
+  // ctx.drawImage(damageNumberImage, 10, 10, 7, 11, 0, 0, 7, 11);
+  // ctx.drawImage(damageNumberImage, 27, 10, 7, 11, 8, 0, 7, 11);
+  // ctx.drawImage(damageNumberImage, 43, 10, 8, 11, 15, 0, 8, 11);
+  // ctx.drawImage(damageNumberImage, 61, 10, 9, 11, 22, 0, 9, 11);
+  // ctx.drawImage(damageNumberImage, 79, 10, 11, 11, 29, 0, 11, 11);
+  // ctx.drawImage(damageNumberImage, 96, 10, 14, 11, 35, 0, 14, 11);
+
+  // ctx.drawImage(damageNumberImage, 114, 10, 16, 11, 42, 0, 16, 11);
+  // ctx.drawImage(damageNumberImage, 142, 10, 8, 11, 59, 0, 8, 11);
+  // ctx.drawImage(damageNumberImage, 162, 10, 8, 11, 68, 0, 8, 11);
+  // ctx.drawImage(damageNumberImage, 182, 10, 8, 11, 77, 0, 8, 11);
 
   keyboardController.drawPlayer();
 
