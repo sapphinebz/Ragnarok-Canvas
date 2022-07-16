@@ -233,6 +233,17 @@ const keyboardController = new KeyboardController(canvas, thief);
 
 const killCount$ = new BehaviorSubject(0);
 
+const drawScore = () => {
+  ctx.textAlign = 'center';
+  ctx.font = 'bold 24px Arial';
+  ctx.fillStyle = 'white';
+  ctx.fillText(
+    `kill: ${killCount$.value}`,
+    canvas.width - canvas.width * 0.1,
+    canvas.height * 0.05
+  );
+};
+
 const render$ = new Subject<void>();
 
 // call this function to make render canvas
@@ -262,17 +273,9 @@ onCanvasRender$.subscribe(() => {
     monster.drawImage();
   }
 
-
   keyboardController.drawPlayer();
 
-  ctx.textAlign = 'center';
-  ctx.font = 'bold 24px Arial';
-  ctx.fillStyle = 'white';
-  ctx.fillText(
-    `kill: ${killCount$.value}`,
-    canvas.width - canvas.width * 0.1,
-    canvas.height * 0.05
-  );
+  drawScore();
 });
 
 killCount$.subscribe(() => tick());
