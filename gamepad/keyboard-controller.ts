@@ -39,7 +39,7 @@ export class KeyboardController {
   start(tick: () => void) {
     merge(
       this.movementAction(),
-      this.attackAction().pipe(tap(() => console.log('attack')))
+      this.attackAction()
     )
       .pipe(switchAll(), takeUntil(this.onCleanup$))
       .subscribe(() => tick());
@@ -113,9 +113,6 @@ export class KeyboardController {
     return keyboardCode$.pipe(
       distinctUntilChanged(),
       startWith('KeyUp'),
-      tap((event) => {
-        console.log('move', event);
-      }),
       map((key) => movementKeyMap[key])
     );
   }
@@ -189,7 +186,7 @@ export class KeyboardController {
 
         const distributeSubscription = keyup$.subscribe((event) => {
           const index = collections.findIndex((key) => key === event.code);
-          if (index >= -1) {
+          if (index > -1) {
             collections.splice(index, 1);
             subscriber.next(collections);
           }
