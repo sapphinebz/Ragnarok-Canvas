@@ -23,6 +23,7 @@ import {
 import {
   concatAll,
   distinctUntilChanged,
+  filter,
   repeat,
   takeUntil,
   takeWhile,
@@ -31,6 +32,14 @@ import { loadCriticalAttack } from '../sounds/critical-attack';
 import { playAudio } from '../utils/play-audio';
 import { randomMinMax } from '../utils/random-minmax';
 import { shuffle } from '../utils/shuffle';
+
+export interface WalkingConfig {
+  faceDirection: DIRECTION;
+  moveOption: () => { x: number; y: number };
+  stopIfOutOfCanvas?: boolean;
+}
+
+export type WalkingStoppable = Pick<WalkingConfig, 'stopIfOutOfCanvas'>;
 
 export const enum ACTION {
   IDLE,
@@ -51,7 +60,6 @@ export interface Area {
   h: number;
 }
 
-// [order, offsetX, width, offsetY, height]
 export type CropImage = {
   order: number;
   offsetX: number;
@@ -75,7 +83,6 @@ export abstract class Monster {
   frameY = 0;
   width: number;
   height: number;
-  // isDied$ = new BehaviorSubject<boolean>(false);
 
   onCleanup$ = new ReplaySubject<void>(1);
   onDamageArea$ = new Subject<Area>();
@@ -87,14 +94,6 @@ export abstract class Monster {
   get direction() {
     return this.direction$.value;
   }
-
-  // get isDie() {
-  //   return this.isDied$.value;
-  // }
-  // set isDie(value: boolean) {
-  //   this.isDied$.next(value);
-  // }
-  // onDied$ = this.isDied$.pipe(filter((isDied) => isDied === true));
 
   leftImage$ = new ReplaySubject<HTMLImageElement>(1);
   rightImage$ = new ReplaySubject<HTMLImageElement>(1);
@@ -267,33 +266,6 @@ export abstract class Monster {
 
   abstract hurting(): Observable<any>;
 
-  // createForwardFrame(
-  //   delay: number,
-  //   minFrameX: number,
-  //   maxFrameX: number,
-  //   option: { once: boolean } = { once: false }
-  // ) {
-  //   this.frameX = minFrameX;
-  //   const { once } = option;
-  //   const stopAnimation = new ReplaySubject<void>(1);
-  //   return interval(delay, animationFrameScheduler).pipe(
-  //     map(() => {
-  //       if (this.frameX + 1 <= maxFrameX) {
-  //         this.frameX++;
-  //       } else {
-  //         if (once) {
-  //           stopAnimation.next();
-  //         } else {
-  //           this.frameX = minFrameX;
-  //         }
-  //       }
-  //       return this.frameX;
-  //     }),
-  //     takeUntil(stopAnimation),
-  //     startWith(0)
-  //   );
-  // }
-
   createForwardFrame(
     delay: number,
     minFrameX: number,
@@ -324,7 +296,7 @@ export abstract class Monster {
   }
 
   /**
-   * use for test only
+   * for test only
    */
   testSprites(frames: [number, number][], delay = 1000) {
     let index = 0;
@@ -344,7 +316,7 @@ export abstract class Monster {
   }
 
   /**
-   * use for test only
+   * for test only
    */
   testArea(area: Area) {
     this.ctx.beginPath();
@@ -355,152 +327,110 @@ export abstract class Monster {
 
   die() {
     this.actionChange$.next(ACTION.DIE);
-    // return this.onActionTick$;
-    // return this.nextAction(ACTION.DIE);
   }
 
   hurt() {
     this.actionChange$.next(ACTION.HURT);
-    // return this.onActionTick$;
-    // return this.nextAction(ACTION.HURT);
   }
 
-  walkingDown() {
-    return defer(() => {
-      this.direction = DIRECTION.LEFT;
-      return this.walking().pipe(
-        tap(() => {
-          this.moveDown();
-        }),
-        this.takeWhileWithInCanvas()
-      );
+  walkingDown(config: WalkingStoppable = { stopIfOutOfCanvas: true }) {
+    return this.walkingAnimationFrames({
+      faceDirection: DIRECTION.LEFT,
+      moveOption: () => this.moveDown(),
+      stopIfOutOfCanvas: config.stopIfOutOfCanvas,
     });
   }
 
-  walkingUp() {
-    return defer(() => {
-      this.direction = DIRECTION.RIGHT;
-      return this.walking().pipe(
-        tap(() => {
-          this.moveUp();
-        }),
-        this.takeWhileWithInCanvas()
-      );
+  walkingUp(config: WalkingStoppable = { stopIfOutOfCanvas: true }) {
+    return this.walkingAnimationFrames({
+      faceDirection: DIRECTION.RIGHT,
+      moveOption: () => this.moveUp(),
+      stopIfOutOfCanvas: config.stopIfOutOfCanvas,
     });
   }
 
-  walkingLeft() {
-    return defer(() => {
-      this.direction = DIRECTION.LEFT;
-      return this.walking().pipe(
-        tap(() => {
-          this.moveLeft();
-        }),
-        this.takeWhileWithInCanvas()
-      );
+  walkingLeft(config: WalkingStoppable = { stopIfOutOfCanvas: true }) {
+    return this.walkingAnimationFrames({
+      faceDirection: DIRECTION.LEFT,
+      moveOption: () => this.moveLeft(),
+      stopIfOutOfCanvas: config.stopIfOutOfCanvas,
     });
   }
 
-  walkingRight() {
-    return defer(() => {
-      this.direction = DIRECTION.RIGHT;
-      return this.walking().pipe(
-        tap(() => {
-          this.moveRight();
-        }),
-        this.takeWhileWithInCanvas()
-      );
+  walkingRight(config: WalkingStoppable = { stopIfOutOfCanvas: true }) {
+    return this.walkingAnimationFrames({
+      faceDirection: DIRECTION.RIGHT,
+      moveOption: () => this.moveRight(),
+      stopIfOutOfCanvas: config.stopIfOutOfCanvas,
     });
   }
 
-  walkingTopLeft() {
-    return defer(() => {
-      this.direction = DIRECTION.LEFT;
-      return this.walking().pipe(
-        tap(() => {
-          this.moveTopLeft();
-        }),
-        this.takeWhileWithInCanvas()
-      );
+  walkingTopLeft(config: WalkingStoppable = { stopIfOutOfCanvas: true }) {
+    return this.walkingAnimationFrames({
+      faceDirection: DIRECTION.LEFT,
+      moveOption: () => this.moveTopLeft(),
+      stopIfOutOfCanvas: config.stopIfOutOfCanvas,
     });
   }
 
-  walkingTopRight() {
-    return defer(() => {
-      this.direction = DIRECTION.RIGHT;
-      return this.walking().pipe(
-        tap(() => {
-          this.moveTopRight();
-        }),
-        this.takeWhileWithInCanvas()
-      );
+  walkingTopRight(config: WalkingStoppable = { stopIfOutOfCanvas: true }) {
+    return this.walkingAnimationFrames({
+      faceDirection: DIRECTION.RIGHT,
+      moveOption: () => this.moveTopRight(),
+      stopIfOutOfCanvas: config.stopIfOutOfCanvas,
     });
   }
 
-  walkingBottomLeft() {
-    return defer(() => {
-      this.direction = DIRECTION.LEFT;
-      return this.walking().pipe(
-        tap(() => {
-          this.moveBottomLeft();
-        }),
-        this.takeWhileWithInCanvas()
-      );
+  walkingBottomLeft(config: WalkingStoppable = { stopIfOutOfCanvas: true }) {
+    return this.walkingAnimationFrames({
+      faceDirection: DIRECTION.LEFT,
+      moveOption: () => this.moveBottomLeft(),
+      stopIfOutOfCanvas: config.stopIfOutOfCanvas,
     });
   }
 
-  walkingBottomRight() {
-    return defer(() => {
-      this.direction = DIRECTION.RIGHT;
-      return this.walking().pipe(
-        tap(() => {
-          this.moveBottomRight();
-        }),
-        this.takeWhileWithInCanvas()
-      );
+  walkingBottomRight(config: WalkingStoppable = { stopIfOutOfCanvas: true }) {
+    return this.walkingAnimationFrames({
+      faceDirection: DIRECTION.RIGHT,
+      moveOption: () => this.moveBottomRight(),
+      stopIfOutOfCanvas: config.stopIfOutOfCanvas,
     });
   }
 
   randomAction() {
     this.actionChange$.next(ACTION.RANDOM);
-    // return this.onActionTick$;
-    // return this.nextAction(ACTION.RANDOM);
   }
 
   moveRight() {
-    this.x += this.speedX;
+    return { x: this.x + this.speedX, y: this.y };
   }
 
   moveLeft() {
-    this.x -= this.speedX;
+    return { x: this.x - this.speedX, y: this.y };
   }
 
   moveUp() {
-    this.y -= this.speedY;
+    return { x: this.x, y: this.y - this.speedY };
   }
 
   moveDown() {
-    this.y += this.speedY;
+    return { x: this.x, y: this.y + this.speedY };
   }
 
   moveTopLeft() {
-    this.y -= this.speedY;
-    this.x -= this.speedX;
+    return { x: this.x - this.speedX, y: this.y - this.speedY };
   }
 
   moveBottomLeft() {
-    this.y += this.speedY;
-    this.x -= this.speedX;
+    return { x: this.x - this.speedX, y: this.y + this.speedY };
   }
 
   moveTopRight() {
-    this.y -= this.speedY;
-    this.x += this.speedX;
+    return { x: this.x + this.speedX, y: this.y - this.speedY };
   }
 
   moveBottomRight() {
-    this.y += this.speedY;
-    this.x += this.speedX;
+    return { x: this.x + this.speedX, y: this.y + this.speedY };
   }
 
   cleanup() {
@@ -508,22 +438,47 @@ export abstract class Monster {
     this.onCleanup$.complete();
   }
 
-  playCriticalAttack() {
+  playCriticalAudio() {
     this.onPlayCriticalAttack$.next();
   }
 
-  takeWhileWithInCanvas<T>(): MonoTypeOperatorFunction<T> {
-    return takeWhile(() => {
-      if (this.x + this.width > this.canvas.width) {
-        return false;
-      } else if (this.x < 0) {
-        return false;
-      } else if (this.y + this.height > this.canvas.height) {
-        return false;
-      } else if (this.y < 0) {
-        return false;
-      }
-      return true;
+  private updateMove(): MonoTypeOperatorFunction<{ x: number; y: number }> {
+    return tap(({ x, y }) => {
+      this.x = x;
+      this.y = y;
     });
+  }
+
+  private walkingAnimationFrames(option: WalkingConfig) {
+    const { faceDirection, stopIfOutOfCanvas = true, moveOption } = option;
+
+    return defer(() => {
+      this.direction = faceDirection;
+      return this.walking().pipe(
+        map(() => moveOption()),
+        (source) => {
+          if (stopIfOutOfCanvas) {
+            return source.pipe(
+              takeWhile(({ x, y }) => !this.isOutOfCanvas(x, y))
+            );
+          }
+          return source.pipe(filter(({ x, y }) => !this.isOutOfCanvas(x, y)));
+        },
+        this.updateMove()
+      );
+    });
+  }
+
+  private isOutOfCanvas(x: number, y: number) {
+    if (x + this.width > this.canvas.width) {
+      return true;
+    } else if (x < 0) {
+      return true;
+    } else if (y + this.height > this.canvas.height) {
+      return true;
+    } else if (y < 0) {
+      return true;
+    }
+    return false;
   }
 }

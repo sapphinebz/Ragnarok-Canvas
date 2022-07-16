@@ -17,7 +17,7 @@ import {
   takeUntil,
   tap,
 } from 'rxjs/operators';
-import { Monster } from '../monsters/Monster';
+import { Monster, WalkingStoppable } from '../monsters/Monster';
 import { comboResetWith } from '../utils/combo-reset-with';
 
 export class KeyboardController {
@@ -84,16 +84,19 @@ export class KeyboardController {
   }
 
   private movementAction() {
+    const walkConfig: WalkingStoppable = {
+      stopIfOutOfCanvas: false,
+    };
     const movementKeyMap = {
       KeyUp: this.monster.standing(),
-      ArrowLeft: this.monster.walkingLeft(),
-      ArrowRight: this.monster.walkingRight(),
-      ArrowUp: this.monster.walkingUp(),
-      ArrowDown: this.monster.walkingDown(),
-      ArrowTopRight: this.monster.walkingTopRight(),
-      ArrowTopLeft: this.monster.walkingTopLeft(),
-      ArrowBottomRight: this.monster.walkingBottomRight(),
-      ArrowBottomLeft: this.monster.walkingBottomLeft(),
+      ArrowLeft: this.monster.walkingLeft(walkConfig),
+      ArrowRight: this.monster.walkingRight(walkConfig),
+      ArrowUp: this.monster.walkingUp(walkConfig),
+      ArrowDown: this.monster.walkingDown(walkConfig),
+      ArrowTopRight: this.monster.walkingTopRight(walkConfig),
+      ArrowTopLeft: this.monster.walkingTopLeft(walkConfig),
+      ArrowBottomRight: this.monster.walkingBottomRight(walkConfig),
+      ArrowBottomLeft: this.monster.walkingBottomLeft(walkConfig),
     };
 
     const movementKeys = Object.keys(movementKeyMap);

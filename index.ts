@@ -183,7 +183,7 @@ const reduceMonstersHpFromAttacker = (
       const criticalRate = 10;
       let damage = attacker.atk;
       if (randomNumber <= criticalRate) {
-        monster.playCriticalAttack();
+        monster.playCriticalAudio();
         damage += damage;
       }
 
