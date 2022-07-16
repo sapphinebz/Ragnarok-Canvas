@@ -2,6 +2,9 @@ import {
   defer,
   fromEvent,
   merge,
+  MonoTypeOperatorFunction,
+  Observable,
+  OperatorFunction,
   ReplaySubject,
   startWith,
   switchAll,
@@ -18,25 +21,12 @@ import {
   tap,
 } from 'rxjs/operators';
 import { Monster, WalkingStoppable } from '../monsters/Monster';
-import { comboResetWith } from '../utils/combo-reset-with';
+import { onDocumentKeydown } from '../utils/on-document-keydown';
 
 export class KeyboardController {
   onCleanup$ = new ReplaySubject<void>(1);
-  keydown$ = fromEvent<KeyboardEvent>(document, 'keydown').pipe(
-    tap((event) => {
-      event.preventDefault();
-      event.stopPropagation();
-    }),
-    share()
-  );
-
-  keyup$ = fromEvent<KeyboardEvent>(document, 'keyup').pipe(
-    tap((event) => {
-      event.preventDefault();
-      event.stopPropagation();
-    }),
-    share()
-  );
+  keydown$ = onDocumentKeydown('keydown');
+  keyup$ = onDocumentKeydown('keyup');
 
   get ctx() {
     return this.canvas.getContext('2d');
@@ -100,49 +90,17 @@ export class KeyboardController {
     };
 
     const movementKeys = Object.keys(movementKeyMap);
-    const keyup$ = fromEvent<KeyboardEvent>(document, 'keyup').pipe(
-      tap((event) => {
-        event.preventDefault();
-        event.stopPropagation();
-      }),
-      share()
-    );
 
     const keyboardCode$ = this.keydown$.pipe(
       map((event) => event.code),
       filter((keyboardCode) => {
         return movementKeys.indexOf(keyboardCode) !== -1;
       }),
-      comboResetWith(keyup$),
-      map((keys) => {
-        if (keys.length === 0) {
-          return 'KeyUp';
-        } else if (keys.length === 1) {
-          return keys[0];
-        }
-        if (
-          keys.indexOf('ArrowRight') !== -1 &&
-          keys.indexOf('ArrowUp') !== -1
-        ) {
-          return 'ArrowTopRight';
-        } else if (
-          keys.indexOf('ArrowRight') !== -1 &&
-          keys.indexOf('ArrowDown') !== -1
-        ) {
-          return 'ArrowBottomRight';
-        } else if (
-          keys.indexOf('ArrowLeft') !== -1 &&
-          keys.indexOf('ArrowUp') !== -1
-        ) {
-          return 'ArrowTopLeft';
-        } else if (
-          keys.indexOf('ArrowLeft') !== -1 &&
-          keys.indexOf('ArrowDown') !== -1
-        ) {
-          return 'ArrowBottomLeft';
-        }
-        return keys[keys.length - 1];
+      this.collectKeydown({
+        distributeWith: this.keyup$,
       }),
+      this.sliceLastestKeydown(2),
+      this.mapKeysToActualKey(),
       share()
     );
 
@@ -151,5 +109,83 @@ export class KeyboardController {
       startWith('KeyUp'),
       map((key) => movementKeyMap[key])
     );
+  }
+
+  private mapKeysToActualKey(): OperatorFunction<string[], string> {
+    return map((keys) => {
+      if (keys.length === 0) {
+        return 'KeyUp';
+      } else if (keys.length === 1) {
+        return keys[0];
+      }
+      if (keys.indexOf('ArrowRight') !== -1 && keys.indexOf('ArrowUp') !== -1) {
+        return 'ArrowTopRight';
+      } else if (
+        keys.indexOf('ArrowRight') !== -1 &&
+        keys.indexOf('ArrowDown') !== -1
+      ) {
+        return 'ArrowBottomRight';
+      } else if (
+        keys.indexOf('ArrowLeft') !== -1 &&
+        keys.indexOf('ArrowUp') !== -1
+      ) {
+        return 'ArrowTopLeft';
+      } else if (
+        keys.indexOf('ArrowLeft') !== -1 &&
+        keys.indexOf('ArrowDown') !== -1
+      ) {
+        return 'ArrowBottomLeft';
+      }
+      return keys[keys.length - 1];
+    });
+  }
+
+  private sliceLastestKeydown(
+    length: number
+  ): MonoTypeOperatorFunction<string[]> {
+    return map((keys) => {
+      if (keys.length > length) {
+        return keys.slice(keys.length - length, keys.length - 1);
+      }
+      return keys;
+    });
+  }
+
+  private collectKeydown(option: {
+    distributeWith: Observable<any>;
+  }): OperatorFunction<string, string[]> {
+    const { distributeWith: reset$ } = option;
+    return (source: Observable<string>) =>
+      new Observable((subscriber) => {
+        let collections: string[] = [];
+
+        const cleanupSubscription = reset$.subscribe((event) => {
+          const index = collections.findIndex((key) => key === event.code);
+          if (index >= -1) {
+            collections.splice(index, 1);
+            subscriber.next(collections);
+          }
+        });
+
+        const bufferSubscription = source.subscribe({
+          next: (value) => {
+            if (collections[collections.length - 1] !== value) {
+              collections.push(value);
+            }
+            subscriber.next(collections);
+          },
+          error: (err) => {
+            subscriber.error(err);
+          },
+          complete: () => {
+            subscriber.complete();
+          },
+        });
+
+        return () => {
+          cleanupSubscription.unsubscribe();
+          bufferSubscription.unsubscribe();
+        };
+      });
   }
 }
