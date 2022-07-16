@@ -323,6 +323,7 @@ onToggleBackgroundSound$.subscribe((isOpen) => {
     if (!backgroundMusic) {
       backgroundMusic = loadProteraFieldVol2();
       backgroundMusic.volume = 0.05;
+      backgroundMusic.loop = true;
     }
     if (backgroundMusic) {
       backgroundMusic.play();
