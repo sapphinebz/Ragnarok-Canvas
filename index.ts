@@ -275,7 +275,7 @@ onCanvasRender$.subscribe(() => {
   keyboardController.drawPlayer();
 
   drawScore();
-  
+
   ctx.drawImage(
     backgroundSoundTogglerImage,
     backgroundSoundTogglerImagePosition.x,
@@ -293,6 +293,23 @@ const onLoadMonster$ = merge(
   ),
   from(monsters)
 ).pipe(shareReplay());
+
+onCanvasMount$
+  .pipe(switchMap(() => fromEvent<MouseEvent>(canvas, 'mousemove')))
+  .subscribe((event) => {
+    if (
+      event.x >= backgroundSoundTogglerImagePosition.x &&
+      event.y >= backgroundSoundTogglerImagePosition.y &&
+      event.x <=
+        backgroundSoundTogglerImage.x + backgroundSoundTogglerImage.width &&
+      event.y <=
+        backgroundSoundTogglerImage.y + backgroundSoundTogglerImage.height
+    ) {
+      canvas.style.cursor = 'pointer';
+    } else {
+      canvas.style.cursor = 'default';
+    }
+  });
 
 onCanvasMount$.subscribe(() => {
   keyboardController.start(tick);
