@@ -18,6 +18,8 @@ import {
   Observable,
   ReplaySubject,
   EMPTY,
+  of,
+  NEVER,
 } from 'rxjs';
 import {
   connect,
@@ -41,37 +43,44 @@ import {
 import { Acidus } from './monsters/Acidus';
 import { randomMinMax } from './utils/random-minmax';
 import { audioIsOpenImage } from './sprites/audio-is-open-image';
+import { audioIsCloseImage } from './sprites/audio-is-close-image';
 
 const canvas = document.querySelector<HTMLCanvasElement>('canvas');
 const ctx = canvas.getContext('2d');
-const onCanvasMouseMove$ = fromEvent<MouseEvent>(canvas, 'mousemove').pipe(share());
+const onCanvasMouseMove$ = fromEvent<MouseEvent>(canvas, 'mousemove').pipe(
+  share()
+);
 
-const onHoverCanvasArea = (option: {
-  area: Area;
-  onMouseHover: () => void;
-  onMouseOut: () => void;
-  onClick: (event: MouseEvent) => void;
-}) => {
-  return onCanvasMouseMove$.pipe(
-    map((event) => {
-      return isMouseHoverArea(event, option.area);
-    }),
-    distinctUntilChanged(),
-    switchMap((isHover) => {
-      if (isHover) {
-        option.onMouseHover();
-        return fromEvent<MouseEvent>(canvas, 'click').pipe(
-          tap((event) => {
-            option.onClick(event);
-          })
-        );
-      } else {
-        option.onMouseOut();
-      }
-      return EMPTY;
-    })
-  );
-};
+// const onHoverCanvasArea = (option: {
+//   area: Area;
+//   onMouseHover: () => void;
+//   onMouseOut: () => void;
+//   onClick: (event: MouseEvent) => void;
+// }) => {
+//   return onCanvasMouseMove$.pipe(
+//     map((event) => {
+//       return isMouseHoverArea(event, option.area);
+//     }),
+//     distinctUntilChanged(),
+//     // tap((isHover) => {
+//     //   console.log(isHover);
+//     // }),
+//     switchMap((isHover) => {
+//       console.log('sdfs');
+//       if (isHover) {
+//         option.onMouseHover();
+//         return fromEvent<MouseEvent>(canvas, 'click').pipe(
+//           tap((event) => {
+//             option.onClick(event);
+//           })
+//         );
+//       } else {
+//         option.onMouseOut();
+//       }
+//       return of(null);
+//     })
+//   );
+// };
 
 const onWindowResize$ = fromEvent(window, 'resize').pipe(
   startWith(0),
@@ -262,7 +271,7 @@ const keyboardController = new KeyboardController(canvas, thief);
 
 const killCount$ = new BehaviorSubject(0);
 
-const backgroundSoundTogglerImage = audioIsOpenImage;
+let backgroundSoundTogglerImage = audioIsOpenImage;
 const backgroundSoundTogglerImagePosition = { x: 16, y: 16 };
 
 const drawScore = () => {
@@ -300,6 +309,47 @@ const onCanvasRender$ = onWindowResize$.pipe(
   share()
 );
 
+const isHoverBackgroundSoundToggler$ = onCanvasMouseMove$.pipe(
+  map((event) => {
+    if (
+      isMouseHoverArea(event, {
+        x: backgroundSoundTogglerImagePosition.x,
+        y: backgroundSoundTogglerImagePosition.y,
+        w: backgroundSoundTogglerImage.width,
+        h: backgroundSoundTogglerImage.height,
+      })
+    ) {
+      canvas.style.cursor = 'pointer';
+      return true;
+    } else {
+      canvas.style.cursor = 'default';
+    }
+    return false;
+  }),
+  distinctUntilChanged(),
+  shareReplay(1)
+);
+
+const onToggleBackgroundSound$ = isHoverBackgroundSoundToggler$.pipe(
+  switchMap((isHover) => {
+    if (isHover) {
+      return fromEvent(canvas, 'click');
+    }
+    return NEVER;
+  }),
+  map(() => backgroundSoundTogglerImage === audioIsOpenImage),
+  share()
+);
+
+onToggleBackgroundSound$.subscribe((isOpen) => {
+  if (isOpen) {
+    backgroundSoundTogglerImage = audioIsCloseImage;
+  } else {
+    backgroundSoundTogglerImage = audioIsOpenImage;
+  }
+  tick();
+});
+
 onCanvasRender$.subscribe(() => {
   for (const monster of monsters) {
     monster.drawImage();
@@ -327,37 +377,35 @@ const onLoadMonster$ = merge(
   from(monsters)
 ).pipe(shareReplay());
 
-onCanvasMount$
-  .pipe(
-    switchMap(
-      () => {
-        const backgroundSoundToggler$ = onHoverCanvasArea({
-          area: {
-            x: backgroundSoundTogglerImagePosition.x,
-            y: backgroundSoundTogglerImagePosition.y,
-            w: backgroundSoundTogglerImage.width,
-            h: backgroundSoundTogglerImage.height,
-          },
-          onClick: (event) => {
-            backgroundSoundTogglerImage =
-              backgroundSoundTogglerImage === audioIsOpenImage
-                ? audioIsCloseImage
-                : audioIsOpenImage;
-          },
-          onMouseHover: () => {
-            canvas.style.cursor = 'pointer';
-          },
-          onMouseOut: () => {
-            canvas.style.cursor = 'default';
-          },
-        });
-        return merge(backgroundSoundToggler$);
-      }
-    )
-  )
-  .subscribe(() => {
-    tick();
-  });
+// onCanvasMount$
+//   .pipe(
+//     switchMap(() => {
+//       const backgroundSoundToggler$ = onHoverCanvasArea({
+//         area: {
+//           x: backgroundSoundTogglerImagePosition.x,
+//           y: backgroundSoundTogglerImagePosition.y,
+//           w: backgroundSoundTogglerImage.width,
+//           h: backgroundSoundTogglerImage.height,
+//         },
+//         onClick: (event) => {
+//           backgroundSoundTogglerImage =
+//             backgroundSoundTogglerImage === audioIsOpenImage
+//               ? audioIsCloseImage
+//               : audioIsOpenImage;
+//         },
+//         onMouseHover: () => {
+//           canvas.style.cursor = 'pointer';
+//         },
+//         onMouseOut: () => {
+//           canvas.style.cursor = 'default';
+//         },
+//       });
+//       return merge(backgroundSoundToggler$);
+//     })
+//   )
+//   .subscribe(() => {
+//     tick();
+//   });
 
 onCanvasMount$.subscribe(() => {
   keyboardController.start(tick);
