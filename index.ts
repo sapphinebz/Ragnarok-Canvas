@@ -40,6 +40,7 @@ import { audioIsOpenImage } from './sprites/audio-is-open-image';
 
 const canvas = document.querySelector<HTMLCanvasElement>('canvas');
 const ctx = canvas.getContext('2d');
+const onCanvasMouseMove$ = fromEvent<MouseEvent>(canvas, 'mousemove').pipe(share());
 const onWindowResize$ = fromEvent(window, 'resize').pipe(
   startWith(0),
   tap(() => {
