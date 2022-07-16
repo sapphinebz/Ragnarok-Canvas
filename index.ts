@@ -22,6 +22,7 @@ import {
 import {
   connect,
   debounceTime,
+  distinctUntilChanged,
   map,
   mergeMap,
   shareReplay,
@@ -32,10 +33,13 @@ import { Area, DIRECTION, Monster } from './monsters/Monster';
 import { Fabre } from './monsters/Fabre';
 import { Thief } from './monsters/Thief';
 import { KeyboardController } from './gamepad/keyboard-controller';
-import { COLLISION_DIRECTION, rectanglesIntersect } from './utils/collision';
+import {
+  COLLISION_DIRECTION,
+  isMouseHoverArea,
+  rectanglesIntersect,
+} from './utils/collision';
 import { Acidus } from './monsters/Acidus';
 import { randomMinMax } from './utils/random-minmax';
-import { loadDamageNumbers } from './sprites/load-damage-numbers';
 import { audioIsOpenImage } from './sprites/audio-is-open-image';
 
 const canvas = document.querySelector<HTMLCanvasElement>('canvas');
