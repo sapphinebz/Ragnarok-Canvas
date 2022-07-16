@@ -29,8 +29,8 @@ export class Poring extends Monster {
   y = 100;
   hp = 50;
   maxHp = this.hp;
-  speedX = 5;
-  speedY = 5;
+  speedX = 3;
+  speedY = 3;
   frameX = 0;
   frameY = 0;
   width = 60;
@@ -140,7 +140,7 @@ export class Poring extends Monster {
   standing(): Observable<any> {
     return defer(() => {
       this.frameY = 0;
-      return this.createForwardFrame(250, 0, 3);
+      return this.createForwardFrame(120, 0, 3);
     });
   }
 
@@ -180,7 +180,22 @@ export class Poring extends Monster {
     });
   }
 
-  playWalkingSound() {
+  walking(): Observable<any> {
+    return defer(() => {
+      this.frameY = 1;
+      return this.createForwardFrame(50, 0, 7).pipe(
+        connect((xframe$) => {
+          const sound$ = xframe$.pipe(
+            filter((xframe) => xframe === 3),
+            concatMap(() => this.playWalkingAudio())
+          );
+          return merge(xframe$, sound$.pipe(ignoreElements()));
+        })
+      );
+    });
+  }
+
+  private playWalkingAudio() {
     return new Observable((subscriber) => {
       this.walkingAudio.play();
       const stopAudio = () => {
@@ -194,21 +209,6 @@ export class Poring extends Monster {
         clearTimeout(timeoutIndex);
         stopAudio();
       };
-    });
-  }
-
-  walking(): Observable<any> {
-    return defer(() => {
-      this.frameY = 1;
-      return this.createForwardFrame(100, 0, 7).pipe(
-        connect((xframe$) => {
-          const sound$ = xframe$.pipe(
-            filter((xframe) => xframe === 3),
-            concatMap(() => this.playWalkingSound())
-          );
-          return merge(xframe$, sound$.pipe(ignoreElements()));
-        })
-      );
     });
   }
 }
