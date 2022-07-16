@@ -36,6 +36,7 @@ import { COLLISION_DIRECTION, rectanglesIntersect } from './utils/collision';
 import { Acidus } from './monsters/Acidus';
 import { randomMinMax } from './utils/random-minmax';
 import { loadDamageNumbers } from './sprites/load-damage-numbers';
+import { audioIsOpenImage } from './sprites/audio-is-open-image';
 
 const canvas = document.querySelector<HTMLCanvasElement>('canvas');
 const ctx = canvas.getContext('2d');
