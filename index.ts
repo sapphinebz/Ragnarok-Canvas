@@ -143,10 +143,6 @@ const showAnimationDieAndRespawn = (monster: Monster) => {
   );
 };
 
-// const showAnimationHurt = (monster: Monster) =>{
-//   return monster.hurting().pipe()
-// }
-
 const monstersBeHurtOrDie = (): OperatorFunction<Monster[], any> =>
   mergeMap((collision) => {
     return from(collision).pipe(
@@ -157,7 +153,6 @@ const monstersBeHurtOrDie = (): OperatorFunction<Monster[], any> =>
         }
         monster.hurt();
         return EMPTY;
-        // return monster.hurt();
       })
     );
   });
@@ -233,6 +228,9 @@ const keyboardController = new KeyboardController(canvas, thief);
 
 const killCount$ = new BehaviorSubject(0);
 
+const backgroundSoundTogglerImage = audioIsOpenImage;
+const backgroundSoundTogglerImagePosition = { x: 16, y: 16 };
+
 const drawScore = () => {
   ctx.textAlign = 'center';
   ctx.font = 'bold 24px Arial';
@@ -276,6 +274,12 @@ onCanvasRender$.subscribe(() => {
   keyboardController.drawPlayer();
 
   drawScore();
+  
+  ctx.drawImage(
+    backgroundSoundTogglerImage,
+    backgroundSoundTogglerImagePosition.x,
+    backgroundSoundTogglerImagePosition.y
+  );
 });
 
 killCount$.subscribe(() => tick());
@@ -299,9 +303,6 @@ onCanvasMount$.pipe(switchMap(() => onLoadMonster$)).subscribe((monster) => {
 
 onLoadMonster$
   .pipe(
-    // mergeMap((monster) =>
-    //   monster.randomAction().pipe(takeUntil(monster.onDied$))
-    // )
     mergeMap((monster) => {
       monster.randomAction();
       return monster.onActionTick$.pipe(takeUntil(monster.onDied$));
