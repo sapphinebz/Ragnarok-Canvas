@@ -324,20 +324,35 @@ const onLoadMonster$ = merge(
 ).pipe(shareReplay());
 
 onCanvasMount$
-  .pipe(switchMap(() => fromEvent<MouseEvent>(canvas, 'mousemove')))
-  .subscribe((event) => {
-    if (
-      event.x >= backgroundSoundTogglerImagePosition.x &&
-      event.y >= backgroundSoundTogglerImagePosition.y &&
-      event.x <=
-        backgroundSoundTogglerImage.x + backgroundSoundTogglerImage.width &&
-      event.y <=
-        backgroundSoundTogglerImage.y + backgroundSoundTogglerImage.height
-    ) {
-      canvas.style.cursor = 'pointer';
-    } else {
-      canvas.style.cursor = 'default';
-    }
+  .pipe(
+    switchMap(
+      () => {
+        const backgroundSoundToggler$ = onHoverCanvasArea({
+          area: {
+            x: backgroundSoundTogglerImagePosition.x,
+            y: backgroundSoundTogglerImagePosition.y,
+            w: backgroundSoundTogglerImage.width,
+            h: backgroundSoundTogglerImage.height,
+          },
+          onClick: (event) => {
+            backgroundSoundTogglerImage =
+              backgroundSoundTogglerImage === audioIsOpenImage
+                ? audioIsCloseImage
+                : audioIsOpenImage;
+          },
+          onMouseHover: () => {
+            canvas.style.cursor = 'pointer';
+          },
+          onMouseOut: () => {
+            canvas.style.cursor = 'default';
+          },
+        });
+        return merge(backgroundSoundToggler$);
+      }
+    )
+  )
+  .subscribe(() => {
+    tick();
   });
 
 onCanvasMount$.subscribe(() => {
