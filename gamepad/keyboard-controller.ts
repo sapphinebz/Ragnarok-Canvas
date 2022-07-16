@@ -145,7 +145,7 @@ export class KeyboardController {
   ): MonoTypeOperatorFunction<string[]> {
     return map((keys) => {
       if (keys.length > length) {
-        return keys.slice(keys.length - length, keys.length - 1);
+        return keys.slice(keys.length - length, keys.length);
       }
       return keys;
     });
