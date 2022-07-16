@@ -41,6 +41,34 @@ import { audioIsOpenImage } from './sprites/audio-is-open-image';
 const canvas = document.querySelector<HTMLCanvasElement>('canvas');
 const ctx = canvas.getContext('2d');
 const onCanvasMouseMove$ = fromEvent<MouseEvent>(canvas, 'mousemove').pipe(share());
+
+const onHoverCanvasArea = (option: {
+  area: Area;
+  onMouseHover: () => void;
+  onMouseOut: () => void;
+  onClick: (event: MouseEvent) => void;
+}) => {
+  return onCanvasMouseMove$.pipe(
+    map((event) => {
+      return isMouseHoverArea(event, option.area);
+    }),
+    distinctUntilChanged(),
+    switchMap((isHover) => {
+      if (isHover) {
+        option.onMouseHover();
+        return fromEvent<MouseEvent>(canvas, 'click').pipe(
+          tap((event) => {
+            option.onClick(event);
+          })
+        );
+      } else {
+        option.onMouseOut();
+      }
+      return EMPTY;
+    })
+  );
+};
+
 const onWindowResize$ = fromEvent(window, 'resize').pipe(
   startWith(0),
   tap(() => {
