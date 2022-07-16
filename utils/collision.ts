@@ -52,3 +52,19 @@ export function rectanglesIntersect(area: Area, monster: Monster) {
   }
   return COLLISION_DIRECTION.NOTHING;
 }
+
+export function isMouseHoverArea(event: MouseEvent, area: Area){
+  if (
+    event.x >= area.x &&
+    event.y >= area.y &&
+    event.x <=
+      area.x +
+      area.w &&
+    event.y <=
+      area.y +
+      area.h
+  ) {
+    return true;
+  }
+  return false;
+}
