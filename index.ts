@@ -44,6 +44,7 @@ import { Acidus } from './monsters/Acidus';
 import { randomMinMax } from './utils/random-minmax';
 import { audioIsOpenImage } from './sprites/audio-is-open-image';
 import { audioIsCloseImage } from './sprites/audio-is-close-image';
+import { loadProteraFieldVol2 } from './sounds/prontera-field-vol2';
 
 const canvas = document.querySelector<HTMLCanvasElement>('canvas');
 const ctx = canvas.getContext('2d');
@@ -240,7 +241,7 @@ const keyboardController = new KeyboardController(canvas, thief);
 
 const killCount$ = new BehaviorSubject(0);
 
-let backgroundSoundTogglerImage = audioIsOpenImage;
+let backgroundSoundTogglerImage = audioIsCloseImage;
 const backgroundSoundTogglerImagePosition = { x: 16, y: 16 };
 
 const drawScore = () => {
@@ -310,11 +311,22 @@ const onToggleBackgroundSound$ = isHoverBackgroundSoundToggler$.pipe(
   share()
 );
 
+let backgroundMusic: HTMLAudioElement;
 onToggleBackgroundSound$.subscribe((isOpen) => {
   if (isOpen) {
     backgroundSoundTogglerImage = audioIsCloseImage;
+    if (backgroundMusic) {
+      backgroundMusic.pause();
+    }
   } else {
     backgroundSoundTogglerImage = audioIsOpenImage;
+    if (!backgroundMusic) {
+      backgroundMusic = loadProteraFieldVol2();
+      backgroundMusic.volume = 0.05;
+    }
+    if (backgroundMusic) {
+      backgroundMusic.play();
+    }
   }
   tick();
 });
