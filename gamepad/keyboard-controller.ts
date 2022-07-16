@@ -113,7 +113,8 @@ export class KeyboardController {
     return keyboardCode$.pipe(
       distinctUntilChanged(),
       startWith('KeyUp'),
-      map((key) => movementKeyMap[key])
+      map((key) => movementKeyMap[key]),
+      filter((observableAction) => observableAction !== undefined)
     );
   }
 
@@ -194,6 +195,7 @@ export class KeyboardController {
 
         const cleanupSubscription = reset$.subscribe(() => {
           collections = [];
+          subscriber.next(['KeyReset']);
         });
 
         const bufferSubscription = source.subscribe({
