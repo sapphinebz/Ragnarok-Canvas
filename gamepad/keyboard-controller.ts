@@ -7,6 +7,7 @@ import {
   OperatorFunction,
   ReplaySubject,
   startWith,
+  Subject,
   switchAll,
   switchMap,
 } from 'rxjs';
@@ -27,6 +28,7 @@ export class KeyboardController {
   onCleanup$ = new ReplaySubject<void>(1);
   keydown$ = onDocumentKeydown('keydown');
   keyup$ = onDocumentKeydown('keyup');
+  onAttack$ = new Subject<void>();
 
   get ctx() {
     return this.canvas.getContext('2d');
@@ -35,7 +37,10 @@ export class KeyboardController {
   constructor(private canvas: HTMLCanvasElement, private monster: Monster) {}
 
   start(tick: () => void) {
-    merge(this.movementAction(), this.attackAction())
+    merge(
+      this.movementAction(),
+      this.attackAction().pipe(tap(() => console.log('attack')))
+    )
       .pipe(switchAll(), takeUntil(this.onCleanup$))
       .subscribe(() => tick());
   }
@@ -69,7 +74,10 @@ export class KeyboardController {
       filter((keyboardCode) => {
         return attackKeys.indexOf(keyboardCode) !== -1;
       }),
-      map((key) => attackKeyMap[key])
+      map((key) => {
+        this.onAttack$.next();
+        return attackKeyMap[key];
+      })
     );
   }
 
@@ -92,23 +100,42 @@ export class KeyboardController {
     const movementKeys = Object.keys(movementKeyMap);
 
     const keyboardCode$ = this.keydown$.pipe(
-      map((event) => event.code),
-      filter((keyboardCode) => {
-        return movementKeys.indexOf(keyboardCode) !== -1;
-      }),
+      this.mapToKeyCode(),
+      this.filterKeys(movementKeys),
       this.collectKeydown({
-        distributeWith: this.keyup$,
+        distributeWith: this.keyup$.pipe(this.filterKeys(movementKeys)),
+        resetWith: this.onAttack$,
       }),
       this.sliceLastestKeydown(2),
-      this.mapKeysToActualKey(),
-      share()
+      this.mapKeysToActualKey()
     );
 
     return keyboardCode$.pipe(
       distinctUntilChanged(),
       startWith('KeyUp'),
+      tap((event) => {
+        console.log('move', event);
+      }),
       map((key) => movementKeyMap[key])
     );
+  }
+
+  private mapToKeyCode(): OperatorFunction<KeyboardEvent, string> {
+    return map((event) => event.code);
+  }
+
+  private filterKeys<T extends string | KeyboardEvent>(
+    keys: string[]
+  ): MonoTypeOperatorFunction<T> {
+    return filter((eventOrKeyboardCode) => {
+      let keyboardCode: string;
+      if (eventOrKeyboardCode instanceof KeyboardEvent) {
+        keyboardCode = eventOrKeyboardCode.code;
+      } else {
+        keyboardCode = eventOrKeyboardCode;
+      }
+      return keys.indexOf(keyboardCode) !== -1;
+    });
   }
 
   private mapKeysToActualKey(): OperatorFunction<string[], string> {
@@ -152,19 +179,24 @@ export class KeyboardController {
   }
 
   private collectKeydown(option: {
-    distributeWith: Observable<any>;
+    distributeWith: Observable<KeyboardEvent>;
+    resetWith: Observable<any>;
   }): OperatorFunction<string, string[]> {
-    const { distributeWith: reset$ } = option;
+    const { distributeWith: keyup$, resetWith: reset$ } = option;
     return (source: Observable<string>) =>
       new Observable((subscriber) => {
         let collections: string[] = [];
 
-        const cleanupSubscription = reset$.subscribe((event) => {
+        const distributeSubscription = keyup$.subscribe((event) => {
           const index = collections.findIndex((key) => key === event.code);
           if (index >= -1) {
             collections.splice(index, 1);
             subscriber.next(collections);
           }
+        });
+
+        const cleanupSubscription = reset$.subscribe(() => {
+          collections = [];
         });
 
         const bufferSubscription = source.subscribe({
@@ -185,6 +217,7 @@ export class KeyboardController {
         return () => {
           cleanupSubscription.unsubscribe();
           bufferSubscription.unsubscribe();
+          distributeSubscription.unsubscribe();
         };
       });
   }
