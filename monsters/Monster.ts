@@ -64,6 +64,14 @@ export const enum ACTION {
   MOVE_TO_TARGET,
   ATTACK,
   STANDING,
+  WALKING_LEFT,
+  WALKING_RIGHT,
+  WALKING_UP,
+  WALKING_DOWN,
+  WALKING_TOP_RIGHT,
+  WALKING_TOP_LEFT,
+  WALKING_BOTTOM_RIGHT,
+  WALKING_BOTTOM_LEFT,
 }
 
 export const enum DIRECTION {
@@ -182,9 +190,29 @@ export abstract class Monster {
             return this.standing();
           } else if (action === ACTION.IDLE) {
             return EMPTY;
+          } else if (action === ACTION.WALKING_LEFT) {
+            return this.walkingLeft({ stopIfOutOfCanvas: false });
+          } else if (action === ACTION.WALKING_RIGHT) {
+            return this.walkingRight({ stopIfOutOfCanvas: false });
+          } else if (action === ACTION.WALKING_UP) {
+            return this.walkingUp({ stopIfOutOfCanvas: false });
+          } else if (action === ACTION.WALKING_DOWN) {
+            return this.walkingDown({ stopIfOutOfCanvas: false });
+          } else if (action === ACTION.WALKING_TOP_RIGHT) {
+            return this.walkingTopRight({ stopIfOutOfCanvas: false });
+          } else if (action === ACTION.WALKING_TOP_LEFT) {
+            return this.walkingTopLeft({ stopIfOutOfCanvas: false });
+          } else if (action === ACTION.WALKING_BOTTOM_RIGHT) {
+            return this.walkingBottomRight({ stopIfOutOfCanvas: false });
+          } else if (action === ACTION.WALKING_BOTTOM_LEFT) {
+            return this.walkingBottomLeft({ stopIfOutOfCanvas: false });
           } else if (action === ACTION.MOVE_TO_TARGET) {
             return this.aggressiveTarget$.pipe(
               switchMap((target) => {
+                if (target === null || target.isDied) {
+                  this.actionChange$.next(ACTION.RANDOM);
+                  return EMPTY;
+                }
                 return this.walkingToTarget(target).pipe(
                   tap({
                     complete: () => {
@@ -192,7 +220,15 @@ export abstract class Monster {
                         this.actionChange$.next(ACTION.ATTACK);
                       }
                     },
-                  })
+                  }),
+                  takeUntil(
+                    target.onDied$.pipe(
+                      tap(() => {
+                        this.aggressiveTarget$.next(null);
+                        this.actionChange$.next(ACTION.RANDOM);
+                      })
+                    )
+                  )
                 );
               })
             );
@@ -202,6 +238,8 @@ export abstract class Monster {
                 complete: () => {
                   if (this.aggressiveTarget !== null) {
                     this.actionChange$.next(ACTION.MOVE_TO_TARGET);
+                  } else {
+                    this.actionChange$.next(ACTION.STANDING);
                   }
                 },
               })
@@ -263,7 +301,8 @@ export abstract class Monster {
               map(() => [target]),
               this.decreaseTargetsHp(),
               this.forceTargetsFaceToMe(),
-              this.targetsBeHurtOrDie()
+              this.targetsBeHurtOrDie(),
+              takeUntil(target.onDied$)
             );
           }
           return EMPTY;
