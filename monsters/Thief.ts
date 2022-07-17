@@ -301,6 +301,16 @@ export class Thief extends Monster {
         height: 109,
         marginHeight: -3,
       },
+      {
+        order: 4,
+        offsetX: 413,
+        offsetY: 832,
+        width: 80,
+        height: 48,
+        marginHeight: 52,
+        marginLeftWidth: 30,
+        marginRightWidth: -30,
+      },
     ],
   ];
 
@@ -387,17 +397,8 @@ export class Thief extends Monster {
 
   dying(): Observable<any> {
     return defer(() => {
-      this.frameY = 3;
-
-      return this.createForwardFrame(100, 0, 5).pipe(
-        tap((frameX) => {
-          if (frameX === 2) {
-          }
-        }),
-        takeWhile((frameX) => {
-          return frameX + 1 <= 5;
-        })
-      );
+      this.frameY = 6;
+      return this.createForwardFrame(150, 0, 4, { once: true });
     });
   }
 

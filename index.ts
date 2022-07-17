@@ -71,8 +71,7 @@ const onWindowResize$ = fromEvent(window, 'resize').pipe(
 const monstersClass: [any, number][] = [
   [Acidus, 2],
   [Poring, 20],
-  [Fabre, 7],
-  // [Acidus, 1],
+  [Fabre, 2],
 ];
 
 const onRespawnMonster$ = new Subject<Monster>();
@@ -187,30 +186,6 @@ const findMonstersBeAttacked = (): OperatorFunction<Area, Monster[]> => {
   });
 };
 
-const reduceMonstersHpFromAttacker = (
-  attacker: Monster
-): OperatorFunction<Monster[], Monster[]> => {
-  return tap((monsters) => {
-    for (const monster of monsters) {
-      attacker.damageTo(monster);
-    }
-  });
-};
-
-const monstersFaceToAttacker = (
-  attacker: Monster
-): OperatorFunction<Monster[], Monster[]> => {
-  return tap((monsters) => {
-    for (const monster of monsters) {
-      if (monster.x > attacker.x) {
-        monster.direction = DIRECTION.LEFT;
-      } else if (monster.x < attacker.x) {
-        monster.direction = DIRECTION.RIGHT;
-      }
-    }
-  });
-};
-
 const monsters = generateMonsters();
 
 /**
@@ -221,8 +196,8 @@ const thief = new Thief(canvas);
 thief.onDamageArea$
   .pipe(
     findMonstersBeAttacked(),
-    reduceMonstersHpFromAttacker(thief),
-    monstersFaceToAttacker(thief),
+    thief.decreaseTargetsHp(),
+    thief.forceTargetsFaceToMe(),
     monstersBeHurtOrDie()
   )
   .subscribe();
@@ -355,10 +330,8 @@ const onLoadMonster$ = merge(
 
 onCanvasMount$.subscribe(() => {
   keyboardController.start(tick);
-  // thief
-  //   .hurting()
-  //   .pipe(repeat())
-  //   .subscribe(() => tick());
+  // thief.direction = DIRECTION.RIGHT;
+  // thief.hurting().subscribe(() => tick());
 });
 
 onCanvasMount$.pipe(switchMap(() => onLoadMonster$)).subscribe((monster) => {

@@ -11,6 +11,7 @@ import {
   map,
   MonoTypeOperatorFunction,
   Observable,
+  OperatorFunction,
   pairwise,
   ReplaySubject,
   startWith,
@@ -24,6 +25,7 @@ import {
   concatAll,
   distinctUntilChanged,
   filter,
+  mergeMap,
   repeat,
   takeUntil,
   takeWhile,
@@ -33,6 +35,7 @@ import { distanceBetween } from '../utils/collision';
 import { playAudio } from '../utils/play-audio';
 import { randomMinMax } from '../utils/random-minmax';
 import { shuffle } from '../utils/shuffle';
+import { Thief } from './Thief';
 
 export interface MoveLocation {
   x: number;
@@ -257,10 +260,10 @@ export abstract class Monster {
         switchMap((target) => {
           if (target !== null) {
             return this.onDamageArea$.pipe(
-              tap(() => {
-                this.damageTo(target);
-                target.hurt();
-              })
+              map(() => [target]),
+              this.decreaseTargetsHp(),
+              this.forceTargetsFaceToMe(),
+              this.targetsBeHurtOrDie()
             );
           }
           return EMPTY;
@@ -585,6 +588,38 @@ export abstract class Monster {
     if (monster.hp < 0) {
       monster.hp = 0;
     }
+  }
+
+  targetsBeHurtOrDie(): OperatorFunction<Monster[], any> {
+    return tap((monsters) => {
+      for (const monster of monsters) {
+        if (monster.hp <= 0) {
+          monster.die();
+        } else {
+          monster.hurt();
+        }
+      }
+    });
+  }
+
+  decreaseTargetsHp(): OperatorFunction<Monster[], Monster[]> {
+    return tap((monsters) => {
+      for (const monster of monsters) {
+        this.damageTo(monster);
+      }
+    });
+  }
+
+  forceTargetsFaceToMe(): OperatorFunction<Monster[], Monster[]> {
+    return tap((monsters) => {
+      for (const monster of monsters) {
+        if (monster.x > this.x) {
+          monster.direction = DIRECTION.LEFT;
+        } else if (monster.x < this.x) {
+          monster.direction = DIRECTION.RIGHT;
+        }
+      }
+    });
   }
 
   private updateMove(): MonoTypeOperatorFunction<MoveLocation> {
