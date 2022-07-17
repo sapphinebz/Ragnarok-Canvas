@@ -1,6 +1,8 @@
 import { defer, Observable, Subject, switchMap, timer } from 'rxjs';
 import { map, mergeMap, takeUntil, takeWhile, tap } from 'rxjs/operators';
 import { loadDaggerHitSound } from '../sounds/dagger-hit-sound';
+import { loadThiefFamaleDamagedAudio } from '../sounds/thief-famale-damaged';
+import { loadThiefFamaleDeadAudio } from '../sounds/thief-famale-dead';
 import { loadThiefLeftSprite } from '../sprites/load-thief-left';
 import { loadLeftThiefDagger } from '../sprites/load-thief-left-dagger';
 import { loadThiefRightSprite } from '../sprites/load-thief-right';
@@ -22,6 +24,8 @@ export class Thief extends Monster {
   height = 107;
 
   daggerHitSound = loadDaggerHitSound();
+  damagedAudio = loadThiefFamaleDamagedAudio();
+  deadAudio = loadThiefFamaleDeadAudio();
 
   frames: CropImage[][] = [
     [
@@ -333,6 +337,8 @@ export class Thief extends Monster {
     super(canvas, loadThiefLeftSprite(), loadThiefRightSprite());
 
     this.daggerHitSound.volume = 0.05;
+    this.damagedAudio.volume = 0.05;
+    this.deadAudio.volume = 0.05;
 
     this.onSoundEffectAttackPlay
       .pipe(
@@ -391,6 +397,7 @@ export class Thief extends Monster {
   dying(): Observable<any> {
     return defer(() => {
       this.frameY = 6;
+      this.deadAudio.play();
       return this.createForwardFrame(150, 0, 4, { once: true });
     });
   }
@@ -400,6 +407,7 @@ export class Thief extends Monster {
   hurting(): Observable<any> {
     return defer(() => {
       this.frameY = 6;
+      this.damagedAudio.play();
       return this.createForwardFrame(150, 0, 3, { once: true });
     });
   }
