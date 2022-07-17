@@ -85,7 +85,7 @@ export class Thief extends Monster {
     ],
     // walk left
     [
-      { order: 0, offsetX: 29, offsetY: 133, width: 41, height: 93 },
+      { order: 0, offsetY: 257, offsetX: 3, width: 80, height: 109 },
       {
         order: 1,
         offsetY: 257,
