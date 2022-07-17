@@ -5,7 +5,7 @@ import { loadAcidusDeadSound } from '../sounds/acidus-dead';
 import { loadAcidusLeftSprite } from '../sprites/load-acidus-left';
 import { loadAcidusSpriteRight } from '../sprites/load-acidus-right';
 import { playAudio } from '../utils/play-audio';
-import { CropImage, DIRECTION, Monster } from './Monster';
+import { AggressiveCondition, CropImage, DIRECTION, Monster } from './Monster';
 
 export class Acidus extends Monster {
   maxHp = 120;
@@ -123,6 +123,12 @@ export class Acidus extends Monster {
   }
 
   drawEffect(): void {}
+
+  checkAggressive(condition: AggressiveCondition) {
+    if (condition.distance < 100) {
+      this.aggressive = true;
+    }
+  }
 
   hurting(): Observable<any> {
     return defer(() => {

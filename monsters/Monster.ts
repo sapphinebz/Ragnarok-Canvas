@@ -46,6 +46,10 @@ export interface WalkingConfig {
 
 export type WalkingStoppable = Pick<WalkingConfig, 'stopIfOutOfCanvas'>;
 
+export interface AggressiveCondition {
+  distance: number;
+}
+
 export const enum ACTION {
   IDLE,
   RANDOM,
@@ -58,9 +62,7 @@ export const enum DIRECTION {
   RIGHT,
 }
 
-export interface Area {
-  x: number;
-  y: number;
+export interface Area extends MoveLocation {
   w: number;
   h: number;
 }
@@ -92,6 +94,18 @@ export abstract class Monster {
   onCleanup$ = new ReplaySubject<void>(1);
   onDamageArea$ = new Subject<Area>();
   onMoving$ = new Subject<MoveLocation>();
+  /**
+   * if aggressive true will move to player and attack
+   */
+  aggressive$ = new BehaviorSubject<boolean>(false);
+
+  get aggressive() {
+    return this.aggressive$.value;
+  }
+  set aggressive(value: boolean) {
+    this.aggressive$.next(value);
+  }
+
   direction$ = new BehaviorSubject<DIRECTION>(DIRECTION.LEFT);
 
   set direction(value: DIRECTION) {
@@ -274,6 +288,8 @@ export abstract class Monster {
   abstract attack(): Observable<any>;
 
   abstract hurting(): Observable<any>;
+
+  abstract checkAggressive(condition: AggressiveCondition): void;
 
   createForwardFrame(
     delay: number,

@@ -1,4 +1,4 @@
-import { Area, Monster } from '../monsters/Monster';
+import { Area, Monster, MoveLocation } from '../monsters/Monster';
 
 export const enum COLLISION_DIRECTION {
   NOTHING,
@@ -53,18 +53,23 @@ export function rectanglesIntersect(area: Area, monster: Monster) {
   return COLLISION_DIRECTION.NOTHING;
 }
 
-export function isMouseHoverArea(event: MouseEvent, area: Area){
+export function isMouseHoverArea(event: MouseEvent, area: Area) {
   if (
     event.x >= area.x &&
     event.y >= area.y &&
-    event.x <=
-      area.x +
-      area.w &&
-    event.y <=
-      area.y +
-      area.h
+    event.x <= area.x + area.w &&
+    event.y <= area.y + area.h
   ) {
     return true;
   }
   return false;
+}
+
+export function distanceBetween(
+  location1: MoveLocation,
+  location2: MoveLocation
+) {
+  return Math.sqrt(
+    (location1.x - location2.x) ** 2 + (location1.y - location2.y) ** 2
+  );
 }

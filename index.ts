@@ -20,11 +20,13 @@ import {
   EMPTY,
   of,
   NEVER,
+  combineLatest,
 } from 'rxjs';
 import {
   connect,
   debounceTime,
   distinctUntilChanged,
+  filter,
   map,
   mergeMap,
   shareReplay,
@@ -37,6 +39,7 @@ import { Thief } from './monsters/Thief';
 import { KeyboardController } from './gamepad/keyboard-controller';
 import {
   COLLISION_DIRECTION,
+  distanceBetween,
   isMouseHoverArea,
   rectanglesIntersect,
 } from './utils/collision';
@@ -367,6 +370,30 @@ onCanvasMount$.pipe(switchMap(() => onLoadMonster$)).subscribe((monster) => {
   monster.randomSpawn();
 });
 
+// Monsters have agressive to Player
+combineLatest({
+  player: thief.onMoving$.pipe(startWith({ x: thief.x, y: thief.y })),
+  monster: onLoadMonster$.pipe(
+    filter((monster) => monster.checkAggressive !== undefined),
+    mergeMap((monster) => {
+      const alreadyAggressive$ = monster.aggressive$.pipe(
+        filter((isAggressive) => isAggressive === true)
+      );
+      return monster.onMoving$.pipe(
+        map(() => monster),
+        takeUntil(alreadyAggressive$)
+      );
+    })
+  ),
+}).subscribe(({ player, monster }) => {
+  if (monster.aggressive === false) {
+    monster.checkAggressive({
+      distance: distanceBetween(player, monster),
+    });
+  }
+});
+
+// Monster Random Action
 onLoadMonster$
   .pipe(
     mergeMap((monster) => {
