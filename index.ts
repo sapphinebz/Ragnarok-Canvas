@@ -21,6 +21,7 @@ import {
   of,
   NEVER,
   combineLatest,
+  repeat,
 } from 'rxjs';
 import {
   connect,
@@ -33,7 +34,7 @@ import {
   takeUntil,
 } from 'rxjs/operators';
 import { Poring } from './monsters/Poring';
-import { Area, DIRECTION, Monster } from './monsters/Monster';
+import { ACTION, Area, DIRECTION, Monster } from './monsters/Monster';
 import { Fabre } from './monsters/Fabre';
 import { Thief } from './monsters/Thief';
 import { KeyboardController } from './gamepad/keyboard-controller';
@@ -402,6 +403,8 @@ onLoadMonster$
     mergeMap((monster) => {
       monster.randomAction();
       return monster.onActionTick$.pipe(takeUntil(monster.onDied$));
+      // monster.direction = DIRECTION.LEFT;
+      // return monster.hurting().pipe(repeat());
     })
   )
   .subscribe(() => tick());

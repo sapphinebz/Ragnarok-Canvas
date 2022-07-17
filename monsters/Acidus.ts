@@ -1,18 +1,12 @@
-import { defer, EMPTY, Observable, Subject, switchMap } from 'rxjs';
-import { takeUntil, takeWhile, tap } from 'rxjs/operators';
+import { defer, Observable, Subject, switchMap } from 'rxjs';
+import { takeUntil, tap } from 'rxjs/operators';
 import { loadAcidusAttackSound } from '../sounds/acidus-attack';
 import { loadAcidusDeadSound } from '../sounds/acidus-dead';
 import { loadAcidusLeftSprite } from '../sprites/load-acidus-left';
 import { loadAcidusSpriteRight } from '../sprites/load-acidus-right';
 import { distanceBetween } from '../utils/collision';
 import { playAudio } from '../utils/play-audio';
-import {
-  ACTION,
-  AggressiveCondition,
-  CropImage,
-  DIRECTION,
-  Monster,
-} from './Monster';
+import { ACTION, AggressiveCondition, CropImage, Monster } from './Monster';
 
 export class Acidus extends Monster {
   maxHp = 120;
@@ -35,57 +29,166 @@ export class Acidus extends Monster {
     [
       {
         order: 0,
-        offsetX: 0,
-        width: 119,
-        marginLeftWidth: -6,
-        marginRightWidth: 6,
+        offsetX: 6,
+        offsetY: 26,
+        width: 90,
+        height: 71,
       },
-      { order: 1, offsetX: 119, width: 119 },
-      { order: 2, offsetX: 240, width: 135, marginRightWidth: -16 },
-      { order: 3, offsetX: 392, width: 135, marginRightWidth: -16 },
-      { order: 4, offsetX: 527, width: 120, marginRightWidth: -2 },
-      { order: 5, offsetX: 653, width: 130, marginRightWidth: -12 },
-      { order: 6, offsetX: 783, width: 135, marginRightWidth: -14 },
-      { order: 7, offsetX: 930, width: 110, marginRightWidth: 9 },
+      {
+        order: 1,
+        offsetX: 119,
+        offsetY: 25,
+        width: 101,
+        height: 64,
+        marginRightWidth: -12,
+        // marginHeight: 1,
+      },
+      {
+        order: 2,
+        offsetX: 240,
+        offsetY: 19,
+        width: 132,
+        height: 75,
+        marginRightWidth: -43,
+        // marginHeight: -10,
+      },
+      {
+        order: 3,
+        offsetX: 392,
+        offsetY: 16,
+        width: 116,
+        height: 82,
+        marginRightWidth: -27,
+        // marginHeight: -17,
+      },
+      {
+        order: 4,
+        offsetX: 527,
+        offsetY: 4,
+        width: 104,
+        height: 103,
+        marginRightWidth: -15,
+        // marginHeight: -38,
+      },
+      {
+        order: 5,
+        offsetX: 653,
+        offsetY: 4,
+        width: 111,
+        height: 104,
+        marginRightWidth: -22,
+        // marginHeight: -39,
+      },
+      {
+        order: 6,
+        offsetX: 786,
+        offsetY: 19,
+        width: 113,
+        height: 84,
+        marginRightWidth: -24,
+        // marginHeight: -19,
+      },
+      {
+        order: 7,
+        offsetX: 930,
+        offsetY: 22,
+        width: 99,
+        height: 64,
+        marginRightWidth: -10,
+        // marginHeight: 1,
+      },
     ],
     [],
+    //Attack
     [
-      { order: 0, offsetX: 0, width: 135 },
-      { order: 0, offsetX: 120, width: 140 },
-      { order: 1, offsetX: 280, width: 140 },
-      { order: 2, offsetX: 420, width: 135 },
-      { order: 3, offsetX: 540, width: 140 },
-      { order: 4, offsetX: 680, width: 130 },
-      { order: 5, offsetX: 815, width: 135 },
-      { order: 6, offsetX: 950, width: 100 },
-      // { order: 7, offsetX: 1075, width: 135 },
+      { order: 0, offsetX: 6, offsetY: 276, width: 98, height: 67 },
+      {
+        order: 1,
+        offsetX: 135,
+        offsetY: 271,
+        width: 130,
+        height: 77,
+        marginRightWidth: -32,
+      },
+      {
+        order: 2,
+        offsetX: 295,
+        offsetY: 266,
+        width: 115,
+        height: 83,
+        marginRightWidth: -18,
+      },
+      {
+        order: 3,
+        offsetX: 434,
+        offsetY: 258,
+        width: 100,
+        height: 97,
+        marginRightWidth: -5,
+      },
+      {
+        order: 4,
+        offsetX: 558,
+        offsetY: 259,
+        width: 109,
+        height: 95,
+        marginRightWidth: -14,
+      },
+      {
+        order: 5,
+        offsetX: 687,
+        offsetY: 272,
+        width: 114,
+        height: 78,
+        marginRightWidth: -8,
+      },
+      {
+        order: 6,
+        offsetX: 823,
+        offsetY: 279,
+        width: 104,
+        height: 63,
+        marginRightWidth: 2,
+      },
+      {
+        order: 7,
+        offsetX: 953,
+        offsetY: 275,
+        width: 87,
+        height: 71,
+        marginRightWidth: 20,
+      },
     ],
     [],
     [],
     [
       {
         order: 0,
-        offsetX: 0,
-        width: 106,
-        height: 122,
-        marginLeftWidth: -11,
-        marginRightWidth: 22,
+        offsetX: 9,
+        offsetY: 651,
+        width: 97,
+        height: 72,
+        marginLeftWidth: -3,
+        marginRightWidth: -5,
       },
       {
         order: 1,
-        offsetX: 117,
-        width: 106,
-        height: 122,
-        marginLeftWidth: -11,
-        marginRightWidth: 22,
+        offsetX: 130,
+        offsetY: 650,
+        width: 87,
+        height: 73,
+        marginLeftWidth: -1,
+        marginRightWidth: 3,
       },
       {
         order: 2,
-        offsetX: 228,
-        width: 137,
-        height: 122,
-        marginLeftWidth: -11,
-        marginRightWidth: -3,
+        offsetX: 245,
+        offsetY: 662,
+        width: 123,
+        height: 49,
+        marginLeftWidth: -3,
+        marginRightWidth: -34,
+        marginHeight: 20,
       },
     ],
   ];
@@ -110,7 +213,7 @@ export class Acidus extends Monster {
     return defer(() => {
       this.frameY = 2;
       this.attackAudio.play();
-      return this.createForwardFrame(50, 0, 7, { once: true });
+      return this.createForwardFrame(60, 0, 7, { once: true });
     });
   }
 
@@ -141,7 +244,7 @@ export class Acidus extends Monster {
   hurting(): Observable<any> {
     return defer(() => {
       this.frameY = 5;
-      return this.createForwardFrame(120, 0, 1, { once: true }).pipe(
+      return this.createForwardFrame(120, 1, 2, { once: true }).pipe(
         tap((frameX) => {
           if (frameX === 0) {
             this.onPlayDeadAudio$.next();
