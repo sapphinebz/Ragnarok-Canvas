@@ -1,11 +1,4 @@
-import {
-  animationFrameScheduler,
-  defer,
-  Observable,
-  Subject,
-  switchMap,
-  timer,
-} from 'rxjs';
+import { defer, Observable, Subject, switchMap, timer } from 'rxjs';
 import { map, mergeMap, takeUntil, takeWhile, tap } from 'rxjs/operators';
 import { loadDaggerHitSound } from '../sounds/dagger-hit-sound';
 import { loadThiefLeftSprite } from '../sprites/load-thief-left';
@@ -351,7 +344,7 @@ export class Thief extends Monster {
     this.onEffectAttack
       .pipe(
         mergeMap(({ x, y, direction }) => {
-          return timer(0, 100, animationFrameScheduler).pipe(
+          return timer(0, 100).pipe(
             map((_, index) => index),
             takeWhile((frameX) => {
               if (this.attackEffectFrames[frameX] !== undefined) {

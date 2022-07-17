@@ -9,6 +9,7 @@ import {
   fromEvent,
   interval,
   map,
+  merge,
   MonoTypeOperatorFunction,
   Observable,
   OperatorFunction,
@@ -59,7 +60,6 @@ export interface AggressiveCondition {
 export const enum ACTION {
   IDLE,
   RANDOM,
-  DIE,
   HURT,
   MOVE_TO_TARGET,
   ATTACK,
@@ -179,117 +179,120 @@ export abstract class Monster {
       )
       .subscribe();
 
-    this.actionChange$
-      .pipe(
-        distinctUntilChanged(),
-        pairwise(),
-        switchMap(([preAction, action]) => {
-          if (this.isDied === true) {
-            return EMPTY;
-          } else if (action === ACTION.STANDING) {
-            return this.standing();
-          } else if (action === ACTION.IDLE) {
-            return EMPTY;
-          } else if (action === ACTION.WALKING_LEFT) {
-            return this.walkingLeft({ stopIfOutOfCanvas: false });
-          } else if (action === ACTION.WALKING_RIGHT) {
-            return this.walkingRight({ stopIfOutOfCanvas: false });
-          } else if (action === ACTION.WALKING_UP) {
-            return this.walkingUp({ stopIfOutOfCanvas: false });
-          } else if (action === ACTION.WALKING_DOWN) {
-            return this.walkingDown({ stopIfOutOfCanvas: false });
-          } else if (action === ACTION.WALKING_TOP_RIGHT) {
-            return this.walkingTopRight({ stopIfOutOfCanvas: false });
-          } else if (action === ACTION.WALKING_TOP_LEFT) {
-            return this.walkingTopLeft({ stopIfOutOfCanvas: false });
-          } else if (action === ACTION.WALKING_BOTTOM_RIGHT) {
-            return this.walkingBottomRight({ stopIfOutOfCanvas: false });
-          } else if (action === ACTION.WALKING_BOTTOM_LEFT) {
-            return this.walkingBottomLeft({ stopIfOutOfCanvas: false });
-          } else if (action === ACTION.MOVE_TO_TARGET) {
-            return this.aggressiveTarget$.pipe(
-              switchMap((target) => {
-                if (target === null || target.isDied) {
-                  this.actionChange$.next(ACTION.RANDOM);
-                  return EMPTY;
-                }
-                return this.walkingToTarget(target).pipe(
-                  tap({
-                    complete: () => {
-                      if (this.aggressiveTarget !== null) {
-                        this.actionChange$.next(ACTION.ATTACK);
-                      }
-                    },
-                  }),
-                  takeUntil(
-                    target.onDied$.pipe(
-                      tap(() => {
-                        this.aggressiveTarget$.next(null);
-                        this.actionChange$.next(ACTION.RANDOM);
-                      })
-                    )
-                  )
-                );
-              })
-            );
-          } else if (action === ACTION.ATTACK) {
-            return this.attack().pipe(
-              tap({
-                complete: () => {
-                  if (this.aggressiveTarget !== null) {
-                    this.actionChange$.next(ACTION.MOVE_TO_TARGET);
-                  } else {
-                    this.actionChange$.next(ACTION.STANDING);
-                  }
-                },
-              })
-            );
-          } else if (action === ACTION.RANDOM) {
-            return defer(() => {
-              const randomTime = () => Math.random() * 3000 + 1000;
-              const randomEndAction = () => takeUntil(timer(randomTime()));
-              const actions = [
-                this.walkingLeft().pipe(randomEndAction()),
-                this.standing().pipe(randomEndAction()),
-                this.walkingRight().pipe(randomEndAction()),
-                this.standing().pipe(randomEndAction()),
-                this.walkingUp().pipe(randomEndAction()),
-                this.walkingDown().pipe(randomEndAction()),
-                this.walkingTopLeft().pipe(randomEndAction()),
-                this.walkingTopRight().pipe(randomEndAction()),
-                this.walkingBottomLeft().pipe(randomEndAction()),
-                this.walkingBottomRight().pipe(randomEndAction()),
-              ];
-              return from(shuffle(actions)).pipe(concatAll());
-            }).pipe(repeat());
-          } else if (action === ACTION.DIE) {
-            this.isDied = true;
-            return this.dying().pipe(
-              tap({
-                complete: () => {
-                  this.onDied$.next();
-                  this.onDied$.complete();
-                },
-              })
-            );
-          } else if (action === ACTION.HURT) {
-            return this.hurting().pipe(
-              tap({
-                complete: () => {
-                  // if (preAction === ACTION.IDLE) {
-                  //   this.actionChange$.next(ACTION.STANDING);
-                  // } else {
-                  //   this.actionChange$.next(preAction);
-                  // }
-                  this.actionChange$.next(preAction);
-                },
-              })
-            );
-          }
+    const action$ = this.actionChange$.pipe(
+      distinctUntilChanged((preAction, action) => {
+        return preAction === ACTION.HURT && action === ACTION.HURT;
+      }),
+      pairwise(),
+      filter(([preAction, action]) => {
+        if (preAction === ACTION.ATTACK && action === ACTION.HURT) {
+          return false;
+        }
+        return true;
+      }),
+      switchMap(([preAction, action]) => {
+        if (action === ACTION.STANDING) {
+          return this.standing();
+        } else if (action === ACTION.IDLE) {
           return EMPTY;
-        }),
-        takeUntil(this.onCleanup$)
-      )
+        } else if (action === ACTION.WALKING_LEFT) {
+          return this.walkingLeft({ stopIfOutOfCanvas: false });
+        } else if (action === ACTION.WALKING_RIGHT) {
+          return this.walkingRight({ stopIfOutOfCanvas: false });
+        } else if (action === ACTION.WALKING_UP) {
+          return this.walkingUp({ stopIfOutOfCanvas: false });
+        } else if (action === ACTION.WALKING_DOWN) {
+          return this.walkingDown({ stopIfOutOfCanvas: false });
+        } else if (action === ACTION.WALKING_TOP_RIGHT) {
+          return this.walkingTopRight({ stopIfOutOfCanvas: false });
+        } else if (action === ACTION.WALKING_TOP_LEFT) {
+          return this.walkingTopLeft({ stopIfOutOfCanvas: false });
+        } else if (action === ACTION.WALKING_BOTTOM_RIGHT) {
+          return this.walkingBottomRight({ stopIfOutOfCanvas: false });
+        } else if (action === ACTION.WALKING_BOTTOM_LEFT) {
+          return this.walkingBottomLeft({ stopIfOutOfCanvas: false });
+        } else if (action === ACTION.MOVE_TO_TARGET) {
+          return this.aggressiveTarget$.pipe(
+            switchMap((target) => {
+              if (target === null || target.isDied) {
+                this.actionChange$.next(ACTION.RANDOM);
+                return EMPTY;
+              }
+              return this.walkingToTarget(target).pipe(
+                tap({
+                  complete: () => {
+                    if (this.aggressiveTarget !== null) {
+                      this.actionChange$.next(ACTION.ATTACK);
+                    }
+                  },
+                }),
+                takeUntil(
+                  target.onDied$.pipe(
+                    tap(() => {
+                      this.aggressiveTarget$.next(null);
+                      this.actionChange$.next(ACTION.RANDOM);
+                    })
+                  )
+                )
+              );
+            })
+          );
+        } else if (action === ACTION.ATTACK) {
+          return this.attack().pipe(
+            tap({
+              complete: () => {
+                if (this.aggressiveTarget !== null) {
+                  this.actionChange$.next(ACTION.MOVE_TO_TARGET);
+                } else {
+                  this.actionChange$.next(ACTION.STANDING);
+                }
+              },
+            })
+          );
+        } else if (action === ACTION.RANDOM) {
+          return defer(() => {
+            const randomTime = () => Math.random() * 3000 + 1000;
+            const randomEndAction = () => takeUntil(timer(randomTime()));
+            const actions = [
+              this.walkingLeft().pipe(randomEndAction()),
+              this.standing().pipe(randomEndAction()),
+              this.walkingRight().pipe(randomEndAction()),
+              this.standing().pipe(randomEndAction()),
+              this.walkingUp().pipe(randomEndAction()),
+              this.walkingDown().pipe(randomEndAction()),
+              this.walkingTopLeft().pipe(randomEndAction()),
+              this.walkingTopRight().pipe(randomEndAction()),
+              this.walkingBottomLeft().pipe(randomEndAction()),
+              this.walkingBottomRight().pipe(randomEndAction()),
+            ];
+            return from(shuffle(actions)).pipe(concatAll());
+          }).pipe(repeat());
+        } else if (action === ACTION.HURT) {
+          return this.hurting().pipe(
+            tap({
+              complete: () => {
+                // if (preAction === ACTION.IDLE) {
+                //   this.actionChange$.next(ACTION.STANDING);
+                // } else {
+                //   this.actionChange$.next(preAction);
+                // }
+                this.actionChange$.next(preAction);
+              },
+            })
+          );
+        }
+        return EMPTY;
+      }),
+      takeUntil(this.onDied$)
+    );
+
+    const dieAnimation$ = this.onDied$.pipe(
+      switchMap(() => this.dying()),
+      takeUntil(this.onCleanup$)
+    );
+
+    merge(action$, dieAnimation$)
+      .pipe(takeUntil(this.onCleanup$))
       .subscribe(() => this.onActionTick$.next());
 
     // Aggressive do damage to target
@@ -402,7 +405,7 @@ export abstract class Monster {
   ) {
     this.frameX = minFrameX;
     const { once } = option;
-    return interval(delay, animationFrameScheduler).pipe(
+    return interval(delay).pipe(
       map(() => this.frameX + 1),
       takeWhile((nextFrame) => {
         if (once && nextFrame > maxFrameX) {
@@ -428,7 +431,7 @@ export abstract class Monster {
    */
   testSprites(frames: [number, number][], delay = 1000) {
     let index = 0;
-    return interval(delay, animationFrameScheduler).pipe(
+    return interval(delay).pipe(
       map(() => {
         const [frameX, frameY] = frames[index];
         this.frameX = frameX;
@@ -454,7 +457,9 @@ export abstract class Monster {
   }
 
   die() {
-    this.actionChange$.next(ACTION.DIE);
+    this.isDied = true;
+    this.onDied$.next();
+    this.onDied$.complete();
   }
 
   hurt() {
