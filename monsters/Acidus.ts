@@ -267,6 +267,7 @@ export class Acidus extends Monster {
     const distance = distanceBetween(condition.target, this);
     if (distance <= this.visionRange) {
       this.aggressiveTarget = condition.target;
+
       this.actionChange$.next(ACTION.MOVE_TO_TARGET);
     }
   }
