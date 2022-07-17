@@ -13,7 +13,7 @@ import { loadLeftThiefDagger } from '../sprites/load-thief-left-dagger';
 import { loadThiefRightSprite } from '../sprites/load-thief-right';
 import { loadRightThiefDagger } from '../sprites/load-thief-right-dagger';
 import { playAudio } from '../utils/play-audio';
-import { CropImage, DIRECTION, Monster } from './Monster';
+import { AggressiveCondition, CropImage, DIRECTION, Monster } from './Monster';
 
 export class Thief extends Monster {
   maxHp = 500;
@@ -400,6 +400,8 @@ export class Thief extends Monster {
       );
     });
   }
+
+  checkAggressive(condition: AggressiveCondition): void {}
 
   hurting(): Observable<any> {
     return defer(() => {
