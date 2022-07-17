@@ -6,6 +6,7 @@ import {
   EMPTY,
   from,
   fromEvent,
+  ignoreElements,
   interval,
   map,
   merge,
@@ -23,6 +24,8 @@ import {
 } from 'rxjs';
 import {
   concatAll,
+  connect,
+  distinctUntilChanged,
   filter,
   repeat,
   takeUntil,
@@ -43,8 +46,6 @@ export interface WalkingConfig {
   faceDirection?: DIRECTION;
   moveOption: () => MoveLocation;
   stopIfOutOfCanvas?: boolean;
-  stopWhen?: (moveLocation: MoveLocation) => boolean;
-  afterMove?: () => void;
 }
 
 export type WalkingStoppable = Pick<WalkingConfig, 'stopIfOutOfCanvas'>;
@@ -217,12 +218,23 @@ export abstract class Monster {
                 return EMPTY;
               }
               return this.walkingToTarget(target).pipe(
-                tap({
-                  complete: () => {
-                    if (this.aggressiveTarget !== null) {
-                      this.actionChange$.next(ACTION.ATTACK);
-                    }
-                  },
+                connect((walking$) => {
+                  const nextAttack$ = walking$.pipe(
+                    distinctUntilChanged(),
+                    switchMap((isCloseTarget) => {
+                      if (isCloseTarget) {
+                        return timer(this.dps).pipe(
+                          tap(() => {
+                            if (this.aggressiveTarget !== null) {
+                              this.actionChange$.next(ACTION.ATTACK);
+                            }
+                          })
+                        );
+                      }
+                      return EMPTY;
+                    })
+                  );
+                  return merge(walking$, nextAttack$.pipe(ignoreElements()));
                 }),
                 takeUntil(
                   target.onDied$.pipe(
@@ -269,11 +281,6 @@ export abstract class Monster {
           return this.hurting().pipe(
             tap({
               complete: () => {
-                // if (preAction === ACTION.IDLE) {
-                //   this.actionChange$.next(ACTION.STANDING);
-                // } else {
-                //   this.actionChange$.next(preAction);
-                // }
                 this.actionChange$.next(preAction);
               },
             })
@@ -465,46 +472,54 @@ export abstract class Monster {
   }
 
   walkingToTarget(target: Monster) {
-    return this.walkingAnimationFrames({
-      moveOption: () => {
-        const currentMoveLocation = { x: this.x, y: this.y };
-        let moveNextLocation = { ...currentMoveLocation };
-        let targetIsLeftSide = target.x < this.x;
-        let targetIsTopSide = target.y < this.y;
-        if (targetIsLeftSide) {
-          moveNextLocation.x -= this.speedX;
-        } else {
-          moveNextLocation.x += this.speedX;
-        }
+    return defer(() => {
+      return this.walking().pipe(
+        map(() => {
+          const currentMoveLocation = { x: this.x, y: this.y };
+          let moveNextLocation = { ...currentMoveLocation };
 
-        if (targetIsTopSide) {
-          moveNextLocation.y -= this.speedY;
-        } else {
-          moveNextLocation.y += this.speedY;
-        }
+          let targetIsLeftSide = target.x < this.x;
+          let targetIsTopSide = target.y < this.y;
 
-        if (targetIsLeftSide) {
-          this.direction = DIRECTION.LEFT;
-        } else {
-          this.direction = DIRECTION.RIGHT;
-        }
+          if (targetIsLeftSide) {
+            moveNextLocation.x -= this.speedX;
+          } else {
+            moveNextLocation.x += this.speedX;
+          }
 
-        return moveNextLocation;
-      },
-      stopIfOutOfCanvas: false,
-      stopWhen: (moveNextLocation) => {
-        const targetX = target.x + target.width / 2;
-        const targetY = target.y + target.height / 2;
+          if (targetIsTopSide) {
+            moveNextLocation.y -= this.speedY;
+          } else {
+            moveNextLocation.y += this.speedY;
+          }
 
-        const sourceX = moveNextLocation.x + this.width / 2;
-        const sourceY = moveNextLocation.y + this.height / 2;
+          if (targetIsLeftSide) { 
+            this.direction = DIRECTION.LEFT;
+          } else {
+            this.direction = DIRECTION.RIGHT;
+          }
 
-        const distance = distanceBetween(
-          { x: targetX, y: targetY },
-          { x: sourceX, y: sourceY }
-        );
-        return distance <= this.attackRange;
-      },
+          const targetX = target.x + target.width / 2;
+          const targetY = target.y + target.height / 2;
+
+          const sourceX = moveNextLocation.x + this.width / 2;
+          const sourceY = moveNextLocation.y + this.height / 2;
+
+          const distance = distanceBetween(
+            { x: targetX, y: targetY },
+            { x: sourceX, y: sourceY }
+          );
+          if (distance <= this.attackRange) {
+            return true;
+          }
+
+          this.x = moveNextLocation.x;
+          this.y = moveNextLocation.y;
+          this.onMoving$.next(moveNextLocation);
+
+          return false;
+        })
+      );
     });
   }
 
@@ -673,13 +688,7 @@ export abstract class Monster {
   }
 
   private walkingAnimationFrames(option: WalkingConfig) {
-    const {
-      faceDirection,
-      stopIfOutOfCanvas = true,
-      moveOption,
-      stopWhen,
-      afterMove,
-    } = option;
+    const { faceDirection, stopIfOutOfCanvas = true, moveOption } = option;
 
     return defer(() => {
       if (faceDirection !== undefined) {
@@ -697,21 +706,7 @@ export abstract class Monster {
             filter((moveLocation) => !this.isOutOfCanvas(moveLocation))
           );
         },
-        (source) => {
-          if (stopWhen !== undefined) {
-            return source.pipe(
-              takeWhile((moveLocation) => !stopWhen(moveLocation))
-            );
-          }
-          return source;
-        },
-        this.updateMove(),
-        (source) => {
-          if (afterMove !== undefined) {
-            return source.pipe(tap(() => afterMove()));
-          }
-          return source;
-        }
+        this.updateMove()
       );
     });
   }

@@ -27,6 +27,7 @@ export class Acidus extends Monster {
   height = 120;
   atk = 25;
   visionRange = 200;
+  dps = 300;
 
   attackAudio = loadAcidusAttackSound();
   deadAudio = loadAcidusDeadSound();
@@ -250,14 +251,14 @@ export class Acidus extends Monster {
   walking() {
     return defer(() => {
       this.frameY = 0;
-      return this.createForwardFrame(45, 0, 7);
+      return this.createForwardFrame(60, 0, 7);
     });
   }
 
   standing() {
     return defer(() => {
       this.frameY = 0;
-      return this.createForwardFrame(45, 0, 7);
+      return this.createForwardFrame(60, 0, 7);
     });
   }
 
