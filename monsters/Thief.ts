@@ -42,14 +42,25 @@ export class Thief extends Monster {
     ],
     // stand top
     [
-      { order: 0, offsetX: 29, offsetY: 133, width: 41, height: 93 },
+      {
+        order: 0,
+        offsetX: 29,
+        offsetY: 133,
+        width: 41,
+        height: 93,
+        marginLeftWidth: 20,
+        marginRightWidth: 20,
+        marginHeight: 14,
+      },
       {
         order: 1,
         offsetX: 129,
         offsetY: 133,
         width: 41,
         height: 94,
-        marginHeight: -1,
+        marginLeftWidth: 20,
+        marginRightWidth: 20,
+        marginHeight: 13,
       },
       {
         order: 2,
@@ -57,7 +68,9 @@ export class Thief extends Monster {
         offsetY: 133,
         width: 41,
         height: 95,
-        marginHeight: -1,
+        marginLeftWidth: 20,
+        marginRightWidth: 20,
+        marginHeight: 13,
       },
       {
         order: 3,
@@ -65,7 +78,9 @@ export class Thief extends Monster {
         offsetY: 133,
         width: 41,
         height: 95,
-        marginHeight: -1,
+        marginLeftWidth: 20,
+        marginRightWidth: 20,
+        marginHeight: 13,
       },
       {
         order: 4,
@@ -73,7 +88,9 @@ export class Thief extends Monster {
         offsetY: 133,
         width: 41,
         height: 94,
-        marginHeight: -1,
+        marginLeftWidth: 20,
+        marginRightWidth: 20,
+        marginHeight: 13,
       },
       {
         order: 5,
@@ -81,6 +98,9 @@ export class Thief extends Monster {
         offsetY: 133,
         width: 41,
         height: 93,
+        marginLeftWidth: 20,
+        marginRightWidth: 20,
+        marginHeight: 14,
       },
     ],
     // walk left
