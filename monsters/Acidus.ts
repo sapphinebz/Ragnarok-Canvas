@@ -170,6 +170,7 @@ export class Acidus extends Monster {
         height: 72,
         marginLeftWidth: -3,
         marginRightWidth: -5,
+        marginHeight: 13,
       },
       {
         order: 1,
@@ -179,6 +180,7 @@ export class Acidus extends Monster {
         height: 73,
         marginLeftWidth: -1,
         marginRightWidth: 3,
+        marginHeight: 13,
       },
       {
         order: 2,
@@ -188,7 +190,7 @@ export class Acidus extends Monster {
         height: 49,
         marginLeftWidth: -3,
         marginRightWidth: -34,
-        marginHeight: 20,
+        marginHeight: 33,
       },
     ],
   ];
@@ -244,13 +246,17 @@ export class Acidus extends Monster {
   hurting(): Observable<any> {
     return defer(() => {
       this.frameY = 5;
-      return this.createForwardFrame(120, 1, 2, { once: true }).pipe(
+      return this.createForwardFrame(120, 0, 1, { once: true }).pipe(
         tap((frameX) => {
           if (frameX === 0) {
             this.onPlayDeadAudio$.next();
           }
         })
       );
+      // return this.testSprites([
+      //   [0, 0],
+      //   [0, 5],
+      // ]);
     });
   }
 

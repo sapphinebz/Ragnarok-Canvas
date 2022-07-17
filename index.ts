@@ -72,6 +72,7 @@ const monstersClass: [any, number][] = [
   [Acidus, 2],
   [Poring, 20],
   [Fabre, 7],
+  // [Acidus, 1],
 ];
 
 const onRespawnMonster$ = new Subject<Monster>();
