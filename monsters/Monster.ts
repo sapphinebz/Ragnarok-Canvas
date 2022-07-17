@@ -33,9 +33,14 @@ import { playAudio } from '../utils/play-audio';
 import { randomMinMax } from '../utils/random-minmax';
 import { shuffle } from '../utils/shuffle';
 
+export interface MoveLocation {
+  x: number;
+  y: number;
+}
+
 export interface WalkingConfig {
   faceDirection: DIRECTION;
-  moveOption: () => { x: number; y: number };
+  moveOption: () => MoveLocation;
   stopIfOutOfCanvas?: boolean;
 }
 
@@ -86,6 +91,7 @@ export abstract class Monster {
 
   onCleanup$ = new ReplaySubject<void>(1);
   onDamageArea$ = new Subject<Area>();
+  onMoving$ = new Subject<MoveLocation>();
   direction$ = new BehaviorSubject<DIRECTION>(DIRECTION.LEFT);
 
   set direction(value: DIRECTION) {
@@ -102,6 +108,9 @@ export abstract class Monster {
 
   onDied$ = new AsyncSubject<void>();
   isDied = false;
+  /**
+   * on this monster need render
+   */
   onActionTick$ = new Subject<void>();
   drawImage$ = new Subject<void>();
 
@@ -442,7 +451,7 @@ export abstract class Monster {
     this.onPlayCriticalAttack$.next();
   }
 
-  private updateMove(): MonoTypeOperatorFunction<{ x: number; y: number }> {
+  private updateMove(): MonoTypeOperatorFunction<MoveLocation> {
     return tap(({ x, y }) => {
       this.x = x;
       this.y = y;
@@ -459,24 +468,26 @@ export abstract class Monster {
         (source) => {
           if (stopIfOutOfCanvas) {
             return source.pipe(
-              takeWhile(({ x, y }) => !this.isOutOfCanvas(x, y))
+              takeWhile((moveLocation) => !this.isOutOfCanvas(moveLocation))
             );
           }
-          return source.pipe(filter(({ x, y }) => !this.isOutOfCanvas(x, y)));
+          return source.pipe(
+            filter((moveLocation) => !this.isOutOfCanvas(moveLocation))
+          );
         },
         this.updateMove()
       );
     });
   }
 
-  private isOutOfCanvas(x: number, y: number) {
-    if (x + this.width > this.canvas.width) {
+  private isOutOfCanvas(moveLocation: MoveLocation) {
+    if (moveLocation.x + this.width > this.canvas.width) {
       return true;
-    } else if (x < 0) {
+    } else if (moveLocation.x < 0) {
       return true;
-    } else if (y + this.height > this.canvas.height) {
+    } else if (moveLocation.y + this.height > this.canvas.height) {
       return true;
-    } else if (y < 0) {
+    } else if (moveLocation.y < 0) {
       return true;
     }
     return false;
