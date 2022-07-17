@@ -29,6 +29,7 @@ import {
   takeWhile,
 } from 'rxjs/operators';
 import { loadCriticalAttack } from '../sounds/critical-attack';
+import { distanceBetween } from '../utils/collision';
 import { playAudio } from '../utils/play-audio';
 import { randomMinMax } from '../utils/random-minmax';
 import { shuffle } from '../utils/shuffle';
@@ -39,15 +40,17 @@ export interface MoveLocation {
 }
 
 export interface WalkingConfig {
-  faceDirection: DIRECTION;
+  faceDirection?: DIRECTION;
   moveOption: () => MoveLocation;
   stopIfOutOfCanvas?: boolean;
+  stopWhen?: (moveLocation: MoveLocation) => boolean;
+  afterMove?: () => void;
 }
 
 export type WalkingStoppable = Pick<WalkingConfig, 'stopIfOutOfCanvas'>;
 
 export interface AggressiveCondition {
-  distance: number;
+  target: Monster;
 }
 
 export const enum ACTION {
@@ -55,6 +58,7 @@ export const enum ACTION {
   RANDOM,
   DIE,
   HURT,
+  MOVE_TO_TARGET,
 }
 
 export const enum DIRECTION {
@@ -97,13 +101,15 @@ export abstract class Monster {
   /**
    * if aggressive true will move to player and attack
    */
-  aggressive$ = new BehaviorSubject<boolean>(false);
+  aggressiveTarget$ = new BehaviorSubject<Monster | null>(null);
+  visionRange = 150;
+  attackRange = 70;
 
-  get aggressive() {
-    return this.aggressive$.value;
+  get aggressiveTarget() {
+    return this.aggressiveTarget$.value;
   }
-  set aggressive(value: boolean) {
-    this.aggressive$.next(value);
+  set aggressiveTarget(value: Monster | null) {
+    this.aggressiveTarget$.next(value);
   }
 
   direction$ = new BehaviorSubject<DIRECTION>(DIRECTION.LEFT);
@@ -169,6 +175,12 @@ export abstract class Monster {
             return EMPTY;
           } else if (action === ACTION.IDLE) {
             return EMPTY;
+          } else if (action === ACTION.MOVE_TO_TARGET) {
+            return this.aggressiveTarget$.pipe(
+              switchMap((target) => {
+                return this.walkingToTarget(target);
+              })
+            );
           } else if (action === ACTION.RANDOM) {
             return defer(() => {
               const randomTime = () => Math.random() * 3000 + 1000;
@@ -358,6 +370,52 @@ export abstract class Monster {
     this.actionChange$.next(ACTION.HURT);
   }
 
+  walkingToTarget(target: Monster) {
+    return this.walkingAnimationFrames({
+      moveOption: () => {
+        const currentMoveLocation = { x: this.x, y: this.y };
+        let moveNextLocation = { ...currentMoveLocation };
+        let targetIsLeftSide = target.x < this.x;
+        let targetIsTopSide = target.y < this.y;
+        if (targetIsLeftSide) {
+          moveNextLocation.x -= this.speedX;
+        } else {
+          moveNextLocation.x += this.speedX;
+        }
+
+        if (targetIsTopSide) {
+          moveNextLocation.y -= this.speedY;
+        } else {
+          moveNextLocation.y += this.speedY;
+        }
+
+        const targetX = target.x + target.width / 2;
+        const targetY = target.y + target.height / 2;
+
+        const sourceX = moveNextLocation.x + this.width / 2;
+        const sourceY = moveNextLocation.y + this.height / 2;
+
+        const distance = distanceBetween(
+          { x: targetX, y: targetY },
+          { x: sourceX, y: sourceY }
+        );
+
+        if (distance <= this.attackRange) {
+          return currentMoveLocation;
+        }
+
+        if (targetIsLeftSide) {
+          this.direction = DIRECTION.LEFT;
+        } else {
+          this.direction = DIRECTION.RIGHT;
+        }
+
+        return moveNextLocation;
+      },
+      stopIfOutOfCanvas: false,
+    });
+  }
+
   walkingDown(config: WalkingStoppable = { stopIfOutOfCanvas: true }) {
     return this.walkingAnimationFrames({
       faceDirection: DIRECTION.LEFT,
@@ -476,10 +534,18 @@ export abstract class Monster {
   }
 
   private walkingAnimationFrames(option: WalkingConfig) {
-    const { faceDirection, stopIfOutOfCanvas = true, moveOption } = option;
+    const {
+      faceDirection,
+      stopIfOutOfCanvas = true,
+      moveOption,
+      stopWhen,
+      afterMove,
+    } = option;
 
     return defer(() => {
-      this.direction = faceDirection;
+      if (faceDirection !== undefined) {
+        this.direction = faceDirection;
+      }
       return this.walking().pipe(
         map(() => moveOption()),
         (source) => {
@@ -492,7 +558,21 @@ export abstract class Monster {
             filter((moveLocation) => !this.isOutOfCanvas(moveLocation))
           );
         },
-        this.updateMove()
+        (source) => {
+          if (stopWhen !== undefined) {
+            return source.pipe(
+              takeWhile((moveLocation) => !stopWhen(moveLocation))
+            );
+          }
+          return source;
+        },
+        this.updateMove(),
+        (source) => {
+          if (afterMove !== undefined) {
+            return source.pipe(tap(() => afterMove()));
+          }
+          return source;
+        }
       );
     });
   }

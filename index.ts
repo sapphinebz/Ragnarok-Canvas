@@ -372,12 +372,15 @@ onCanvasMount$.pipe(switchMap(() => onLoadMonster$)).subscribe((monster) => {
 
 // Monsters have agressive to Player
 combineLatest({
-  player: thief.onMoving$.pipe(startWith({ x: thief.x, y: thief.y })),
+  player: thief.onMoving$.pipe(
+    startWith(0),
+    map(() => thief)
+  ),
   monster: onLoadMonster$.pipe(
     filter((monster) => monster.checkAggressive !== undefined),
     mergeMap((monster) => {
-      const alreadyAggressive$ = monster.aggressive$.pipe(
-        filter((isAggressive) => isAggressive === true)
+      const alreadyAggressive$ = monster.aggressiveTarget$.pipe(
+        filter((isAggressive) => isAggressive !== null)
       );
       return monster.onMoving$.pipe(
         map(() => monster),
@@ -386,9 +389,9 @@ combineLatest({
     })
   ),
 }).subscribe(({ player, monster }) => {
-  if (monster.aggressive === false) {
+  if (monster.aggressiveTarget === null) {
     monster.checkAggressive({
-      distance: distanceBetween(player, monster),
+      target: player,
     });
   }
 });

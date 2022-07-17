@@ -4,8 +4,15 @@ import { loadAcidusAttackSound } from '../sounds/acidus-attack';
 import { loadAcidusDeadSound } from '../sounds/acidus-dead';
 import { loadAcidusLeftSprite } from '../sprites/load-acidus-left';
 import { loadAcidusSpriteRight } from '../sprites/load-acidus-right';
+import { distanceBetween } from '../utils/collision';
 import { playAudio } from '../utils/play-audio';
-import { AggressiveCondition, CropImage, DIRECTION, Monster } from './Monster';
+import {
+  ACTION,
+  AggressiveCondition,
+  CropImage,
+  DIRECTION,
+  Monster,
+} from './Monster';
 
 export class Acidus extends Monster {
   maxHp = 120;
@@ -125,8 +132,10 @@ export class Acidus extends Monster {
   drawEffect(): void {}
 
   checkAggressive(condition: AggressiveCondition) {
-    if (condition.distance < 100) {
-      this.aggressive = true;
+    const distance = distanceBetween(condition.target, this);
+    if (distance <= this.visionRange) {
+      this.aggressiveTarget = condition.target;
+      this.actionChange$.next(ACTION.MOVE_TO_TARGET);
     }
   }
 
