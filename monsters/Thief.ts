@@ -22,6 +22,8 @@ export class Thief extends Monster {
   frameY = 0;
   width = 80;
   height = 107;
+  attackSpeed = 80;
+  dps = 0;
 
   daggerHitSound = loadDaggerHitSound();
   damagedAudio = loadThiefFamaleDamagedAudio();
@@ -325,12 +327,12 @@ export class Thief extends Monster {
 
   hasEffect = false;
   effectFrame: number[];
-  onSoundEffectAttackPlay = new Subject<void>();
+  onSoundEffectAttackPlay$ = new Subject<void>();
+  onStopSoundEffectAttack$ = new Subject<void>();
   onEffectAttack = new Subject<{
     x: number;
     y: number;
     direction: DIRECTION;
-    attackSpeed: number;
   }>();
 
   constructor(canvas: HTMLCanvasElement) {
@@ -340,9 +342,13 @@ export class Thief extends Monster {
     this.damagedAudio.volume = 0.05;
     this.deadAudio.volume = 0.05;
 
-    this.onSoundEffectAttackPlay
+    this.onSoundEffectAttackPlay$
       .pipe(
-        switchMap(() => playAudio(this.daggerHitSound)),
+        switchMap(() =>
+          playAudio(this.daggerHitSound).pipe(
+            takeUntil(this.onStopSoundEffectAttack$)
+          )
+        ),
         takeUntil(this.onCleanup$)
       )
       .subscribe();
@@ -350,7 +356,7 @@ export class Thief extends Monster {
     this.onEffectAttack
       .pipe(
         mergeMap(({ x, y, direction }) => {
-          return timer(0, 100).pipe(
+          return timer(0, this.attackSpeed).pipe(
             map((_, index) => index),
             takeWhile((frameX) => {
               if (this.attackEffectFrames[frameX] !== undefined) {
@@ -435,19 +441,19 @@ export class Thief extends Monster {
   attack(): Observable<any> {
     return defer(() => {
       this.frameY = 4;
-      const attackSpeed = 80;
-      return this.createForwardFrame(attackSpeed, 0, 6, { once: true }).pipe(
+      return this.createForwardFrame(this.attackSpeed, 0, 6, {
+        once: true,
+      }).pipe(
         tap({
           next: (frameX) => {
             if (frameX === 4) {
-              this.onSoundEffectAttackPlay.next();
+              this.onSoundEffectAttackPlay$.next();
             }
             if (frameX === 5) {
               this.onEffectAttack.next({
                 x: this.x,
                 y: this.y,
                 direction: this.direction,
-                attackSpeed,
               });
             }
             if (frameX >= 5) {

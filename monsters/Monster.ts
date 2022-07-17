@@ -21,9 +21,11 @@ import {
   take,
   tap,
   timer,
+  zip,
 } from 'rxjs';
 import {
   concatAll,
+  delay,
   distinctUntilChanged,
   filter,
   mergeMap,
@@ -107,6 +109,9 @@ export abstract class Monster {
   frameY = 0;
   width: number;
   height: number;
+  // damage per second
+  dps = 800;
+  attackSpeed = 120;
 
   onCleanup$ = new ReplaySubject<void>(1);
   onDamageArea$ = new Subject<Area>();
@@ -180,12 +185,11 @@ export abstract class Monster {
       .subscribe();
 
     const action$ = this.actionChange$.pipe(
-      distinctUntilChanged((preAction, action) => {
-        return preAction === ACTION.HURT && action === ACTION.HURT;
-      }),
       pairwise(),
       filter(([preAction, action]) => {
         if (preAction === ACTION.ATTACK && action === ACTION.HURT) {
+          return false;
+        } else if (preAction === ACTION.HURT && action === ACTION.HURT) {
           return false;
         }
         return true;

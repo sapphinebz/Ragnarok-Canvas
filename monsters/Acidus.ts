@@ -249,14 +249,14 @@ export class Acidus extends Monster {
   walking() {
     return defer(() => {
       this.frameY = 0;
-      return this.createForwardFrame(60, 0, 7);
+      return this.createForwardFrame(45, 0, 7);
     });
   }
 
   standing() {
     return defer(() => {
       this.frameY = 0;
-      return this.createForwardFrame(60, 0, 7);
+      return this.createForwardFrame(45, 0, 7);
     });
   }
 
