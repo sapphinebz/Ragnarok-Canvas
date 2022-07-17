@@ -452,9 +452,10 @@ export abstract class Monster {
   }
 
   private updateMove(): MonoTypeOperatorFunction<MoveLocation> {
-    return tap(({ x, y }) => {
-      this.x = x;
-      this.y = y;
+    return tap((moveLocation) => {
+      this.x = moveLocation.x;
+      this.y = moveLocation.y;
+      this.onMoving$.next(moveLocation);
     });
   }
 
