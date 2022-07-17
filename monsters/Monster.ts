@@ -493,7 +493,7 @@ export abstract class Monster {
             moveNextLocation.y += this.speedY;
           }
 
-          if (targetIsLeftSide) { 
+          if (targetIsLeftSide) {
             this.direction = DIRECTION.LEFT;
           } else {
             this.direction = DIRECTION.RIGHT;
