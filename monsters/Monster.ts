@@ -647,6 +647,15 @@ export abstract class Monster {
     }
   }
 
+   aggressiveMonsters (): MonoTypeOperatorFunction<Monster[]> {
+    return tap(monsters=>{
+      for(const monster of monsters){
+        monster.aggressiveTarget = this;
+        monster.actionChange$.next(ACTION.MOVE_TO_TARGET);
+      }
+    })  
+  }
+
   targetsBeHurtOrDie(): OperatorFunction<Monster[], any> {
     return tap((monsters) => {
       for (const monster of monsters) {

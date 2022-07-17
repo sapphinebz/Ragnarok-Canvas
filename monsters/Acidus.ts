@@ -25,7 +25,7 @@ export class Acidus extends Monster {
   frameY = 0;
   width = 119;
   height = 120;
-  atk = 25;
+  atk = 50;
   visionRange = 200;
   dps = 300;
 
@@ -237,7 +237,7 @@ export class Acidus extends Monster {
             } else if (this.direction === DIRECTION.RIGHT) {
               this.onDamageArea$.next({
                 x: this.x + (this.width * 3) / 4,
-                y: this.y + this.height / 4,
+                y: this.y,
                 w: 60,
                 h: 60,
               });
@@ -268,7 +268,6 @@ export class Acidus extends Monster {
     const distance = distanceBetween(condition.target, this);
     if (distance <= this.visionRange) {
       this.aggressiveTarget = condition.target;
-
       this.actionChange$.next(ACTION.MOVE_TO_TARGET);
     }
   }

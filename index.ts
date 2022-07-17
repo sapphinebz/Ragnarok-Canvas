@@ -22,6 +22,7 @@ import {
   NEVER,
   combineLatest,
   repeat,
+  MonoTypeOperatorFunction,
 } from 'rxjs';
 import {
   connect,
@@ -72,7 +73,7 @@ const onWindowResize$ = fromEvent(window, 'resize').pipe(
 const monstersClass: [any, number][] = [
   [Acidus, 2],
   [Poring, 20],
-  [Fabre, 2],
+  [Fabre, 7],
 ];
 
 const onRespawnMonster$ = new Subject<Monster>();
@@ -197,6 +198,7 @@ const thief = new Thief(canvas);
 thief.onDamageArea$
   .pipe(
     findMonstersBeAttacked(),
+    thief.aggressiveMonsters(),
     thief.decreaseTargetsHp(),
     thief.forceTargetsFaceToMe(),
     monstersBeHurtOrDie()

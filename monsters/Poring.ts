@@ -22,19 +22,23 @@ import { loadPoringWalkSound } from '../sounds/poring-walk';
 import { loadPoringSpriteLeft } from '../sprites/load-poring-left';
 import { loadPoringSpriteRight } from '../sprites/load-poring-right';
 import { playAudio } from '../utils/play-audio';
-import { CropImage, Monster } from './Monster';
+import { AggressiveCondition, CropImage, DIRECTION, Monster } from './Monster';
 
 export class Poring extends Monster {
   x = 100;
   y = 100;
   hp = 50;
   maxHp = this.hp;
+  atk = 15;
   speedX = 3;
   speedY = 3;
   frameX = 0;
   frameY = 0;
   width = 60;
   height = 60;
+
+  attackRange = 30;
+  dps = 600;
 
   dyingAudio = loadPoringDeadSound();
 
@@ -162,7 +166,30 @@ export class Poring extends Monster {
   }
 
   attack(): Observable<any> {
-    return NEVER;
+    return defer(() => {
+      this.frameY = 1;
+      return this.createForwardFrame(100, 0, 7, { once: true }).pipe(
+        tap((frameX) => {
+          if (frameX === 4) {
+            if (this.direction === DIRECTION.RIGHT) {
+              this.onDamageArea$.next({
+                x: this.x + (this.width * 3) / 4,
+                y: this.y,
+                w: 40,
+                h: 40,
+              });
+            } else if (this.direction === DIRECTION.LEFT) {
+              this.onDamageArea$.next({
+                x: this.x - this.width / 4,
+                y: this.y,
+                w: 40,
+                h: 40,
+              });
+            }
+          }
+        })
+      );
+    });
   }
 
   drawEffect(): void {}
@@ -194,6 +221,8 @@ export class Poring extends Monster {
       );
     });
   }
+
+  checkAggressive(condition: AggressiveCondition): void {}
 
   private playWalkingAudio() {
     return new Observable((subscriber) => {
