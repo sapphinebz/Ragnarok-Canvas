@@ -60,6 +60,7 @@ export const enum ACTION {
   HURT,
   MOVE_TO_TARGET,
   ATTACK,
+  STANDING,
 }
 
 export const enum DIRECTION {
@@ -174,6 +175,8 @@ export abstract class Monster {
         switchMap(([preAction, action]) => {
           if (this.isDied === true) {
             return EMPTY;
+          } else if (action === ACTION.STANDING) {
+            return this.standing();
           } else if (action === ACTION.IDLE) {
             return EMPTY;
           } else if (action === ACTION.MOVE_TO_TARGET) {
@@ -230,7 +233,16 @@ export abstract class Monster {
             );
           } else if (action === ACTION.HURT) {
             return this.hurting().pipe(
-              tap({ complete: () => this.actionChange$.next(preAction) })
+              tap({
+                complete: () => {
+                  // if (preAction === ACTION.IDLE) {
+                  //   this.actionChange$.next(ACTION.STANDING);
+                  // } else {
+                  //   this.actionChange$.next(preAction);
+                  // }
+                  this.actionChange$.next(preAction);
+                },
+              })
             );
           }
           return EMPTY;
@@ -238,6 +250,24 @@ export abstract class Monster {
         takeUntil(this.onCleanup$)
       )
       .subscribe(() => this.onActionTick$.next());
+
+    // Aggressive do damage to target
+    this.aggressiveTarget$
+      .pipe(
+        switchMap((target) => {
+          if (target !== null) {
+            return this.onDamageArea$.pipe(
+              tap(() => {
+                this.damageTo(target);
+                target.hurt();
+              })
+            );
+          }
+          return EMPTY;
+        }),
+        takeUntil(this.onCleanup$)
+      )
+      .subscribe();
 
     combineLatest({
       direction: this.direction$,
@@ -540,6 +570,21 @@ export abstract class Monster {
 
   playCriticalAudio() {
     this.onPlayCriticalAttack$.next();
+  }
+
+  damageTo(monster: Monster) {
+    const randomNumber = randomMinMax(0, 100);
+    const criticalRate = 10;
+    let damage = this.atk;
+    if (randomNumber <= criticalRate) {
+      monster.playCriticalAudio();
+      damage += damage;
+    }
+
+    monster.hp -= damage;
+    if (monster.hp < 0) {
+      monster.hp = 0;
+    }
   }
 
   private updateMove(): MonoTypeOperatorFunction<MoveLocation> {

@@ -192,18 +192,7 @@ const reduceMonstersHpFromAttacker = (
 ): OperatorFunction<Monster[], Monster[]> => {
   return tap((monsters) => {
     for (const monster of monsters) {
-      const randomNumber = randomMinMax(0, 100);
-      const criticalRate = 10;
-      let damage = attacker.atk;
-      if (randomNumber <= criticalRate) {
-        monster.playCriticalAudio();
-        damage += damage;
-      }
-
-      monster.hp -= damage;
-      if (monster.hp < 0) {
-        monster.hp = 0;
-      }
+      attacker.damageTo(monster);
     }
   });
 };
@@ -366,6 +355,10 @@ const onLoadMonster$ = merge(
 
 onCanvasMount$.subscribe(() => {
   keyboardController.start(tick);
+  // thief
+  //   .hurting()
+  //   .pipe(repeat())
+  //   .subscribe(() => tick());
 });
 
 onCanvasMount$.pipe(switchMap(() => onLoadMonster$)).subscribe((monster) => {

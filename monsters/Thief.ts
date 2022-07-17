@@ -406,7 +406,7 @@ export class Thief extends Monster {
   hurting(): Observable<any> {
     return defer(() => {
       this.frameY = 6;
-      return this.createForwardFrame(150, 0, 3);
+      return this.createForwardFrame(150, 0, 3, { once: true });
     });
   }
 

@@ -1,4 +1,4 @@
-import { defer, Observable, Subject, switchMap } from 'rxjs';
+import { defer, EMPTY, Observable, Subject, switchMap } from 'rxjs';
 import { takeUntil, tap } from 'rxjs/operators';
 import { loadAcidusAttackSound } from '../sounds/acidus-attack';
 import { loadAcidusDeadSound } from '../sounds/acidus-dead';
@@ -6,7 +6,13 @@ import { loadAcidusLeftSprite } from '../sprites/load-acidus-left';
 import { loadAcidusSpriteRight } from '../sprites/load-acidus-right';
 import { distanceBetween } from '../utils/collision';
 import { playAudio } from '../utils/play-audio';
-import { ACTION, AggressiveCondition, CropImage, Monster } from './Monster';
+import {
+  ACTION,
+  AggressiveCondition,
+  CropImage,
+  DIRECTION,
+  Monster,
+} from './Monster';
 
 export class Acidus extends Monster {
   maxHp = 120;
@@ -19,6 +25,7 @@ export class Acidus extends Monster {
   frameY = 0;
   width = 119;
   height = 120;
+  atk = 50;
 
   attackAudio = loadAcidusAttackSound();
   deadAudio = loadAcidusDeadSound();
@@ -215,7 +222,27 @@ export class Acidus extends Monster {
     return defer(() => {
       this.frameY = 2;
       this.attackAudio.play();
-      return this.createForwardFrame(60, 0, 7, { once: true });
+      return this.createForwardFrame(60, 0, 7, { once: true }).pipe(
+        tap((frameX) => {
+          if (frameX === 7) {
+            if (this.direction === DIRECTION.LEFT) {
+              this.onDamageArea$.next({
+                x: this.x - this.width / 4,
+                y: this.y + this.height / 4,
+                w: 60,
+                h: 60,
+              });
+            } else if (this.direction === DIRECTION.RIGHT) {
+              this.onDamageArea$.next({
+                x: this.x + (this.width * 3) / 4,
+                y: this.y + this.height / 4,
+                w: 60,
+                h: 60,
+              });
+            }
+          }
+        })
+      );
     });
   }
 
@@ -253,10 +280,6 @@ export class Acidus extends Monster {
           }
         })
       );
-      // return this.testSprites([
-      //   [0, 0],
-      //   [0, 5],
-      // ]);
     });
   }
 
