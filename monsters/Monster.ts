@@ -59,6 +59,7 @@ export const enum ACTION {
   DIE,
   HURT,
   MOVE_TO_TARGET,
+  ATTACK,
 }
 
 export const enum DIRECTION {
@@ -178,7 +179,25 @@ export abstract class Monster {
           } else if (action === ACTION.MOVE_TO_TARGET) {
             return this.aggressiveTarget$.pipe(
               switchMap((target) => {
-                return this.walkingToTarget(target);
+                return this.walkingToTarget(target).pipe(
+                  tap({
+                    complete: () => {
+                      if (this.aggressiveTarget !== null) {
+                        this.actionChange$.next(ACTION.ATTACK);
+                      }
+                    },
+                  })
+                );
+              })
+            );
+          } else if (action === ACTION.ATTACK) {
+            return this.attack().pipe(
+              tap({
+                complete: () => {
+                  if (this.aggressiveTarget !== null) {
+                    this.actionChange$.next(ACTION.MOVE_TO_TARGET);
+                  }
+                },
               })
             );
           } else if (action === ACTION.RANDOM) {
@@ -389,6 +408,16 @@ export abstract class Monster {
           moveNextLocation.y += this.speedY;
         }
 
+        if (targetIsLeftSide) {
+          this.direction = DIRECTION.LEFT;
+        } else {
+          this.direction = DIRECTION.RIGHT;
+        }
+
+        return moveNextLocation;
+      },
+      stopIfOutOfCanvas: false,
+      stopWhen: (moveNextLocation) => {
         const targetX = target.x + target.width / 2;
         const targetY = target.y + target.height / 2;
 
@@ -399,20 +428,8 @@ export abstract class Monster {
           { x: targetX, y: targetY },
           { x: sourceX, y: sourceY }
         );
-
-        if (distance <= this.attackRange) {
-          return currentMoveLocation;
-        }
-
-        if (targetIsLeftSide) {
-          this.direction = DIRECTION.LEFT;
-        } else {
-          this.direction = DIRECTION.RIGHT;
-        }
-
-        return moveNextLocation;
+        return distance <= this.attackRange;
       },
-      stopIfOutOfCanvas: false,
     });
   }
 

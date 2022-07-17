@@ -109,9 +109,7 @@ export class Acidus extends Monster {
     return defer(() => {
       this.frameY = 2;
       this.attackAudio.play();
-      return this.createForwardFrame(50, 0, 7).pipe(
-        takeWhile((frameX) => frameX + 1 <= 7)
-      );
+      return this.createForwardFrame(50, 0, 7, {once:true})
     });
   }
 
