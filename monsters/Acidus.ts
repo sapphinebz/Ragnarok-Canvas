@@ -25,7 +25,7 @@ export class Acidus extends Monster {
   frameY = 0;
   width = 119;
   height = 120;
-  atk = 50;
+  atk = 25;
   visionRange = 200;
 
   attackAudio = loadAcidusAttackSound();
