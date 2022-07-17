@@ -32,6 +32,7 @@ import {
   mergeMap,
   shareReplay,
   takeUntil,
+  throttleTime,
 } from 'rxjs/operators';
 import { Poring } from './monsters/Poring';
 import { ACTION, Area, DIRECTION, Monster } from './monsters/Monster';
@@ -239,7 +240,7 @@ const onCanvasRender$ = onWindowResize$.pipe(
     onCanvasMount$.complete();
 
     return render$.pipe(
-      debounceTime(0, animationFrameScheduler),
+      throttleTime(0, animationFrameScheduler),
       tap(() => {
         ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
       })
