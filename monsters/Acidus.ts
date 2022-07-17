@@ -50,6 +50,7 @@ export class Acidus extends Monster {
     ],
     [],
     [
+      { order: 0, offsetX: 0, width: 135 },
       { order: 0, offsetX: 120, width: 140 },
       { order: 1, offsetX: 280, width: 140 },
       { order: 2, offsetX: 420, width: 135 },
@@ -57,7 +58,7 @@ export class Acidus extends Monster {
       { order: 4, offsetX: 680, width: 130 },
       { order: 5, offsetX: 815, width: 135 },
       { order: 6, offsetX: 950, width: 100 },
-      { order: 7, offsetX: 1075, width: 135 },
+      // { order: 7, offsetX: 1075, width: 135 },
     ],
     [],
     [],
@@ -109,7 +110,7 @@ export class Acidus extends Monster {
     return defer(() => {
       this.frameY = 2;
       this.attackAudio.play();
-      return this.createForwardFrame(50, 0, 7, {once:true})
+      return this.createForwardFrame(50, 0, 7, { once: true });
     });
   }
 
