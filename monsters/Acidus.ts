@@ -8,7 +8,7 @@ import { playAudio } from '../utils/play-audio';
 import { CropImage, DIRECTION, Monster } from './Monster';
 
 export class Acidus extends Monster {
-  maxHp = 120;
+  maxHp = 250;
   hp = this.maxHp;
   x = 200;
   y = 200;

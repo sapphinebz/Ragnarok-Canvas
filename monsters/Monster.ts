@@ -219,8 +219,8 @@ export abstract class Monster {
                 connect((walking$) => {
                   const nextAttack$ = walking$.pipe(
                     distinctUntilChanged(),
-                    switchMap((isCloseTarget) => {
-                      if (isCloseTarget) {
+                    switchMap((targetWithInAttackRange) => {
+                      if (targetWithInAttackRange) {
                         return timer(this.dps).pipe(
                           tap(() => {
                             if (this.aggressiveTarget !== null) {
@@ -232,6 +232,7 @@ export abstract class Monster {
                       return EMPTY;
                     })
                   );
+
                   return merge(walking$, nextAttack$.pipe(ignoreElements()));
                 }),
                 takeUntil(
@@ -699,6 +700,8 @@ export abstract class Monster {
   targetsBeHurtOrDie(): OperatorFunction<Monster[], any> {
     return tap((monsters) => {
       for (const monster of monsters) {
+        console.clear();
+        console.log(monster.hp);
         if (monster.hp <= 0) {
           monster.die();
         } else {
@@ -762,8 +765,7 @@ export abstract class Monster {
 
       if (option.moveX) {
         this.x =
-          locationBeforeAttack.x +
-          (option.moveX / 2) * percent * directionX;
+          locationBeforeAttack.x + (option.moveX / 2) * percent * directionX;
       }
       if (option.moveY) {
         this.y =
