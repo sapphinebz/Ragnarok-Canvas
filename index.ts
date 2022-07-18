@@ -18,19 +18,13 @@ import {
   Observable,
   ReplaySubject,
   EMPTY,
-  of,
   NEVER,
-  combineLatest,
-  repeat,
-  MonoTypeOperatorFunction,
 } from 'rxjs';
 import {
   connect,
   debounceTime,
   distinctUntilChanged,
-  filter,
   map,
-  mergeAll,
   mergeMap,
   shareReplay,
   takeUntil,
@@ -42,7 +36,6 @@ import { Thief } from './monsters/Thief';
 import { KeyboardController } from './gamepad/keyboard-controller';
 import {
   COLLISION_DIRECTION,
-  distanceBetween,
   isMouseHoverArea,
   rectanglesIntersect,
 } from './utils/collision';
