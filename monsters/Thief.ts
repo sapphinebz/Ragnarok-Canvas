@@ -24,7 +24,7 @@ export class Thief extends Monster {
   height = 107;
   attackSpeed = 80;
   dps = 0;
-  showHpGage = true;
+  showHpGauge = true;
 
   daggerHitSound = loadDaggerHitSound();
   damagedAudio = loadThiefFamaleDamagedAudio();

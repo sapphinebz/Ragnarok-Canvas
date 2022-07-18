@@ -102,8 +102,7 @@ export abstract class Monster {
   width: number;
   height: number;
 
-  // gage
-  showHpGage = false;
+  showHpGauge = false;
 
   // damage per second
   dps = 800;
@@ -365,9 +364,9 @@ export abstract class Monster {
             height
           );
 
-          if (this.showHpGage) {
-            this.drawGage(this.width, 'hsl(0deg 0% 10% / 70%)');
-            this.drawGage(this.width * (this.hp / this.maxHp), 'lime');
+          if (this.showHpGauge) {
+            this.drawGauge(this.width, 'hsl(0deg 0% 10% / 70%)');
+            this.drawGauge(this.width * (this.hp / this.maxHp), 'lime');
           }
         }
       });
@@ -808,7 +807,7 @@ export abstract class Monster {
     });
   }
 
-  private drawGage(value: number, color: string) {
+  private drawGauge(value: number, color: string) {
     this.ctx.beginPath();
     this.ctx.fillStyle = color;
     this.ctx.rect(this.x, this.y + this.height + 5, value, 5);

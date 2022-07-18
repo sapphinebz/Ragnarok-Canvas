@@ -170,7 +170,7 @@ const monstersBeHurtOrDie = (): OperatorFunction<Monster[], any> =>
           return showAnimationDieAndRespawn(monster);
         }
         monster.hurt();
-        monster.showHpGage = true;
+        monster.showHpGauge = true;
         return EMPTY;
       })
     );
@@ -188,7 +188,7 @@ const findMonstersBeAttacked = (): OperatorFunction<Area, Monster[]> => {
   });
 };
 
-const showGageHpLatestDamagedMonster = (): MonoTypeOperatorFunction<
+const showGaugeHpLatestDamagedMonster = (): MonoTypeOperatorFunction<
   Monster[]
 > => {
   let latestDamagedMonster: Monster[];
@@ -197,12 +197,12 @@ const showGageHpLatestDamagedMonster = (): MonoTypeOperatorFunction<
       tap((monsters) => {
         if (latestDamagedMonster) {
           for (const monster of latestDamagedMonster) {
-            monster.showHpGage = false;
+            monster.showHpGauge = false;
           }
         }
         latestDamagedMonster = monsters;
         for (const monster of latestDamagedMonster) {
-          monster.showHpGage = true;
+          monster.showHpGauge = true;
         }
       })
     );
@@ -225,7 +225,7 @@ onLoadPlayer$
         thief.aggressiveMonsters(),
         thief.decreaseTargetsHp(),
         thief.forceTargetsFaceToMe(),
-        showGageHpLatestDamagedMonster(),
+        showGaugeHpLatestDamagedMonster(),
         monstersBeHurtOrDie()
       );
     })
