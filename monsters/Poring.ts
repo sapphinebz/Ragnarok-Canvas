@@ -208,33 +208,14 @@ export class Poring extends Monster {
       return this.createForwardFrame(100, minFrameX, maxFrameX, {
         once: true,
       }).pipe(
+        this.moveLocationOnAttack({
+          jump: 15,
+          moveForward: this.attackRange,
+          maxLocationOnFrame: 3,
+        }),
         tap((frameX) => {
           if (frameX === 3) {
             this.onPlayAttackAudio$.next();
-          }
-          const percent = percentAsFrameX(frameX);
-
-          this.x =
-            locationBeforeAttack.x +
-            (this.attackRange / 2) * percent * directionX;
-
-          this.y = locationBeforeAttack.y + (15 / 2) * percent * directionY;
-          if (frameX === 4) {
-            if (this.direction === DIRECTION.RIGHT) {
-              this.onDamageArea$.next({
-                x: this.x + (this.width * 3) / 4,
-                y: this.y,
-                w: 40,
-                h: 40,
-              });
-            } else if (this.direction === DIRECTION.LEFT) {
-              this.onDamageArea$.next({
-                x: this.x - this.width / 4,
-                y: this.y,
-                w: 40,
-                h: 40,
-              });
-            }
           }
         })
       );

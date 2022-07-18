@@ -26,6 +26,7 @@ import {
   distinctUntilChanged,
   map,
   mergeMap,
+  repeat,
   shareReplay,
   takeUntil,
 } from 'rxjs/operators';
@@ -64,9 +65,10 @@ const onWindowResize$ = fromEvent(window, 'resize').pipe(
  */
 // number monster in field & class
 const monstersClass: [any, number][] = [
-  [Acidus, 2],
+  [Acidus, 0],
   [Poring, 10],
   [Fabre, 4],
+  // [Fabre, 1],
 ];
 
 const onRespawnMonster$ = new Subject<Monster>();
@@ -344,6 +346,7 @@ const onMonsterTickRender$ = onLoadMonster$.pipe(
     monster.randomAction();
     monster.autoAggressiveOnVisionTarget(onLoadPlayer$);
     return monster.onActionTick$.pipe(takeUntil(monster.onDied$));
+    // return monster.attack().pipe(repeat());
   })
 );
 

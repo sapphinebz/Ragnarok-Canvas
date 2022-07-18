@@ -728,6 +728,67 @@ export abstract class Monster {
     });
   }
 
+  moveLocationOnAttack(option: {
+    jump?: number;
+    moveForward?: number;
+    maxLocationOnFrame: number;
+  }): MonoTypeOperatorFunction<number> {
+    const locationBeforeAttack = { x: this.x, y: this.y };
+    const rateAsFrameX = (frameX: number) => {
+      const percentPerFrameX = 100 / (option.maxLocationOnFrame + 1);
+      let calPercent = 0;
+      if (frameX + 1 <= option.maxLocationOnFrame) {
+        calPercent = percentPerFrameX * (frameX + 1);
+      } else {
+        calPercent =
+          -percentPerFrameX * (frameX - option.maxLocationOnFrame + 1) + 100;
+      }
+
+      const rate = calPercent / 100;
+      return rate;
+    };
+    const directionX = this.direction === DIRECTION.LEFT ? -1 : 1;
+    let directionY = directionX;
+    if (this.aggressiveTarget !== null) {
+      if (this.aggressiveTarget.y > this.y) {
+        directionY = 1;
+      } else {
+        directionY = -1;
+      }
+    }
+
+    return tap((frameX) => {
+      const percent = rateAsFrameX(frameX);
+
+      if (option.moveForward) {
+        this.x =
+          locationBeforeAttack.x +
+          (option.moveForward / 2) * percent * directionX;
+      }
+      if (option.jump) {
+        this.y =
+          locationBeforeAttack.y + (option.jump / 2) * percent * directionY;
+      }
+      if (frameX === 4) {
+        if (this.direction === DIRECTION.RIGHT) {
+          this.onDamageArea$.next({
+            x: this.x + (this.width * 3) / 4,
+            y: this.y,
+            w: 40,
+            h: 40,
+          });
+        } else if (this.direction === DIRECTION.LEFT) {
+          this.onDamageArea$.next({
+            x: this.x - this.width / 4,
+            y: this.y,
+            w: 40,
+            h: 40,
+          });
+        }
+      }
+    });
+  }
+
   private updateMove(): MonoTypeOperatorFunction<MoveLocation> {
     return tap((moveLocation) => {
       this.x = moveLocation.x;

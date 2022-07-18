@@ -24,7 +24,37 @@ export class Fabre extends Monster {
       { order: 2, offsetX: 96, width: 43 },
       { order: 3, offsetX: 144, width: 43 },
     ],
-    [],
+    [
+      { order: 0, offsetX: 10, offsetY: 57, width: 33, height: 26 },
+      {
+        order: 1,
+        offsetX: 60,
+        offsetY: 55,
+        width: 41,
+        height: 26,
+      },
+      {
+        order: 2,
+        offsetX: 117,
+        offsetY: 54,
+        width: 31,
+        height: 28,
+      },
+      {
+        order: 3,
+        offsetX: 166,
+        offsetY: 56,
+        width: 39,
+        height: 27,
+      },
+      {
+        order: 4,
+        offsetX: 222,
+        offsetY: 57,
+        width: 29,
+        height: 26,
+      },
+    ],
     [
       {
         order: 0,
@@ -90,7 +120,15 @@ export class Fabre extends Monster {
     });
   }
   attack(): Observable<any> {
-    // throw new Error("Method not implemented.");
-    return EMPTY;
+    return defer(() => {
+      this.frameY = 1;
+      return this.createForwardFrame(1000, 0, 2, { once: true }).pipe(
+        this.moveLocationOnAttack({
+          jump: 15,
+          moveForward: 15,
+          maxLocationOnFrame: 1,
+        })
+      );
+    });
   }
 }
