@@ -30,6 +30,7 @@ import {
   distinctUntilChanged,
   filter,
   map,
+  mergeAll,
   mergeMap,
   shareReplay,
   takeUntil,
@@ -353,4 +354,8 @@ const onMonsterTickRender$ = onLoadMonster$.pipe(
   })
 );
 
-merge(onMonsterTickRender$, thief.onActionTick$).subscribe(() => tick());
+const onPlayerTickRender$ = onLoadPlayer$.pipe(
+  mergeMap((player) => player.onActionTick$.pipe(takeUntil(player.onDied$)))
+);
+
+merge(onMonsterTickRender$, onPlayerTickRender$).subscribe(() => tick());
