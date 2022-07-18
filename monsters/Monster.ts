@@ -73,7 +73,7 @@ export const enum ACTION {
 
 export const enum DIRECTION {
   LEFT,
-  RIGHT,
+  RIGHT
 }
 
 export interface Area extends MoveLocation {
@@ -647,13 +647,13 @@ export abstract class Monster {
     }
   }
 
-   aggressiveMonsters (): MonoTypeOperatorFunction<Monster[]> {
-    return tap(monsters=>{
-      for(const monster of monsters){
+  aggressiveMonsters(): MonoTypeOperatorFunction<Monster[]> {
+    return tap((monsters) => {
+      for (const monster of monsters) {
         monster.aggressiveTarget = this;
         monster.actionChange$.next(ACTION.MOVE_TO_TARGET);
       }
-    })  
+    });
   }
 
   targetsBeHurtOrDie(): OperatorFunction<Monster[], any> {

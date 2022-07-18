@@ -194,6 +194,15 @@ export class Poring extends Monster {
         }
         return (-25 * (frameX - 3) + 100) / 100;
       };
+      const directionX = this.direction === DIRECTION.LEFT ? -1 : 1;
+      let directionY = directionX;
+      if (this.aggressiveTarget !== null) {
+        if (this.aggressiveTarget.y > this.y) {
+          directionY = 1;
+        } else {
+          directionY = -1;
+        }
+      }
 
       return this.createForwardFrame(100, minFrameX, maxFrameX, {
         once: true,
@@ -203,13 +212,12 @@ export class Poring extends Monster {
             this.onPlayAttackAudio$.next();
           }
           const percent = percentAsFrameX(frameX);
-          const directionX = this.direction === DIRECTION.LEFT ? -1 : 1;
 
           this.x =
             locationBeforeAttack.x +
             (this.attackRange / 2) * percent * directionX;
 
-          this.y = locationBeforeAttack.y + (25 / 2) * percent * directionX;
+          this.y = locationBeforeAttack.y + (15 / 2) * percent * directionY;
           if (frameX === 4) {
             if (this.direction === DIRECTION.RIGHT) {
               this.onDamageArea$.next({
