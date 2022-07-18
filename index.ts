@@ -68,13 +68,13 @@ const onWindowResize$ = fromEvent(window, 'resize').pipe(
  */
 // number monster in field & class
 const monstersClass: [any, number][] = [
-  [Acidus, 0],
-  [Poring, 0],
-  [Fabre, 0],
+  [Acidus, 2],
+  [Poring, 15],
+  [Fabre, 7],
   // [Fabre, 1],
 ];
 
-const baphomet = new Baphomet(canvas);
+// const baphomet = new Baphomet(canvas);
 
 const onRespawnMonster$ = new Subject<Monster>();
 
@@ -337,7 +337,7 @@ onCanvasRender$.subscribe(() => {
     monster.drawImage();
   }
 
-  baphomet.drawImage();
+  // baphomet.drawImage();
 
   keyboardController.drawPlayer();
 
@@ -350,7 +350,7 @@ onCanvasRender$.subscribe(() => {
   );
 });
 
-baphomet.attack().subscribe(() => tick());
+// baphomet.hurting().subscribe(() => tick());
 
 killCount$.subscribe(() => tick());
 

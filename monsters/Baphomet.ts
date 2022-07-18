@@ -214,8 +214,59 @@ export class Baphomet extends Monster {
         marginHeight: 25,
       },
     ],
+    [],
+    // hurting / die
+    [
+      { order: 0, offsetX: 7, offsetY: 808, width: 83, height: 118 },
+      {
+        order: 1,
+        offsetX: 113,
+        offsetY: 808,
+        width: 134,
+        height: 118,
+        marginLeftWidth: -21,
+        marginHeight: 1,
+      },
+      {
+        order: 2,
+        offsetX: 265,
+        offsetY: 832,
+        width: 123,
+        height: 87,
+        marginLeftWidth: 42,
+        marginHeight: 31,
+      },
+      {
+        order: 3,
+        offsetX: 421,
+        offsetY: 814,
+        width: 79,
+        height: 111,
+        marginLeftWidth: 26,
+        marginHeight: 23,
+      },
+      {
+        order: 4,
+        offsetX: 532,
+        offsetY: 810,
+        width: 77,
+        height: 120,
+        marginLeftWidth: 20,
+        marginHeight: 14,
+      },
+      {
+        order: 5,
+        offsetX: 637,
+        offsetY: 829,
+        width: 89,
+        height: 88,
+        marginLeftWidth: 31,
+        marginHeight: 114,
+      },
+    ],
   ];
 
+  weaponSprite = { offsetX: 772, offsetY: 822, width: 74, height: 99 };
   constructor(public canvas: HTMLCanvasElement) {
     super(canvas, baphometSpriteLeft, baphometSpriteRight);
   }
@@ -248,10 +299,16 @@ export class Baphomet extends Monster {
   drawEffect(): void {}
 
   hurting(): Observable<any> {
-    return EMPTY;
+    return defer(() => {
+      this.frameY = 5;
+      return this.createForwardFrame(150, 0, 1);
+    });
   }
 
   dying() {
-    return EMPTY;
+    return defer(() => {
+      this.frameY = 5;
+      return this.createForwardFrame(150, 0, 2);
+    });
   }
 }
