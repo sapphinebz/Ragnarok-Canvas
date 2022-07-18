@@ -196,13 +196,17 @@ const thief = new Thief(canvas);
 
 const onLoadPlayer$ = new BehaviorSubject<Monster>(thief);
 
-thief.onDamageArea$
+onLoadPlayer$
   .pipe(
-    findMonstersBeAttacked(),
-    thief.aggressiveMonsters(),
-    thief.decreaseTargetsHp(),
-    thief.forceTargetsFaceToMe(),
-    monstersBeHurtOrDie()
+    mergeMap((player) => {
+      return player.onDamageArea$.pipe(
+        findMonstersBeAttacked(),
+        thief.aggressiveMonsters(),
+        thief.decreaseTargetsHp(),
+        thief.forceTargetsFaceToMe(),
+        monstersBeHurtOrDie()
+      );
+    })
   )
   .subscribe();
 
