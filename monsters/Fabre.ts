@@ -14,6 +14,8 @@ export class Fabre extends Monster {
   frameY = 0;
   width = 50;
   height = 40;
+  maxHp = 100;
+  hp = this.maxHp;
 
   dyingAudio = loadFabreDeadSound();
 

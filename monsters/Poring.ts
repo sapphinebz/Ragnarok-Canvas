@@ -28,8 +28,8 @@ import { CropImage, DIRECTION, Monster } from './Monster';
 export class Poring extends Monster {
   x = 100;
   y = 100;
-  hp = 75;
-  maxHp = this.hp;
+  maxHp = 150;
+  hp = this.maxHp;
   atk = 15;
   speedX = 3;
   speedY = 3;
