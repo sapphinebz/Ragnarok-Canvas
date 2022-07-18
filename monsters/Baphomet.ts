@@ -22,6 +22,7 @@ export class Baphomet extends Monster {
   dps = 300;
 
   frames: CropImage[][] = [
+    // standing
     [
       { order: 0, offsetX: 4, offsetY: 3, width: 83, height: 118 },
       {
@@ -89,6 +90,7 @@ export class Baphomet extends Monster {
       },
     ],
     [],
+    // walking
     [
       {
         order: 0,
@@ -163,6 +165,55 @@ export class Baphomet extends Monster {
         marginHeight: 18,
       },
     ],
+    // attacking
+    [
+      { order: 0, offsetX: 11, offsetY: 479, width: 83, height: 118 },
+      {
+        order: 1,
+        offsetX: 128,
+        offsetY: 481,
+        width: 90,
+        height: 114,
+        marginLeftWidth: 14,
+        marginHeight: 4,
+      },
+      {
+        order: 2,
+        offsetX: 244,
+        offsetY: 483,
+        width: 115,
+        height: 112,
+        marginLeftWidth: 0,
+        marginHeight: 6,
+      },
+      {
+        order: 3,
+        offsetX: 384,
+        offsetY: 483,
+        width: 115,
+        height: 112,
+        marginLeftWidth: 0,
+        marginHeight: 6,
+      },
+      {
+        order: 4,
+        offsetX: 525,
+        offsetY: 487,
+        width: 72,
+        height: 97,
+        marginLeftWidth: 14,
+        marginHeight: 23,
+      },
+      {
+        order: 5,
+        offsetX: 633,
+        offsetY: 487,
+        width: 72,
+        height: 96,
+        marginLeftWidth: 16,
+        marginHeight: 25,
+      },
+    ],
   ];
 
   constructor(public canvas: HTMLCanvasElement) {
@@ -175,8 +226,8 @@ export class Baphomet extends Monster {
 
   attack(): Observable<any> {
     return defer(() => {
-      this.frameY = 2;
-      return this.createForwardFrame(150, 0, 3);
+      this.frameY = 3;
+      return this.createForwardFrame(150, 0, 5);
     });
   }
 
