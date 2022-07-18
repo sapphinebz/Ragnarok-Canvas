@@ -242,7 +242,7 @@ const onCanvasRender$ = onWindowResize$.pipe(
     onCanvasMount$.complete();
 
     return render$.pipe(
-      throttleTime(0, animationFrameScheduler),
+      debounceTime(0, animationFrameScheduler),
       tap(() => {
         ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
       })
@@ -332,9 +332,7 @@ const onLoadMonster$ = merge(
 ).pipe(shareReplay());
 
 onCanvasMount$.subscribe(() => {
-  keyboardController.start(tick);
-  // thief.direction = DIRECTION.RIGHT;
-  // thief.hurting().subscribe(() => tick());
+  keyboardController.start();
 });
 
 onCanvasMount$.pipe(switchMap(() => onLoadMonster$)).subscribe((monster) => {
@@ -368,16 +366,14 @@ combineLatest({
 });
 
 // Monster Random Action
-onLoadMonster$
-  .pipe(
-    mergeMap((monster) => {
-      monster.randomAction();
-      return monster.onActionTick$.pipe(takeUntil(monster.onDied$));
-      // monster.direction = DIRECTION.LEFT;
-      // return monster.hurting().pipe(repeat());
-    })
-  )
-  .subscribe(() => tick());
+const onMonsterTickRender$ = onLoadMonster$.pipe(
+  mergeMap((monster) => {
+    monster.randomAction();
+    return monster.onActionTick$.pipe(takeUntil(monster.onDied$));
+  })
+);
+
+merge(onMonsterTickRender$, thief.onActionTick$).subscribe(() => tick());
 
 // FOR ACIDUS MOUSE ATTACK
 

@@ -36,20 +36,10 @@ export class KeyboardController {
 
   constructor(private canvas: HTMLCanvasElement, private monster: Monster) {}
 
-  start(tick: () => void) {
+  start() {
     merge(this.movementAction(), this.attackAction())
       .pipe(takeUntil(this.onCleanup$))
       .subscribe();
-    // this.attackAction()
-    //   .pipe(switchAll(), takeUntil(this.onCleanup$))
-    //   .subscribe(() => tick());
-
-    // merge(
-    //   this.movementAction(),
-    //   this.attackAction()
-    // )
-    //   .pipe(switchAll(), takeUntil(this.onCleanup$))
-    //   .subscribe(() => tick());
   }
 
   drawPlayer() {
@@ -66,12 +56,6 @@ export class KeyboardController {
 
   private attackAction() {
     const attackKeyMap = {
-      // KeyX: this.monster
-      //   .attack()
-      //   .pipe(onErrorResumeNext(this.monster.standing())),
-      // KeyZ: this.monster
-      //   .attack()
-      //   .pipe(onErrorResumeNext(this.monster.standing())),
       KeyX: () => this.monster.actionChange$.next(ACTION.ATTACK),
       KeyZ: () => this.monster.actionChange$.next(ACTION.ATTACK),
     };
@@ -83,10 +67,6 @@ export class KeyboardController {
       filter((keyboardCode) => {
         return attackKeys.indexOf(keyboardCode) !== -1;
       }),
-      // map((key) => {
-      //   this.onAttack$.next();
-      //   return attackKeyMap[key];
-      // })
 
       tap((key) => {
         this.onAttack$.next();
@@ -103,16 +83,6 @@ export class KeyboardController {
       stopIfOutOfCanvas: false,
     };
     const movementKeyMap = {
-      // KeyUp: this.monster.standing(),
-      // ArrowLeft: this.monster.walkingLeft(walkConfig),
-      // ArrowRight: this.monster.walkingRight(walkConfig),
-      // ArrowUp: this.monster.walkingUp(walkConfig),
-      // ArrowDown: this.monster.walkingDown(walkConfig),
-      // ArrowTopRight: this.monster.walkingTopRight(walkConfig),
-      // ArrowTopLeft: this.monster.walkingTopLeft(walkConfig),
-      // ArrowBottomRight: this.monster.walkingBottomRight(walkConfig),
-      // ArrowBottomLeft: this.monster.walkingBottomLeft(walkConfig),
-
       KeyUp: () => this.monster.actionChange$.next(ACTION.STANDING),
       ArrowLeft: () => this.monster.actionChange$.next(ACTION.WALKING_LEFT),
       ArrowRight: () => this.monster.actionChange$.next(ACTION.WALKING_RIGHT),
@@ -150,8 +120,6 @@ export class KeyboardController {
           action();
         }
       })
-      // map((key) => movementKeyMap[key]),
-      // filter((observableAction) => observableAction !== undefined)
     );
   }
 
