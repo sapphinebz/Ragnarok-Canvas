@@ -209,12 +209,12 @@ export class Poring extends Monster {
         once: true,
       }).pipe(
         this.moveLocationOnAttack({
-          jump: 15,
-          moveForward: this.attackRange,
+          moveY: 15,
+          moveX: this.attackRange,
           maxLocationOnFrame: 3,
         }),
         tap((frameX) => {
-          if (frameX === 3) {
+          if (frameX === 2) {
             this.onPlayAttackAudio$.next();
           }
         })

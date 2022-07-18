@@ -729,8 +729,8 @@ export abstract class Monster {
   }
 
   moveLocationOnAttack(option: {
-    jump?: number;
-    moveForward?: number;
+    moveY?: number;
+    moveX?: number;
     maxLocationOnFrame: number;
   }): MonoTypeOperatorFunction<number> {
     const locationBeforeAttack = { x: this.x, y: this.y };
@@ -760,14 +760,14 @@ export abstract class Monster {
     return tap((frameX) => {
       const percent = rateAsFrameX(frameX);
 
-      if (option.moveForward) {
+      if (option.moveX) {
         this.x =
           locationBeforeAttack.x +
-          (option.moveForward / 2) * percent * directionX;
+          (option.moveX / 2) * percent * directionX;
       }
-      if (option.jump) {
+      if (option.moveY) {
         this.y =
-          locationBeforeAttack.y + (option.jump / 2) * percent * directionY;
+          locationBeforeAttack.y + (option.moveY / 2) * percent * directionY;
       }
       if (frameX === 4) {
         if (this.direction === DIRECTION.RIGHT) {
