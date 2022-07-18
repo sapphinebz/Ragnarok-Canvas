@@ -33,7 +33,6 @@ import {
   mergeMap,
   shareReplay,
   takeUntil,
-  throttleTime,
 } from 'rxjs/operators';
 import { Poring } from './monsters/Poring';
 import { ACTION, Area, DIRECTION, Monster } from './monsters/Monster';
@@ -71,9 +70,9 @@ const onWindowResize$ = fromEvent(window, 'resize').pipe(
  */
 // number monster in field & class
 const monstersClass: [any, number][] = [
-  [Acidus, 0],
-  [Poring, 5],
-  [Fabre, 0],
+  [Acidus, 2],
+  [Poring, 20],
+  [Fabre, 7],
 ];
 
 const onRespawnMonster$ = new Subject<Monster>();
