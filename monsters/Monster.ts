@@ -564,7 +564,7 @@ export abstract class Monster {
   }
 
   walkingDown(config: WalkingStoppable = { stopIfOutOfCanvas: true }) {
-    return this.walkingAnimationFrames({
+    return this.walkingDirection({
       faceDirection: DIRECTION.LEFT,
       moveOption: () => this.moveDown(),
       stopIfOutOfCanvas: config.stopIfOutOfCanvas,
@@ -572,7 +572,7 @@ export abstract class Monster {
   }
 
   walkingUp(config: WalkingStoppable = { stopIfOutOfCanvas: true }) {
-    return this.walkingAnimationFrames({
+    return this.walkingDirection({
       faceDirection: DIRECTION.RIGHT,
       moveOption: () => this.moveUp(),
       stopIfOutOfCanvas: config.stopIfOutOfCanvas,
@@ -580,7 +580,7 @@ export abstract class Monster {
   }
 
   walkingLeft(config: WalkingStoppable = { stopIfOutOfCanvas: true }) {
-    return this.walkingAnimationFrames({
+    return this.walkingDirection({
       faceDirection: DIRECTION.LEFT,
       moveOption: () => this.moveLeft(),
       stopIfOutOfCanvas: config.stopIfOutOfCanvas,
@@ -588,7 +588,7 @@ export abstract class Monster {
   }
 
   walkingRight(config: WalkingStoppable = { stopIfOutOfCanvas: true }) {
-    return this.walkingAnimationFrames({
+    return this.walkingDirection({
       faceDirection: DIRECTION.RIGHT,
       moveOption: () => this.moveRight(),
       stopIfOutOfCanvas: config.stopIfOutOfCanvas,
@@ -596,7 +596,7 @@ export abstract class Monster {
   }
 
   walkingTopLeft(config: WalkingStoppable = { stopIfOutOfCanvas: true }) {
-    return this.walkingAnimationFrames({
+    return this.walkingDirection({
       faceDirection: DIRECTION.LEFT,
       moveOption: () => this.moveTopLeft(),
       stopIfOutOfCanvas: config.stopIfOutOfCanvas,
@@ -604,7 +604,7 @@ export abstract class Monster {
   }
 
   walkingTopRight(config: WalkingStoppable = { stopIfOutOfCanvas: true }) {
-    return this.walkingAnimationFrames({
+    return this.walkingDirection({
       faceDirection: DIRECTION.RIGHT,
       moveOption: () => this.moveTopRight(),
       stopIfOutOfCanvas: config.stopIfOutOfCanvas,
@@ -612,7 +612,7 @@ export abstract class Monster {
   }
 
   walkingBottomLeft(config: WalkingStoppable = { stopIfOutOfCanvas: true }) {
-    return this.walkingAnimationFrames({
+    return this.walkingDirection({
       faceDirection: DIRECTION.LEFT,
       moveOption: () => this.moveBottomLeft(),
       stopIfOutOfCanvas: config.stopIfOutOfCanvas,
@@ -620,7 +620,7 @@ export abstract class Monster {
   }
 
   walkingBottomRight(config: WalkingStoppable = { stopIfOutOfCanvas: true }) {
-    return this.walkingAnimationFrames({
+    return this.walkingDirection({
       faceDirection: DIRECTION.RIGHT,
       moveOption: () => this.moveBottomRight(),
       stopIfOutOfCanvas: config.stopIfOutOfCanvas,
@@ -736,7 +736,7 @@ export abstract class Monster {
     });
   }
 
-  private walkingAnimationFrames(option: WalkingConfig) {
+  private walkingDirection(option: WalkingConfig) {
     const { faceDirection, stopIfOutOfCanvas = true, moveOption } = option;
 
     return defer(() => {
