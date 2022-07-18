@@ -186,25 +186,6 @@ export class Poring extends Monster {
       this.frameY = 1;
       const maxFrameX = 7;
       const minFrameX = 0;
-
-      // Poring should pushing when attack
-      const locationBeforeAttack = { x: this.x, y: this.y };
-      const percentAsFrameX = (frameX: number) => {
-        if (frameX + 1 <= 4) {
-          return (25 * (frameX + 1)) / 100;
-        }
-        return (-25 * (frameX - 3) + 100) / 100;
-      };
-      const directionX = this.direction === DIRECTION.LEFT ? -1 : 1;
-      let directionY = directionX;
-      if (this.aggressiveTarget !== null) {
-        if (this.aggressiveTarget.y > this.y) {
-          directionY = 1;
-        } else {
-          directionY = -1;
-        }
-      }
-
       return this.createForwardFrame(100, minFrameX, maxFrameX, {
         once: true,
       }).pipe(
