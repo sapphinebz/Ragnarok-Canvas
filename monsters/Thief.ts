@@ -11,7 +11,7 @@ import { playAudio } from '../utils/play-audio';
 import { CropImage, DIRECTION, Monster } from './Monster';
 
 export class Thief extends Monster {
-  maxHp = 12000;
+  maxHp = 1200;
   hp = this.maxHp;
   atk = 18;
   x = 100;
@@ -24,6 +24,7 @@ export class Thief extends Monster {
   height = 107;
   attackSpeed = 80;
   dps = 0;
+  showHpGage = true;
 
   daggerHitSound = loadDaggerHitSound();
   damagedAudio = loadThiefFamaleDamagedAudio();

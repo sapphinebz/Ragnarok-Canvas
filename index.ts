@@ -19,6 +19,7 @@ import {
   ReplaySubject,
   EMPTY,
   NEVER,
+  MonoTypeOperatorFunction,
 } from 'rxjs';
 import {
   connect,
@@ -67,7 +68,7 @@ const onWindowResize$ = fromEvent(window, 'resize').pipe(
 // number monster in field & class
 const monstersClass: [any, number][] = [
   [Acidus, 2],
-  [Poring, 15],
+  [Poring, 20],
   [Fabre, 7],
   // [Fabre, 1],
 ];
@@ -161,14 +162,15 @@ const showAnimationDieAndRespawn = (monster: Monster) => {
 };
 
 const monstersBeHurtOrDie = (): OperatorFunction<Monster[], any> =>
-  mergeMap((collision) => {
-    return from(collision).pipe(
+  mergeMap((damagedMonsters) => {
+    return from(damagedMonsters).pipe(
       mergeMap((monster) => {
         if (monster.hp <= 0) {
           killCount$.next(killCount$.value + 1);
           return showAnimationDieAndRespawn(monster);
         }
         monster.hurt();
+        monster.showHpGage = true;
         return EMPTY;
       })
     );
@@ -184,6 +186,26 @@ const findMonstersBeAttacked = (): OperatorFunction<Area, Monster[]> => {
       return false;
     });
   });
+};
+
+const showGageHpLatestDamagedMonster = (): MonoTypeOperatorFunction<
+  Monster[]
+> => {
+  let latestDamagedMonster: Monster[];
+  return (source: Observable<Monster[]>) =>
+    source.pipe(
+      tap((monsters) => {
+        if (latestDamagedMonster) {
+          for (const monster of latestDamagedMonster) {
+            monster.showHpGage = false;
+          }
+        }
+        latestDamagedMonster = monsters;
+        for (const monster of latestDamagedMonster) {
+          monster.showHpGage = true;
+        }
+      })
+    );
 };
 
 const monsters = generateMonsters();
@@ -203,6 +225,7 @@ onLoadPlayer$
         thief.aggressiveMonsters(),
         thief.decreaseTargetsHp(),
         thief.forceTargetsFaceToMe(),
+        showGageHpLatestDamagedMonster(),
         monstersBeHurtOrDie()
       );
     })

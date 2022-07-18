@@ -101,6 +101,10 @@ export abstract class Monster {
   frameY = 0;
   width: number;
   height: number;
+
+  // gage
+  showHpGage = false;
+
   // damage per second
   dps = 800;
   attackSpeed = 120;
@@ -360,6 +364,11 @@ export abstract class Monster {
             width,
             height
           );
+
+          if (this.showHpGage) {
+            this.drawGage(this.width, 'hsl(0deg 0% 10% / 70%)');
+            this.drawGage(this.width * (this.hp / this.maxHp), 'lime');
+          }
         }
       });
   }
@@ -797,6 +806,19 @@ export abstract class Monster {
       this.y = moveLocation.y;
       this.onMoving$.next(moveLocation);
     });
+  }
+
+  private drawGage(value: number, color: string) {
+    this.ctx.beginPath();
+    this.ctx.fillStyle = color;
+    this.ctx.rect(this.x, this.y + this.height + 5, value, 5);
+    this.ctx.fill();
+
+    this.ctx.beginPath();
+    this.ctx.strokeStyle = 'hsl(0deg 0% 10% / 70%)';
+    // this.ctx.strokeStyle = 'blue';
+    this.ctx.strokeRect(this.x, this.y + this.height + 5, value, 5);
+    this.ctx.fill();
   }
 
   private walkingDirection(option: WalkingConfig) {
