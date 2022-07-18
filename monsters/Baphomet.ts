@@ -24,24 +24,144 @@ export class Baphomet extends Monster {
   frames: CropImage[][] = [
     [
       { order: 0, offsetX: 4, offsetY: 3, width: 83, height: 118 },
-      { order: 1, offsetX: 109, offsetY: 5, width: 87, height: 117 },
-      { order: 2, offsetX: 215, offsetY: 6, width: 91, height: 116 },
-      { order: 3, offsetX: 332, offsetY: 8, width: 95, height: 112 },
-      { order: 4, offsetX: 445, offsetY: 11, width: 93, height: 106 },
-      { order: 5, offsetX: 561, offsetY: 10, width: 90, height: 107 },
-      { order: 6, offsetX: 675, offsetY: 10, width: 85, height: 110 },
-      { order: 7, offsetX: 783, offsetY: 8, width: 84, height: 114 },
+      {
+        order: 1,
+        offsetX: 109,
+        offsetY: 5,
+        width: 87,
+        height: 117,
+        marginLeftWidth: -6,
+        marginHeight: 1,
+      },
+      {
+        order: 2,
+        offsetX: 215,
+        offsetY: 6,
+        width: 91,
+        height: 116,
+        marginLeftWidth: -10,
+        marginHeight: 2,
+      },
+      {
+        order: 3,
+        offsetX: 332,
+        offsetY: 8,
+        width: 95,
+        height: 112,
+        marginLeftWidth: -14,
+        marginHeight: 6,
+      },
+      {
+        order: 4,
+        offsetX: 445,
+        offsetY: 11,
+        width: 93,
+        height: 106,
+        marginLeftWidth: -12,
+        marginHeight: 12,
+      },
+      {
+        order: 5,
+        offsetX: 561,
+        offsetY: 10,
+        width: 90,
+        height: 107,
+        marginLeftWidth: -9,
+        marginHeight: 11,
+      },
+      {
+        order: 6,
+        offsetX: 675,
+        offsetY: 10,
+        width: 85,
+        height: 110,
+        marginLeftWidth: -4,
+        marginHeight: 8,
+      },
+      {
+        order: 7,
+        offsetX: 783,
+        offsetY: 8,
+        width: 84,
+        height: 114,
+        marginLeftWidth: -2,
+        marginHeight: 4,
+      },
     ],
     [],
     [
-      { order: 0, offsetX: 7, offsetY: 314, width: 88, height: 119 },
-      { order: 1, offsetX: 121, offsetY: 319, width: 96, height: 110 },
-      { order: 2, offsetX: 239, offsetY: 319, width: 88, height: 110 },
-      { order: 3, offsetX: 353, offsetY: 310, width: 83, height: 121 },
-      { order: 4, offsetX: 483, offsetY: 324, width: 82, height: 102 },
-      { order: 5, offsetX: 585, offsetY: 319, width: 78, height: 112 },
-      { order: 6, offsetX: 686, offsetY: 318, width: 67, height: 114 },
-      { order: 7, offsetX: 775, offsetY: 323, width: 78, height: 103 },
+      {
+        order: 0,
+        offsetX: 7,
+        offsetY: 314,
+        width: 88,
+        height: 119,
+        marginLeftWidth: -6,
+        marginHeight: -1,
+      },
+      {
+        order: 1,
+        offsetX: 121,
+        offsetY: 319,
+        width: 96,
+        height: 110,
+        marginLeftWidth: -16,
+        marginHeight: 10,
+      },
+      {
+        order: 2,
+        offsetX: 239,
+        offsetY: 319,
+        width: 88,
+        height: 110,
+        marginLeftWidth: -4,
+        marginHeight: 8,
+      },
+      {
+        order: 3,
+        offsetX: 353,
+        offsetY: 310,
+        width: 83,
+        height: 121,
+        marginLeftWidth: 12,
+        marginHeight: -3,
+      },
+      {
+        order: 4,
+        offsetX: 483,
+        offsetY: 324,
+        width: 82,
+        height: 102,
+        marginLeftWidth: 20,
+        marginHeight: 19,
+      },
+      {
+        order: 5,
+        offsetX: 585,
+        offsetY: 319,
+        width: 78,
+        height: 112,
+        marginLeftWidth: 7,
+        marginHeight: 9,
+      },
+      {
+        order: 6,
+        offsetX: 686,
+        offsetY: 318,
+        width: 67,
+        height: 114,
+        marginLeftWidth: -1,
+        marginHeight: 7,
+      },
+      {
+        order: 7,
+        offsetX: 775,
+        offsetY: 323,
+        width: 78,
+        height: 103,
+        marginLeftWidth: 6,
+        marginHeight: 18,
+      },
     ],
   ];
 
@@ -54,17 +174,23 @@ export class Baphomet extends Monster {
   }
 
   attack(): Observable<any> {
-    return EMPTY;
+    return defer(() => {
+      this.frameY = 2;
+      return this.createForwardFrame(150, 0, 3);
+    });
   }
 
   walking() {
-    return EMPTY;
+    return defer(() => {
+      this.frameY = 2;
+      return this.createForwardFrame(150, 0, 3);
+    });
   }
 
   standing() {
     return defer(() => {
       this.frameY = 0;
-      return this.createForwardFrame(1000, 0, 1);
+      return this.createForwardFrame(150, 0, 7);
     });
   }
 

@@ -46,6 +46,7 @@ import { randomMinMax } from './utils/random-minmax';
 import { audioIsOpenImage } from './sprites/audio-is-open-image';
 import { audioIsCloseImage } from './sprites/audio-is-close-image';
 import { loadProteraFieldVol2 } from './sounds/prontera-field-vol2';
+import { Baphomet } from './monsters/Baphomet';
 // import { Baphomet } from './monsters/Baphomet';
 
 const canvas = document.querySelector<HTMLCanvasElement>('canvas');
@@ -67,13 +68,13 @@ const onWindowResize$ = fromEvent(window, 'resize').pipe(
  */
 // number monster in field & class
 const monstersClass: [any, number][] = [
-  [Acidus, 2],
-  [Poring, 20],
-  [Fabre, 12],
+  [Acidus, 0],
+  [Poring, 0],
+  [Fabre, 0],
   // [Fabre, 1],
 ];
 
-// const baphomet = new Baphomet(canvas);
+const baphomet = new Baphomet(canvas);
 
 const onRespawnMonster$ = new Subject<Monster>();
 
@@ -336,7 +337,7 @@ onCanvasRender$.subscribe(() => {
     monster.drawImage();
   }
 
-  // baphomet.drawImage();
+  baphomet.drawImage();
 
   keyboardController.drawPlayer();
 
@@ -349,7 +350,7 @@ onCanvasRender$.subscribe(() => {
   );
 });
 
-// baphomet.standing().subscribe(() => tick());
+baphomet.attack().subscribe(() => tick());
 
 killCount$.subscribe(() => tick());
 
