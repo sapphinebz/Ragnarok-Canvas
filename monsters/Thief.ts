@@ -8,10 +8,10 @@ import { loadLeftThiefDagger } from '../sprites/load-thief-left-dagger';
 import { loadThiefRightSprite } from '../sprites/load-thief-right';
 import { loadRightThiefDagger } from '../sprites/load-thief-right-dagger';
 import { playAudio } from '../utils/play-audio';
-import { AggressiveCondition, CropImage, DIRECTION, Monster } from './Monster';
+import { CropImage, DIRECTION, Monster } from './Monster';
 
 export class Thief extends Monster {
-  maxHp = 500;
+  maxHp = 1200;
   hp = this.maxHp;
   atk = 18;
   x = 100;
