@@ -16,6 +16,7 @@ import {
   takeWhile,
   tap,
 } from 'rxjs/operators';
+import { loadPoringAttackAudio } from '../sounds/poring-attack';
 import { loadPoringDamage } from '../sounds/poring-damage';
 import { loadPoringDeadSound } from '../sounds/poring-dead';
 import { loadPoringWalkSound } from '../sounds/poring-walk';
@@ -27,7 +28,7 @@ import { AggressiveCondition, CropImage, DIRECTION, Monster } from './Monster';
 export class Poring extends Monster {
   x = 100;
   y = 100;
-  hp = 50;
+  hp = 75;
   maxHp = this.hp;
   atk = 15;
   speedX = 3;
@@ -40,10 +41,13 @@ export class Poring extends Monster {
   attackRange = 30;
   dps = 600;
 
+  onPlayAttackAudio$ = new Subject<void>();
+  attackAudio = loadPoringAttackAudio();
+
   dyingAudio = loadPoringDeadSound();
 
-  damageAudio = loadPoringDamage();
   onPlayDamageAudio$ = new Subject<void>();
+  damageAudio = loadPoringDamage();
 
   walkingAudio = loadPoringWalkSound();
 
@@ -129,6 +133,17 @@ export class Poring extends Monster {
     this.dyingAudio.volume = 0.05;
     this.walkingAudio.volume = 0.02;
     this.damageAudio.volume = 0.05;
+    this.attackAudio.volume = 0.05;
+
+    this.onPlayAttackAudio$
+      .pipe(
+        switchMap(() => {
+          this.attackAudio.currentTime = 0;
+          return playAudio(this.attackAudio);
+        }),
+        takeUntil(this.onCleanup$)
+      )
+      .subscribe();
 
     this.onPlayDamageAudio$
       .pipe(
@@ -168,8 +183,33 @@ export class Poring extends Monster {
   attack(): Observable<any> {
     return defer(() => {
       this.frameY = 1;
-      return this.createForwardFrame(100, 0, 7, { once: true }).pipe(
+      const maxFrameX = 7;
+      const minFrameX = 0;
+
+      // Poring should pushing when attack
+      const locationBeforeAttack = { x: this.x, y: this.y };
+      const percentAsFrameX = (frameX: number) => {
+        if (frameX + 1 <= 4) {
+          return (25 * (frameX + 1)) / 100;
+        }
+        return (-25 * (frameX - 3) + 100) / 100;
+      };
+
+      return this.createForwardFrame(100, minFrameX, maxFrameX, {
+        once: true,
+      }).pipe(
         tap((frameX) => {
+          if (frameX === 3) {
+            this.onPlayAttackAudio$.next();
+          }
+          const percent = percentAsFrameX(frameX);
+          const directionX = this.direction === DIRECTION.LEFT ? -1 : 1;
+
+          this.x =
+            locationBeforeAttack.x +
+            (this.attackRange / 2) * percent * directionX;
+
+          this.y = locationBeforeAttack.y + (25 / 2) * percent * directionX;
           if (frameX === 4) {
             if (this.direction === DIRECTION.RIGHT) {
               this.onDamageArea$.next({
