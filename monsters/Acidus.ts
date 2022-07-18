@@ -1,18 +1,11 @@
-import { defer, EMPTY, Observable, Subject, switchMap } from 'rxjs';
+import { defer, Observable, Subject, switchMap } from 'rxjs';
 import { takeUntil, tap } from 'rxjs/operators';
 import { loadAcidusAttackSound } from '../sounds/acidus-attack';
 import { loadAcidusDeadSound } from '../sounds/acidus-dead';
 import { loadAcidusLeftSprite } from '../sprites/load-acidus-left';
 import { loadAcidusSpriteRight } from '../sprites/load-acidus-right';
-import { distanceBetween } from '../utils/collision';
 import { playAudio } from '../utils/play-audio';
-import {
-  ACTION,
-  AggressiveCondition,
-  CropImage,
-  DIRECTION,
-  Monster,
-} from './Monster';
+import { CropImage, DIRECTION, Monster } from './Monster';
 
 export class Acidus extends Monster {
   maxHp = 120;
@@ -27,6 +20,7 @@ export class Acidus extends Monster {
   height = 120;
   atk = 50;
   visionRange = 200;
+  isAggressiveOnVision = true;
   dps = 300;
 
   attackAudio = loadAcidusAttackSound();
@@ -263,14 +257,6 @@ export class Acidus extends Monster {
   }
 
   drawEffect(): void {}
-
-  checkAggressive(condition: AggressiveCondition) {
-    const distance = distanceBetween(condition.target, this);
-    if (distance <= this.visionRange) {
-      this.aggressiveTarget = condition.target;
-      this.actionChange$.next(ACTION.MOVE_TO_TARGET);
-    }
-  }
 
   hurting(): Observable<any> {
     return defer(() => {

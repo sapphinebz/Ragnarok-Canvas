@@ -23,7 +23,7 @@ import { loadPoringWalkSound } from '../sounds/poring-walk';
 import { loadPoringSpriteLeft } from '../sprites/load-poring-left';
 import { loadPoringSpriteRight } from '../sprites/load-poring-right';
 import { playAudio } from '../utils/play-audio';
-import { AggressiveCondition, CropImage, DIRECTION, Monster } from './Monster';
+import { CropImage, DIRECTION, Monster } from './Monster';
 
 export class Poring extends Monster {
   x = 100;
@@ -39,6 +39,7 @@ export class Poring extends Monster {
   height = 60;
 
   attackRange = 30;
+  isAggressiveOnVision = false;
   dps = 600;
 
   onPlayAttackAudio$ = new Subject<void>();
@@ -269,8 +270,6 @@ export class Poring extends Monster {
       );
     });
   }
-
-  checkAggressive(condition: AggressiveCondition): void {}
 
   private playWalkingAudio() {
     return new Observable((subscriber) => {

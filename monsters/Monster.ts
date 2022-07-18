@@ -27,6 +27,7 @@ import {
   connect,
   distinctUntilChanged,
   filter,
+  mergeAll,
   repeat,
   takeUntil,
   takeWhile,
@@ -50,10 +51,6 @@ export interface WalkingConfig {
 
 export type WalkingStoppable = Pick<WalkingConfig, 'stopIfOutOfCanvas'>;
 
-export interface AggressiveCondition {
-  target: Monster;
-}
-
 export const enum ACTION {
   IDLE,
   RANDOM,
@@ -73,7 +70,7 @@ export const enum ACTION {
 
 export const enum DIRECTION {
   LEFT,
-  RIGHT
+  RIGHT,
 }
 
 export interface Area extends MoveLocation {
@@ -117,6 +114,7 @@ export abstract class Monster {
   aggressiveTarget$ = new BehaviorSubject<Monster | null>(null);
   visionRange = 150;
   attackRange = 70;
+  isAggressiveOnVision = false;
 
   get aggressiveTarget() {
     return this.aggressiveTarget$.value;
@@ -400,7 +398,49 @@ export abstract class Monster {
 
   abstract hurting(): Observable<any>;
 
-  abstract checkAggressive(condition: AggressiveCondition): void;
+  autoAggressiveOnVisionTarget(target$: Observable<Monster>) {
+    if (this.isAggressiveOnVision) {
+      const onTargetsMoving$ = target$.pipe(
+        map((target) =>
+          target.onMoving$.pipe(
+            startWith(0),
+            map(() => {
+              return target;
+            })
+          )
+        ),
+        mergeAll()
+      );
+      const onSelfMoving$ = this.onMoving$.pipe(
+        startWith(0),
+        map(() => {
+          return this as Monster;
+        })
+      );
+      combineLatest({ target: onTargetsMoving$, self: onSelfMoving$ })
+        .pipe(
+          map(({ target, self }) => {
+            const distance = distanceBetween(target, self);
+            if (distance <= this.visionRange) {
+              return target;
+            }
+            return null;
+          }),
+          distinctUntilChanged(),
+          takeUntil(this.onDied$),
+          takeUntil(this.onCleanup$)
+        )
+        .subscribe((aggressiveTarget) => {
+          this.aggressiveTarget = aggressiveTarget;
+
+          if (aggressiveTarget !== null) {
+            this.actionChange$.next(ACTION.MOVE_TO_TARGET);
+          } else {
+            this.actionChange$.next(ACTION.RANDOM);
+          }
+        });
+    }
+  }
 
   createForwardFrame(
     delay: number,

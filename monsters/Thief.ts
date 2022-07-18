@@ -408,8 +408,6 @@ export class Thief extends Monster {
     });
   }
 
-  checkAggressive(condition: AggressiveCondition): void {}
-
   hurting(): Observable<any> {
     return defer(() => {
       this.frameY = 6;

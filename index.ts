@@ -194,6 +194,8 @@ const monsters = generateMonsters();
  */
 const thief = new Thief(canvas);
 
+const onLoadPlayer$ = new BehaviorSubject<Monster>(thief);
+
 thief.onDamageArea$
   .pipe(
     findMonstersBeAttacked(),
@@ -338,36 +340,11 @@ onCanvasMount$.pipe(switchMap(() => onLoadMonster$)).subscribe((monster) => {
   monster.randomSpawn();
 });
 
-// Monsters have agressive to Player
-combineLatest({
-  player: thief.onMoving$.pipe(
-    startWith(0),
-    map(() => thief)
-  ),
-  monster: onLoadMonster$.pipe(
-    filter((monster) => monster.checkAggressive !== undefined),
-    mergeMap((monster) => {
-      const alreadyAggressive$ = monster.aggressiveTarget$.pipe(
-        filter((isAggressive) => isAggressive !== null)
-      );
-      return monster.onMoving$.pipe(
-        map(() => monster),
-        takeUntil(alreadyAggressive$)
-      );
-    })
-  ),
-}).subscribe(({ player, monster }) => {
-  if (monster.aggressiveTarget === null) {
-    monster.checkAggressive({
-      target: player,
-    });
-  }
-});
-
 // Monster Random Action
 const onMonsterTickRender$ = onLoadMonster$.pipe(
   mergeMap((monster) => {
     monster.randomAction();
+    monster.autoAggressiveOnVisionTarget(onLoadPlayer$);
     return monster.onActionTick$.pipe(takeUntil(monster.onDied$));
   })
 );
