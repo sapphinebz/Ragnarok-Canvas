@@ -24,11 +24,13 @@ import {
 } from 'rxjs';
 import {
   concatAll,
+  concatMap,
   connect,
   distinctUntilChanged,
   filter,
   mergeAll,
   repeat,
+  takeLast,
   takeUntil,
   takeWhile,
 } from 'rxjs/operators';
@@ -111,6 +113,10 @@ export abstract class Monster {
   onCleanup$ = new ReplaySubject<void>(1);
   onDamageArea$ = new Subject<Area>();
   onMoving$ = new Subject<MoveLocation>();
+  /**
+   * just standing and thinking
+   */
+  onStandingWithAggressiveVision = new Subject<MoveLocation>();
   /**
    * if aggressive true will move to player and attack
    */
@@ -267,9 +273,15 @@ export abstract class Monster {
             const randomEndAction = () => takeUntil(timer(randomTime()));
             const actions = [
               this.walkingLeft().pipe(randomEndAction()),
-              this.standing().pipe(randomEndAction()),
+              this.standing().pipe(
+                this.emitStandingAggressive(),
+                randomEndAction()
+              ),
               this.walkingRight().pipe(randomEndAction()),
-              this.standing().pipe(randomEndAction()),
+              this.standing().pipe(
+                this.emitStandingAggressive(),
+                randomEndAction()
+              ),
               this.walkingUp().pipe(randomEndAction()),
               this.walkingDown().pipe(randomEndAction()),
               this.walkingTopLeft().pipe(randomEndAction()),
@@ -420,7 +432,10 @@ export abstract class Monster {
         ),
         mergeAll()
       );
-      const onSelfMoving$ = this.onMoving$.pipe(
+      const onSelfMoving$ = merge(
+        this.onMoving$,
+        this.onStandingWithAggressiveVision
+      ).pipe(
         startWith(0),
         map(() => {
           return this as Monster;
@@ -797,6 +812,19 @@ export abstract class Monster {
         }
       }
     });
+  }
+
+  private emitStandingAggressive<T>(): MonoTypeOperatorFunction<T> {
+    return (source: Observable<T>) => {
+      if (this.isAggressiveOnVision) {
+        return source.pipe(
+          tap(() => {
+            this.onStandingWithAggressiveVision.next({ x: this.x, y: this.y });
+          })
+        );
+      }
+      return source;
+    };
   }
 
   private updateMove(): MonoTypeOperatorFunction<MoveLocation> {

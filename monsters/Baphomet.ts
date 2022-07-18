@@ -32,6 +32,17 @@ export class Baphomet extends Monster {
       { order: 6, offsetX: 675, offsetY: 10, width: 85, height: 110 },
       { order: 7, offsetX: 783, offsetY: 8, width: 84, height: 114 },
     ],
+    [],
+    [
+      { order: 0, offsetX: 7, offsetY: 314, width: 88, height: 119 },
+      { order: 1, offsetX: 121, offsetY: 319, width: 96, height: 110 },
+      { order: 2, offsetX: 239, offsetY: 319, width: 88, height: 110 },
+      { order: 3, offsetX: 353, offsetY: 310, width: 83, height: 121 },
+      { order: 4, offsetX: 483, offsetY: 324, width: 82, height: 102 },
+      { order: 5, offsetX: 585, offsetY: 319, width: 78, height: 112 },
+      { order: 6, offsetX: 686, offsetY: 318, width: 67, height: 114 },
+      { order: 7, offsetX: 775, offsetY: 323, width: 78, height: 103 },
+    ],
   ];
 
   constructor(public canvas: HTMLCanvasElement) {
