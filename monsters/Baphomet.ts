@@ -8,18 +8,18 @@ export class Baphomet extends Monster {
   hp = this.maxHp;
   x = 300;
   y = 300;
-  speedX = 7;
-  speedY = 7;
+  speedX = 8;
+  speedY = 8;
   frameX = 0;
   frameY = 0;
 
   width = 83;
   height = 118;
 
-  atk = 50;
+  atk = 250;
   visionRange = 200;
   isAggressiveOnVision = false;
-  dps = 300;
+  dps = 100;
 
   frames: CropImage[][] = [
     // standing
@@ -123,7 +123,8 @@ export class Baphomet extends Monster {
         marginLeftWidth: -6,
         marginLeftHeight: -1,
 
-        marginRightWidth: 36,
+        marginRightWidth: 30,
+        marginRightHeight: 9,
       },
       {
         order: 1,
@@ -133,8 +134,8 @@ export class Baphomet extends Monster {
         height: 110,
         marginLeftWidth: -9,
         marginLeftHeight: -1,
-        marginRightWidth: 31,
-        marginRightHeight: 0,
+        marginRightWidth: 25,
+        marginRightHeight: 9,
       },
       {
         order: 2,
@@ -145,8 +146,8 @@ export class Baphomet extends Monster {
         marginLeftWidth: -6,
         marginLeftHeight: -1,
 
-        marginRightWidth: 36,
-        marginRightHeight: 0,
+        marginRightWidth: 30,
+        marginRightHeight: 9,
       },
       {
         order: 3,
@@ -157,8 +158,8 @@ export class Baphomet extends Monster {
         marginLeftWidth: -2,
         marginLeftHeight: -2,
 
-        marginRightWidth: 37,
-        marginRightHeight: -1,
+        marginRightWidth: 31,
+        marginRightHeight: 8,
       },
       {
         order: 4,
