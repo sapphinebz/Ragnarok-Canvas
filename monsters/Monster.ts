@@ -12,6 +12,7 @@ import {
   merge,
   MonoTypeOperatorFunction,
   Observable,
+  of,
   OperatorFunction,
   pairwise,
   ReplaySubject,
@@ -168,16 +169,16 @@ export abstract class Monster {
     public leftImage: HTMLImageElement,
     public rightImage: HTMLImageElement
   ) {
-    fromEvent(leftImage, 'load')
-      .pipe(take(1), takeUntil(this.onCleanup$))
-      .subscribe(() => {
-        this.leftImage$.next(leftImage);
+    this.loadSprite(this.leftImage)
+      .pipe(takeUntil(this.onCleanup$))
+      .subscribe((image) => {
+        this.leftImage$.next(image);
       });
 
-    fromEvent(rightImage, 'load')
-      .pipe(take(1), takeUntil(this.onCleanup$))
-      .subscribe(() => {
-        this.rightImage$.next(rightImage);
+    this.loadSprite(this.rightImage)
+      .pipe(takeUntil(this.onCleanup$))
+      .subscribe((image) => {
+        this.rightImage$.next(image);
       });
 
     this.criticalAttackSound.volume = 0.05;
@@ -396,6 +397,17 @@ export abstract class Monster {
   abstract getFrameEntry(frameY: number, frameX: number): CropImage;
 
   abstract drawEffect(): void;
+
+  loadSprite(image: HTMLImageElement) {
+    if (image.complete) {
+      return of(image);
+    } else {
+      return fromEvent(image, 'load').pipe(
+        take(1),
+        map(() => image)
+      );
+    }
+  }
 
   drawImage() {
     this.drawImage$.next();
@@ -732,7 +744,6 @@ export abstract class Monster {
   targetsBeHurtOrDie(): OperatorFunction<Monster[], any> {
     return tap((monsters) => {
       for (const monster of monsters) {
-        console.clear();
         if (monster.hp <= 0) {
           monster.die();
         } else {

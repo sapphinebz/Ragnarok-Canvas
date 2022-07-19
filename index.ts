@@ -334,8 +334,6 @@ onCanvasRender$.subscribe(() => {
     monster.drawImage();
   }
 
-  // baphomet.drawImage();
-
   keyboardController.drawPlayer();
 
   drawScore();
@@ -371,6 +369,7 @@ onCanvasMount$.pipe(switchMap(() => onLoadMonster$)).subscribe((monster) => {
 // Monster Random Action
 const onMonsterTickRender$ = onLoadMonster$.pipe(
   mergeMap((monster) => {
+    console.log('monster', monster);
     monster.randomAction();
     monster.autoAggressiveOnVisionTarget(onLoadPlayer$);
     return monster.onActionTick$.pipe(takeUntil(monster.onDied$));

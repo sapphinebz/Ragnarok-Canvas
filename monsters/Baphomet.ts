@@ -21,7 +21,7 @@ import { playAudio, stopAudio } from '../utils/play-audio';
 import { CropImage, DIRECTION, Monster } from './Monster';
 
 export class Baphomet extends Monster {
-  maxHp = 1200;
+  maxHp = 100;
   hp = this.maxHp;
   x = 300;
   y = 300;
@@ -415,14 +415,7 @@ export class Baphomet extends Monster {
   walking() {
     return defer(() => {
       this.frameY = 2;
-      return this.createForwardFrame(80, 0, 3)
-        .pipe
-        // tap((frameX) => {
-        //   if (frameX === 3) {
-        //     this.onPlayBreathAudio$.next();
-        //   }
-        // })
-        ();
+      return this.createForwardFrame(80, 0, 3);
     });
   }
 
