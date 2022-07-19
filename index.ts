@@ -67,10 +67,10 @@ const onWindowResize$ = fromEvent(window, 'resize').pipe(
  */
 // number monster in field & class
 const monstersClass: [any, number][] = [
-  [Acidus, 0],
+  [Acidus, 2],
   [Poring, 20],
   [Fabre, 7],
-  [Baphomet, 0],
+  [Baphomet, 1],
 ];
 
 const onRespawnMonster$ = new Subject<Monster>();
