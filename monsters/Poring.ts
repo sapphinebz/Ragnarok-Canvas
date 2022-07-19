@@ -20,8 +20,8 @@ import { loadPoringAttackAudio } from '../sounds/poring-attack';
 import { loadPoringDamage } from '../sounds/poring-damage';
 import { loadPoringDeadSound } from '../sounds/poring-dead';
 import { loadPoringWalkSound } from '../sounds/poring-walk';
-import { loadPoringSpriteLeft } from '../sprites/load-poring-left';
-import { loadPoringSpriteRight } from '../sprites/load-poring-right';
+import { poringSpriteLeftImage } from '../sprites/load-poring-left';
+import { poringSpriteRightImage } from '../sprites/load-poring-right';
 import { playAudio } from '../utils/play-audio';
 import { CropImage, DIRECTION, Monster } from './Monster';
 
@@ -129,7 +129,7 @@ export class Poring extends Monster {
   ];
 
   constructor(canvas: HTMLCanvasElement) {
-    super(canvas, loadPoringSpriteLeft(), loadPoringSpriteRight());
+    super(canvas, poringSpriteLeftImage, poringSpriteRightImage);
 
     this.dyingAudio.volume = 0.05;
     this.walkingAudio.volume = 0.02;
