@@ -123,23 +123,23 @@ export class Fabre extends Monster {
   drawEffect(): void {}
 
   hurting(): Observable<any> {
-    return EMPTY;
+    return defer(() => {
+      this.frameY = 2;
+
+      return this.createForwardFrame(350, 0, 0, { once: true });
+    });
   }
 
   dying(): Observable<any> {
     return defer(() => {
       this.frameY = 2;
 
-      return this.createForwardFrame(350, 0, 1).pipe(
-        takeWhile((frameX) => {
-          return frameX + 1 <= 1;
-        }),
-        onErrorResumeNext(
-          defer(() => {
+      return this.createForwardFrame(350, 0, 1, { once: true }).pipe(
+        tap((frameX) => {
+          if (frameX === 0) {
             this.dyingAudio.play();
-            return timer(1000);
-          })
-        )
+          }
+        })
       );
     });
   }
