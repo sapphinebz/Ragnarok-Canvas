@@ -21,7 +21,7 @@ import { playAudio, stopAudio } from '../utils/play-audio';
 import { CropImage, DIRECTION, Monster } from './Monster';
 
 export class Baphomet extends Monster {
-  maxHp = 100;
+  maxHp = 450;
   hp = this.maxHp;
   x = 300;
   y = 300;

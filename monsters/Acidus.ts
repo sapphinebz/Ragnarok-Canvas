@@ -2,8 +2,8 @@ import { defer, Observable, Subject, switchMap } from 'rxjs';
 import { takeUntil, tap } from 'rxjs/operators';
 import { loadAcidusAttackSound } from '../sounds/acidus-attack';
 import { loadAcidusDeadSound } from '../sounds/acidus-dead';
-import { loadAcidusLeftSprite } from '../sprites/load-acidus-left';
-import { loadAcidusSpriteRight } from '../sprites/load-acidus-right';
+import { acidusLeftSpriteImage } from '../sprites/load-acidus-left';
+import { acidusSpriteRightImage } from '../sprites/load-acidus-right';
 import { playAudio } from '../utils/play-audio';
 import { CropImage, DIRECTION, Monster } from './Monster';
 
@@ -198,7 +198,7 @@ export class Acidus extends Monster {
     ],
   ];
   constructor(public canvas: HTMLCanvasElement) {
-    super(canvas, loadAcidusLeftSprite(), loadAcidusSpriteRight());
+    super(canvas, acidusLeftSpriteImage, acidusSpriteRightImage);
     this.deadAudio.volume = 0.05;
     this.attackAudio.volume = 0.05;
 
