@@ -18,7 +18,7 @@ export class Baphomet extends Monster {
 
   atk = 150;
   visionRange = 200;
-  isAggressiveOnVision = false;
+  isAggressiveOnVision = true;
   dps = 300;
 
   frames: CropImage[][] = [
