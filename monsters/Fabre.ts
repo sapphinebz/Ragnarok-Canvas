@@ -16,24 +16,43 @@ export class Fabre extends Monster {
   height = 40;
   maxHp = 100;
   hp = this.maxHp;
+  dps = 100;
 
   dyingAudio = loadFabreDeadSound();
 
   frames: CropImage[][] = [
+    // Walking
     [
-      { order: 0, offsetX: 0, width: 43 },
-      { order: 1, offsetX: 48, width: 43 },
-      { order: 2, offsetX: 96, width: 43 },
-      { order: 3, offsetX: 144, width: 43 },
+      { order: 0, offsetX: 10, offsetY: 11, width: 34, height: 27 },
+      { order: 1, offsetX: 58, offsetY: 11, width: 34, height: 27 },
+      { order: 2, offsetX: 108, offsetY: 11, width: 31, height: 27 },
+      { order: 3, offsetX: 154, offsetY: 12, width: 33, height: 26 },
+      { order: 4, offsetX: 206, offsetY: 12, width: 32, height: 26 },
+      { order: 5, offsetX: 251, offsetY: 12, width: 32, height: 25 },
+      { order: 6, offsetX: 299, offsetY: 12, width: 30, height: 25 },
+      { order: 7, offsetX: 344, offsetY: 13, width: 32, height: 26 },
     ],
     [
-      { order: 0, offsetX: 10, offsetY: 57, width: 33, height: 26 },
+      // Attacking
+      {
+        order: 0,
+        offsetX: 10,
+        offsetY: 57,
+        width: 33,
+        height: 26,
+        marginLeftWidth: 1,
+        marginLeftHeight: 1,
+      },
       {
         order: 1,
         offsetX: 60,
         offsetY: 55,
         width: 41,
         height: 26,
+        marginLeftWidth: -7,
+        marginLeftHeight: 5,
+        marginRightWidth: 0,
+        marginRightHeight: 5,
       },
       {
         order: 2,
@@ -41,21 +60,13 @@ export class Fabre extends Monster {
         offsetY: 54,
         width: 31,
         height: 28,
+        marginLeftWidth: 1,
+        marginLeftHeight: -1,
+        marginRightWidth: 3,
+        marginRightHeight: -2,
       },
-      {
-        order: 3,
-        offsetX: 166,
-        offsetY: 56,
-        width: 39,
-        height: 27,
-      },
-      {
-        order: 4,
-        offsetX: 222,
-        offsetY: 57,
-        width: 29,
-        height: 26,
-      },
+      { order: 3, offsetX: 165, offsetY: 56, width: 40, height: 27 },
+      { order: 4, offsetX: 222, offsetY: 57, width: 29, height: 26 },
     ],
     [
       {
@@ -89,13 +100,13 @@ export class Fabre extends Monster {
   standing(): Observable<any> {
     return defer(() => {
       this.frameY = 0;
-      return this.createForwardFrame(150, 0, 3);
+      return this.createForwardFrame(80, 0, 3);
     });
   }
   walking(): Observable<any> {
     return defer(() => {
       this.frameY = 0;
-      return this.createForwardFrame(150, 0, 3);
+      return this.createForwardFrame(80, 0, 3);
     });
   }
 
@@ -124,13 +135,7 @@ export class Fabre extends Monster {
   attack(): Observable<any> {
     return defer(() => {
       this.frameY = 1;
-      return this.createForwardFrame(1000, 0, 2, { once: true }).pipe(
-        this.moveLocationOnAttack({
-          moveY: 15,
-          moveX: 15,
-          maxLocationOnFrame: 1,
-        })
-      );
+      return this.createForwardFrame(150, 0, 2, { once: true });
     });
   }
 }
