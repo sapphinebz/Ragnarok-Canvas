@@ -389,7 +389,7 @@ export abstract class Monster {
           if (this.showHpGauge) {
             const gaugeHpRate = this.hp / this.maxHp;
             this.drawGauge(this.width, 'hsl(0deg 0% 10% / 70%)');
-            if (gaugeHpRate <= 0.3) {
+            if (gaugeHpRate <= 0.2) {
               this.drawGauge(this.width * (this.hp / this.maxHp), '#d50000');
             } else {
               this.drawGauge(this.width * (this.hp / this.maxHp), 'lime');

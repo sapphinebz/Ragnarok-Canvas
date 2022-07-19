@@ -250,60 +250,6 @@ export class Poring extends Monster {
         marginRightWidth: -15,
         marginRightHeight: 17,
       },
-      // {
-      //   order: 0,
-      //   offsetX: 0,
-      //   width: 50,
-      //   offsetY: 200,
-      //   height: 50,
-      //   marginRightWidth: 5,
-      // },
-      // {
-      //   order: 1,
-      //   offsetX: 50,
-      //   width: 50,
-      //   offsetY: 200,
-      //   height: 50,
-      //   marginRightWidth: 5,
-      // },
-      // {
-      //   order: 2,
-      //   offsetX: 130,
-      //   width: 50,
-      //   offsetY: 200,
-      //   height: 50,
-      //   marginRightWidth: 5,
-      // },
-      // {
-      //   order: 3,
-      //   offsetX: 240,
-      //   offsetY: 190,
-      //   width: 90,
-      //   height: 80,
-      //   marginHeight: -20,
-      //   marginLeftWidth: 0,
-      //   marginRightWidth: -35,
-      // },
-      // {
-      //   order: 4,
-      //   offsetX: 310,
-      //   offsetY: 180,
-      //   width: 130,
-      //   height: 80,
-      //   marginLeftWidth: -45,
-      //   marginRightWidth: -30,
-      //   marginHeight: -25,
-      // },
-      // {
-      //   order: 5,
-      //   offsetX: 430,
-      //   offsetY: 200,
-      //   width: 120,
-      //   height: 60,
-      //   marginLeftWidth: -45,
-      //   marginRightWidth: -20,
-      //   marginHeight: -3,
-      // },
     ],
   ];
 
@@ -401,6 +347,10 @@ export class Poring extends Monster {
     return defer(() => {
       this.frameY = 1;
       return this.createForwardFrame(50, 0, 7).pipe(
+        // this.moveLocationOnAttack({
+        //   moveY: 40,
+        //   maxLocationOnFrame: 3,
+        // }),
         connect((xframe$) => {
           const sound$ = xframe$.pipe(
             filter((xframe) => xframe === 3),
