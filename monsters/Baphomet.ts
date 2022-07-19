@@ -19,7 +19,7 @@ export class Baphomet extends Monster {
   atk = 250;
   visionRange = 200;
   isAggressiveOnVision = false;
-  dps = 100;
+  dps = 300;
 
   frames: CropImage[][] = [
     // standing
@@ -208,7 +208,15 @@ export class Baphomet extends Monster {
     ],
     // attacking
     [
-      { order: 0, offsetX: 11, offsetY: 479, width: 83, height: 118 },
+      {
+        order: 0,
+        offsetX: 11,
+        offsetY: 479,
+        width: 83,
+        height: 118,
+        marginRightWidth: 29,
+        marginRightHeight: 10,
+      },
       {
         order: 1,
         offsetX: 128,
@@ -216,7 +224,9 @@ export class Baphomet extends Monster {
         width: 90,
         height: 114,
         marginLeftWidth: 14,
-        marginHeight: 4,
+        marginLeftHeight: 4,
+        marginRightWidth: 8,
+        marginRightHeight: 14,
       },
       {
         order: 2,
@@ -225,7 +235,9 @@ export class Baphomet extends Monster {
         width: 115,
         height: 112,
         marginLeftWidth: 0,
-        marginHeight: 6,
+        marginLeftHeight: 6,
+        marginRightWidth: -3,
+        marginRightHeight: 16,
       },
       {
         order: 3,
@@ -234,7 +246,9 @@ export class Baphomet extends Monster {
         width: 115,
         height: 112,
         marginLeftWidth: 0,
-        marginHeight: 6,
+        marginLeftHeight: 6,
+        marginRightWidth: -3,
+        marginRightHeight: 16,
       },
       {
         order: 4,
@@ -243,7 +257,9 @@ export class Baphomet extends Monster {
         width: 72,
         height: 97,
         marginLeftWidth: 14,
-        marginHeight: 23,
+        marginLeftHeight: 23,
+        marginRightWidth: 26,
+        marginRightHeight: 33,
       },
       {
         order: 5,
@@ -252,13 +268,23 @@ export class Baphomet extends Monster {
         width: 72,
         height: 96,
         marginLeftWidth: 16,
-        marginHeight: 25,
+        marginLeftHeight: 25,
+        marginRightWidth: 24,
+        marginRightHeight: 35,
       },
     ],
     [],
     // hurting / die
     [
-      { order: 0, offsetX: 7, offsetY: 808, width: 83, height: 118 },
+      {
+        order: 0,
+        offsetX: 7,
+        offsetY: 808,
+        width: 83,
+        height: 118,
+        marginRightWidth: 29,
+        marginRightHeight: 10,
+      },
       {
         order: 1,
         offsetX: 113,
@@ -266,7 +292,9 @@ export class Baphomet extends Monster {
         width: 134,
         height: 118,
         marginLeftWidth: -21,
-        marginHeight: 1,
+        marginLeftHeight: 1,
+        marginRightWidth: -1,
+        marginRightHeight: 10,
       },
       {
         order: 2,
@@ -275,7 +303,9 @@ export class Baphomet extends Monster {
         width: 123,
         height: 87,
         marginLeftWidth: 42,
-        marginHeight: 31,
+        marginLeftHeight: 29,
+        marginRightWidth: -53,
+        marginRightHeight: 40,
       },
       {
         order: 3,
@@ -284,7 +314,7 @@ export class Baphomet extends Monster {
         width: 79,
         height: 111,
         marginLeftWidth: 26,
-        marginHeight: 23,
+        marginLeftHeight: 23,
       },
       {
         order: 4,
@@ -293,7 +323,7 @@ export class Baphomet extends Monster {
         width: 77,
         height: 120,
         marginLeftWidth: 20,
-        marginHeight: 14,
+        marginLeftHeight: 14,
       },
       {
         order: 5,
@@ -302,7 +332,7 @@ export class Baphomet extends Monster {
         width: 89,
         height: 88,
         marginLeftWidth: 31,
-        marginHeight: 114,
+        marginLeftHeight: 114,
       },
     ],
   ];
