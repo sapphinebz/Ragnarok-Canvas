@@ -319,7 +319,7 @@ export class Baphomet extends Monster {
   attack(): Observable<any> {
     return defer(() => {
       this.frameY = 3;
-      return this.createForwardFrame(150, 0, 5);
+      return this.createForwardFrame(150, 0, 5, { once: true });
     });
   }
 
@@ -342,14 +342,14 @@ export class Baphomet extends Monster {
   hurting(): Observable<any> {
     return defer(() => {
       this.frameY = 5;
-      return this.createForwardFrame(150, 0, 1);
+      return this.createForwardFrame(150, 0, 1, { once: true });
     });
   }
 
   dying() {
     return defer(() => {
       this.frameY = 5;
-      return this.createForwardFrame(150, 0, 2);
+      return this.createForwardFrame(150, 0, 2, { once: true });
     });
   }
 }
