@@ -1,6 +1,23 @@
-import { defer, EMPTY, Observable, tap } from 'rxjs';
+import {
+  auditTime,
+  defer,
+  EMPTY,
+  ignoreElements,
+  merge,
+  Observable,
+  Subject,
+  switchMap,
+  takeUntil,
+  tap,
+} from 'rxjs';
+import { connect, filter, mergeMap } from 'rxjs/operators';
+import { loadBaphometAttackAudio } from '../sounds/baphomet-attack';
+import { loadBaphometBreath } from '../sounds/baphomet-breath';
+import { loadBaphometDamagedAudio } from '../sounds/baphomet-damaged';
+import { loadBaphometDeadAudio } from '../sounds/baphomet-dead';
 import { baphometSpriteLeft } from '../sprites/baphomet-sprite-left';
 import { baphometSpriteRight } from '../sprites/baphomet-sprite-right';
+import { playAudio } from '../utils/play-audio';
 import { CropImage, DIRECTION, Monster } from './Monster';
 
 export class Baphomet extends Monster {
@@ -20,6 +37,12 @@ export class Baphomet extends Monster {
   visionRange = 200;
   isAggressiveOnVision = true;
   dps = 300;
+
+  attackAudio = loadBaphometAttackAudio();
+  breathAudio = loadBaphometBreath();
+  damagedAudio = loadBaphometDamagedAudio();
+  deadAudio = loadBaphometDeadAudio();
+  onPlayBreathAudio$ = new Subject<void>();
 
   frames: CropImage[][] = [
     // standing
@@ -340,6 +363,19 @@ export class Baphomet extends Monster {
   weaponSprite = { offsetX: 772, offsetY: 822, width: 74, height: 99 };
   constructor(public canvas: HTMLCanvasElement) {
     super(canvas, baphometSpriteLeft, baphometSpriteRight);
+
+    this.onPlayBreathAudio$
+      .pipe(
+        // auditTime(2000),
+        switchMap(() => playAudio(this.breathAudio)),
+        takeUntil(this.onCleanup$)
+      )
+      .subscribe();
+
+    this.attackAudio.volume = 0.05;
+    this.breathAudio.volume = 0.08;
+    this.damagedAudio.volume = 0.05;
+    this.deadAudio.volume = 0.05;
   }
 
   getFrameEntry(frameY: number, frameX: number) {
@@ -351,6 +387,9 @@ export class Baphomet extends Monster {
       this.frameY = 3;
       return this.createForwardFrame(150, 0, 5, { once: true }).pipe(
         tap((frameX) => {
+          if (frameX === 3) {
+            this.attackAudio.play();
+          }
           if (frameX === 4) {
             if (this.direction === DIRECTION.LEFT) {
               this.onDamageArea$.next({
@@ -376,14 +415,27 @@ export class Baphomet extends Monster {
   walking() {
     return defer(() => {
       this.frameY = 2;
-      return this.createForwardFrame(80, 0, 3);
+      return this.createForwardFrame(80, 0, 3)
+        .pipe
+        // tap((frameX) => {
+        //   if (frameX === 3) {
+        //     this.onPlayBreathAudio$.next();
+        //   }
+        // })
+        ();
     });
   }
 
   standing() {
     return defer(() => {
       this.frameY = 0;
-      return this.createForwardFrame(120, 0, 7);
+      return this.createForwardFrame(120, 0, 7).pipe(
+        tap((frameX) => {
+          if (frameX === 3) {
+            this.onPlayBreathAudio$.next();
+          }
+        })
+      );
     });
   }
 
@@ -392,14 +444,26 @@ export class Baphomet extends Monster {
   hurting(): Observable<any> {
     return defer(() => {
       this.frameY = 5;
-      return this.createForwardFrame(150, 0, 1, { once: true });
+      return this.createForwardFrame(130, 0, 1, { once: true }).pipe(
+        tap((frameX) => {
+          if (frameX === 0) {
+            this.damagedAudio.play();
+          }
+        })
+      );
     });
   }
 
   dying() {
     return defer(() => {
       this.frameY = 5;
-      return this.createForwardFrame(150, 0, 2, { once: true });
+      return this.createForwardFrame(130, 0, 2, { once: true }).pipe(
+        tap((frameX) => {
+          if (frameX === 0) {
+            this.deadAudio.play();
+          }
+        })
+      );
     });
   }
 }
