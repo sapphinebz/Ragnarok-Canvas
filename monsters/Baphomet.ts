@@ -17,7 +17,7 @@ import { loadBaphometDamagedAudio } from '../sounds/baphomet-damaged';
 import { loadBaphometDeadAudio } from '../sounds/baphomet-dead';
 import { baphometSpriteLeft } from '../sprites/baphomet-sprite-left';
 import { baphometSpriteRight } from '../sprites/baphomet-sprite-right';
-import { playAudio } from '../utils/play-audio';
+import { playAudio, stopAudio } from '../utils/play-audio';
 import { CropImage, DIRECTION, Monster } from './Monster';
 
 export class Baphomet extends Monster {
@@ -445,10 +445,15 @@ export class Baphomet extends Monster {
     return defer(() => {
       this.frameY = 5;
       return this.createForwardFrame(130, 0, 1, { once: true }).pipe(
-        tap((frameX) => {
-          if (frameX === 0) {
-            this.damagedAudio.play();
-          }
+        tap({
+          next: (frameX) => {
+            if (frameX === 0) {
+              this.damagedAudio.play();
+            }
+          },
+          unsubscribe: () => {
+            stopAudio(this.damagedAudio);
+          },
         })
       );
     });
