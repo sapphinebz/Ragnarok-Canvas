@@ -47,7 +47,6 @@ import { audioIsOpenImage } from './sprites/audio-is-open-image';
 import { audioIsCloseImage } from './sprites/audio-is-close-image';
 import { loadProteraFieldVol2 } from './sounds/prontera-field-vol2';
 import { Baphomet } from './monsters/Baphomet';
-// import { Baphomet } from './monsters/Baphomet';
 
 const canvas = document.querySelector<HTMLCanvasElement>('canvas');
 const ctx = canvas.getContext('2d');
@@ -68,13 +67,11 @@ const onWindowResize$ = fromEvent(window, 'resize').pipe(
  */
 // number monster in field & class
 const monstersClass: [any, number][] = [
-  [Acidus, 2],
+  [Acidus, 0],
   [Poring, 15],
   [Fabre, 7],
-  // [Fabre, 1],
+  [Baphomet, 1],
 ];
-
-// const baphomet = new Baphomet(canvas);
 
 const onRespawnMonster$ = new Subject<Monster>();
 

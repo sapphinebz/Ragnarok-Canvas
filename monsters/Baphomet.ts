@@ -8,8 +8,8 @@ export class Baphomet extends Monster {
   hp = this.maxHp;
   x = 300;
   y = 300;
-  speedX = 5;
-  speedY = 5;
+  speedX = 7;
+  speedY = 7;
   frameX = 0;
   frameY = 0;
 
@@ -18,7 +18,7 @@ export class Baphomet extends Monster {
 
   atk = 50;
   visionRange = 200;
-  isAggressiveOnVision = true;
+  isAggressiveOnVision = false;
   dps = 300;
 
   frames: CropImage[][] = [
@@ -122,6 +122,7 @@ export class Baphomet extends Monster {
         height: 119,
         marginLeftWidth: -6,
         marginLeftHeight: -1,
+
         marginRightWidth: 36,
       },
       {
@@ -130,10 +131,10 @@ export class Baphomet extends Monster {
         offsetY: 319,
         width: 96,
         height: 110,
-        marginLeftWidth: -16,
-        marginLeftHeight: 10,
-        marginRightWidth: 38,
-        marginRightHeight: 11,
+        marginLeftWidth: -9,
+        marginLeftHeight: -1,
+        marginRightWidth: 31,
+        marginRightHeight: 0,
       },
       {
         order: 2,
@@ -141,10 +142,11 @@ export class Baphomet extends Monster {
         offsetY: 319,
         width: 88,
         height: 110,
-        marginLeftWidth: -4,
-        marginLeftHeight: 8,
-        marginRightWidth: 34,
-        marginRightHeight: 9,
+        marginLeftWidth: -6,
+        marginLeftHeight: -1,
+
+        marginRightWidth: 36,
+        marginRightHeight: 0,
       },
       {
         order: 3,
@@ -152,10 +154,11 @@ export class Baphomet extends Monster {
         offsetY: 310,
         width: 83,
         height: 121,
-        marginLeftWidth: 12,
-        marginLeftHeight: -3,
-        marginRightWidth: 23,
-        marginRightHeight: -2,
+        marginLeftWidth: -2,
+        marginLeftHeight: -2,
+
+        marginRightWidth: 37,
+        marginRightHeight: -1,
       },
       {
         order: 4,
@@ -322,14 +325,14 @@ export class Baphomet extends Monster {
   walking() {
     return defer(() => {
       this.frameY = 2;
-      return this.createForwardFrame(150, 0, 3);
+      return this.createForwardFrame(80, 0, 3);
     });
   }
 
   standing() {
     return defer(() => {
       this.frameY = 0;
-      return this.createForwardFrame(150, 0, 7);
+      return this.createForwardFrame(120, 0, 7);
     });
   }
 
