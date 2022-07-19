@@ -385,10 +385,15 @@ export abstract class Monster {
             width,
             height
           );
-
+          //
           if (this.showHpGauge) {
+            const gaugeHpRate = this.hp / this.maxHp;
             this.drawGauge(this.width, 'hsl(0deg 0% 10% / 70%)');
-            this.drawGauge(this.width * (this.hp / this.maxHp), 'lime');
+            if (gaugeHpRate <= 0.3) {
+              this.drawGauge(this.width * (this.hp / this.maxHp), '#d50000');
+            } else {
+              this.drawGauge(this.width * (this.hp / this.maxHp), 'lime');
+            }
           }
         }
       });
