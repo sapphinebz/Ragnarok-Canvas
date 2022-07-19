@@ -1,7 +1,7 @@
-import { defer, EMPTY, Observable } from 'rxjs';
+import { defer, EMPTY, Observable, tap } from 'rxjs';
 import { baphometSpriteLeft } from '../sprites/baphomet-sprite-left';
 import { baphometSpriteRight } from '../sprites/baphomet-sprite-right';
-import { CropImage, Monster } from './Monster';
+import { CropImage, DIRECTION, Monster } from './Monster';
 
 export class Baphomet extends Monster {
   maxHp = 1200;
@@ -16,7 +16,7 @@ export class Baphomet extends Monster {
   width = 83;
   height = 118;
 
-  atk = 250;
+  atk = 150;
   visionRange = 200;
   isAggressiveOnVision = false;
   dps = 300;
@@ -349,7 +349,27 @@ export class Baphomet extends Monster {
   attack(): Observable<any> {
     return defer(() => {
       this.frameY = 3;
-      return this.createForwardFrame(150, 0, 5, { once: true });
+      return this.createForwardFrame(150, 0, 5, { once: true }).pipe(
+        tap((frameX) => {
+          if (frameX === 4) {
+            if (this.direction === DIRECTION.LEFT) {
+              this.onDamageArea$.next({
+                x: this.x - this.width / 4,
+                y: this.y + this.height / 4,
+                w: 60,
+                h: 60,
+              });
+            } else if (this.direction === DIRECTION.RIGHT) {
+              this.onDamageArea$.next({
+                x: this.x + (this.width * 3) / 4,
+                y: this.y,
+                w: 60,
+                h: 60,
+              });
+            }
+          }
+        })
+      );
     });
   }
 
