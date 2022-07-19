@@ -35,8 +35,8 @@ export class Poring extends Monster {
   speedY = 3;
   frameX = 0;
   frameY = 0;
-  width = 60;
-  height = 60;
+  width = 39;
+  height = 37;
 
   attackRange = 30;
   isAggressiveOnVision = false;

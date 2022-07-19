@@ -47,6 +47,7 @@ import { audioIsOpenImage } from './sprites/audio-is-open-image';
 import { audioIsCloseImage } from './sprites/audio-is-close-image';
 import { loadProteraFieldVol2 } from './sounds/prontera-field-vol2';
 import { Baphomet } from './monsters/Baphomet';
+import { Angeling } from './monsters/Angeling';
 
 const canvas = document.querySelector<HTMLCanvasElement>('canvas');
 const ctx = canvas.getContext('2d');
@@ -67,10 +68,11 @@ const onWindowResize$ = fromEvent(window, 'resize').pipe(
  */
 // number monster in field & class
 const monstersClass: [any, number][] = [
-  [Acidus, 2],
-  [Poring, 20],
-  [Fabre, 7],
-  [Baphomet, 1],
+  [Acidus, 0],
+  [Poring, 0],
+  [Angeling, 1],
+  [Fabre, 0],
+  [Baphomet, 0],
 ];
 
 const onRespawnMonster$ = new Subject<Monster>();
@@ -372,7 +374,8 @@ const onMonsterTickRender$ = onLoadMonster$.pipe(
     monster.randomAction();
     monster.autoAggressiveOnVisionTarget(onLoadPlayer$);
     return monster.onActionTick$.pipe(takeUntil(monster.onDied$));
-    // return monster.attack().pipe(repeat());
+    // monster.direction = DIRECTION.LEFT;
+    // return monster.standing().pipe(repeat());
   })
 );
 

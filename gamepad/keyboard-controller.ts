@@ -1,6 +1,4 @@
 import {
-  defer,
-  fromEvent,
   merge,
   MonoTypeOperatorFunction,
   Observable,
@@ -8,16 +6,11 @@ import {
   ReplaySubject,
   startWith,
   Subject,
-  switchAll,
-  switchMap,
 } from 'rxjs';
 import {
   distinctUntilChanged,
   filter,
   map,
-  onErrorResumeNext,
-  share,
-  take,
   takeUntil,
   tap,
 } from 'rxjs/operators';
@@ -44,9 +37,6 @@ export class KeyboardController {
 
   drawPlayer() {
     this.monster.drawImage();
-    if (this.monster.drawEffect) {
-      this.monster.drawEffect();
-    }
   }
 
   cleanup() {

@@ -416,6 +416,9 @@ export abstract class Monster {
 
   drawImage() {
     this.drawImage$.next();
+    if (this.drawEffect) {
+      this.drawEffect();
+    }
   }
 
   randomSpawn(): void;
@@ -836,6 +839,37 @@ export abstract class Monster {
         }
       }
     });
+  }
+
+  drawCropImage(
+    image: HTMLImageElement,
+    cropImage: CropImage,
+    option: { x?: number; y?: number } = {}
+  ) {
+    let marginWidth =
+      this.direction === DIRECTION.LEFT
+        ? cropImage.marginLeftWidth
+        : cropImage.marginRightWidth;
+    let marginHeight =
+      this.direction === DIRECTION.LEFT
+        ? cropImage.marginLeftHeight
+        : cropImage.marginRightHeight;
+
+    const { x: dx, y: dy } = option;
+
+    let offsetX = cropImage.offsetX;
+
+    this.ctx.drawImage(
+      image,
+      offsetX,
+      cropImage.offsetY,
+      cropImage.width,
+      cropImage.height,
+      this.x + (dx ?? 0) + (marginWidth ?? 0),
+      this.y + (dy ?? 0) + (marginHeight ?? 0),
+      cropImage.width,
+      cropImage.height
+    );
   }
 
   private emitStandingAggressive<T>(): MonoTypeOperatorFunction<T> {

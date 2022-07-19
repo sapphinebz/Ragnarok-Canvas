@@ -354,6 +354,9 @@ export class Thief extends Monster {
       )
       .subscribe();
 
+    /**
+     * stay effect even player finish attack and move
+     */
     this.onEffectAttack
       .pipe(
         mergeMap(({ x, y, direction }) => {
