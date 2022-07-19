@@ -733,7 +733,6 @@ export abstract class Monster {
     return tap((monsters) => {
       for (const monster of monsters) {
         console.clear();
-        console.log(monster.hp);
         if (monster.hp <= 0) {
           monster.die();
         } else {
