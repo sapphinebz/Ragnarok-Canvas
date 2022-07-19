@@ -1,8 +1,8 @@
 import { defer, EMPTY, Observable, takeWhile, timer } from 'rxjs';
 import { onErrorResumeNext } from 'rxjs/operators';
 import { loadFabreDeadSound } from '../sounds/fabre-dead';
-import { loadFabreSpriteLeft } from '../sprites/load-fabre-left';
-import { loadFabreSpriteRight } from '../sprites/load-fabre-right';
+import { fabreSpriteLeftImage } from '../sprites/load-fabre-left';
+import { fabreSpriteRightImage } from '../sprites/load-fabre-right';
 import { CropImage, Monster } from './Monster';
 
 export class Fabre extends Monster {
@@ -78,7 +78,7 @@ export class Fabre extends Monster {
   ];
 
   constructor(canvas: HTMLCanvasElement) {
-    super(canvas, loadFabreSpriteLeft(), loadFabreSpriteRight());
+    super(canvas, fabreSpriteLeftImage, fabreSpriteRightImage);
 
     this.dyingAudio.volume = 0.05;
   }
@@ -126,8 +126,8 @@ export class Fabre extends Monster {
       this.frameY = 1;
       return this.createForwardFrame(1000, 0, 2, { once: true }).pipe(
         this.moveLocationOnAttack({
-          jump: 15,
-          moveForward: 15,
+          moveY: 15,
+          moveX: 15,
           maxLocationOnFrame: 1,
         })
       );

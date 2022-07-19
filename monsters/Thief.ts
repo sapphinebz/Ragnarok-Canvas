@@ -3,9 +3,9 @@ import { map, mergeMap, takeUntil, takeWhile, tap } from 'rxjs/operators';
 import { loadDaggerHitSound } from '../sounds/dagger-hit-sound';
 import { loadThiefFamaleDamagedAudio } from '../sounds/thief-famale-damaged';
 import { loadThiefFamaleDeadAudio } from '../sounds/thief-famale-dead';
-import { loadThiefLeftSprite } from '../sprites/load-thief-left';
+import { thiefLeftSpriteImage } from '../sprites/load-thief-left';
 import { loadLeftThiefDagger } from '../sprites/load-thief-left-dagger';
-import { loadThiefRightSprite } from '../sprites/load-thief-right';
+import { thiefRightSpriteImage } from '../sprites/load-thief-right';
 import { loadRightThiefDagger } from '../sprites/load-thief-right-dagger';
 import { playAudio } from '../utils/play-audio';
 import { CropImage, DIRECTION, Monster } from './Monster';
@@ -337,7 +337,7 @@ export class Thief extends Monster {
   }>();
 
   constructor(canvas: HTMLCanvasElement) {
-    super(canvas, loadThiefLeftSprite(), loadThiefRightSprite());
+    super(canvas, thiefLeftSpriteImage, thiefRightSpriteImage);
 
     this.daggerHitSound.volume = 0.05;
     this.damagedAudio.volume = 0.05;
