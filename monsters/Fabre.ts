@@ -1,9 +1,9 @@
 import { defer, EMPTY, Observable, takeWhile, timer } from 'rxjs';
-import { onErrorResumeNext } from 'rxjs/operators';
+import { onErrorResumeNext, tap } from 'rxjs/operators';
 import { loadFabreDeadSound } from '../sounds/fabre-dead';
 import { fabreSpriteLeftImage } from '../sprites/load-fabre-left';
 import { fabreSpriteRightImage } from '../sprites/load-fabre-right';
-import { CropImage, Monster } from './Monster';
+import { CropImage, DIRECTION, Monster } from './Monster';
 
 export class Fabre extends Monster {
   x = 100;
@@ -16,7 +16,8 @@ export class Fabre extends Monster {
   height = 40;
   maxHp = 100;
   hp = this.maxHp;
-  dps = 100;
+  atk = 25;
+  dps = 800;
 
   dyingAudio = loadFabreDeadSound();
 
@@ -111,6 +112,7 @@ export class Fabre extends Monster {
   }
 
   drawEffect(): void {}
+
   hurting(): Observable<any> {
     return EMPTY;
   }
@@ -135,7 +137,27 @@ export class Fabre extends Monster {
   attack(): Observable<any> {
     return defer(() => {
       this.frameY = 1;
-      return this.createForwardFrame(150, 0, 2, { once: true });
+      return this.createForwardFrame(150, 0, 2, { once: true }).pipe(
+        tap((frameX) => {
+          if (frameX === 1) {
+            if (this.direction === DIRECTION.LEFT) {
+              this.onDamageArea$.next({
+                x: this.x - this.width / 2,
+                y: this.y + this.height / 4,
+                w: 30,
+                h: 20,
+              });
+            } else if (this.direction === DIRECTION.RIGHT) {
+              this.onDamageArea$.next({
+                x: this.x + (this.width * 1) / 2,
+                y: this.y + this.height / 4,
+                w: 30,
+                h: 20,
+              });
+            }
+          }
+        })
+      );
     });
   }
 }

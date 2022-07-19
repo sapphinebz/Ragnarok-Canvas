@@ -30,7 +30,7 @@ export class Poring extends Monster {
   y = 100;
   maxHp = 150;
   hp = this.maxHp;
-  atk = 15;
+  atk = 35;
   speedX = 3;
   speedY = 3;
   frameX = 0;
