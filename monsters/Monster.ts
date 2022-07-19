@@ -87,6 +87,8 @@ export type CropImage = {
   width: number;
   height?: number;
   marginHeight?: number;
+  marginRightHeight?: number;
+  marginLeftHeight?: number;
   marginLeftWidth?: number;
   marginRightWidth?: number;
 };
@@ -349,6 +351,8 @@ export abstract class Monster {
             width,
             height,
             marginHeight,
+            marginRightHeight,
+            marginLeftHeight,
             marginLeftWidth,
             marginRightWidth,
           } = frameXEntry;
@@ -357,6 +361,11 @@ export abstract class Monster {
           offsetY ??= this.height * this.frameY;
           height ??= this.height;
           marginHeight ??= 0;
+          if (marginRightHeight && direction === DIRECTION.RIGHT) {
+            marginHeight += marginRightHeight;
+          } else if (marginLeftHeight && direction === DIRECTION.LEFT) {
+            marginHeight += marginLeftHeight;
+          }
           let marginWidth =
             direction === DIRECTION.RIGHT ? marginRightWidth : marginLeftWidth;
           marginWidth ??= 0;
