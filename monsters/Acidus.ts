@@ -218,7 +218,7 @@ export class Acidus extends Monster {
     return defer(() => {
       this.frameY = 2;
       this.attackAudio.play();
-      return this.createForwardFrame(60, 0, 7, { once: true }).pipe(
+      return this.forwardFrameX(60, 0, 7, { once: true }).pipe(
         tap((frameX) => {
           if (frameX === 7) {
             if (this.direction === DIRECTION.LEFT) {
@@ -245,14 +245,14 @@ export class Acidus extends Monster {
   walking() {
     return defer(() => {
       this.frameY = 0;
-      return this.createForwardFrame(60, 0, 7);
+      return this.forwardFrameX(60, 0, 7);
     });
   }
 
   standing() {
     return defer(() => {
       this.frameY = 0;
-      return this.createForwardFrame(60, 0, 7);
+      return this.forwardFrameX(60, 0, 7);
     });
   }
 
@@ -261,7 +261,7 @@ export class Acidus extends Monster {
   hurting(): Observable<any> {
     return defer(() => {
       this.frameY = 5;
-      return this.createForwardFrame(120, 0, 1, { once: true }).pipe(
+      return this.forwardFrameX(120, 0, 1, { once: true }).pipe(
         tap((frameX) => {
           if (frameX === 0) {
             this.onPlayDeadAudio$.next();
@@ -274,7 +274,7 @@ export class Acidus extends Monster {
   dying() {
     return defer(() => {
       this.frameY = 5;
-      return this.createForwardFrame(120, 0, 2, { once: true }).pipe(
+      return this.forwardFrameX(120, 0, 2, { once: true }).pipe(
         tap((frameX) => {
           if (frameX === 0) {
             this.onPlayDeadAudio$.next();

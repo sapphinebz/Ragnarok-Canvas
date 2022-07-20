@@ -400,7 +400,7 @@ export class Thief extends Monster {
   standing(): Observable<any> {
     return defer(() => {
       this.frameY = 0;
-      return this.createForwardFrame(150, 0, 5);
+      return this.forwardFrameX(150, 0, 5);
     });
   }
 
@@ -408,7 +408,7 @@ export class Thief extends Monster {
     return defer(() => {
       this.frameY = 6;
       this.deadAudio.play();
-      return this.createForwardFrame(150, 0, 4, { once: true });
+      return this.forwardFrameX(150, 0, 4, { once: true });
     });
   }
 
@@ -416,7 +416,7 @@ export class Thief extends Monster {
     return defer(() => {
       this.frameY = 6;
       this.damagedAudio.play();
-      return this.createForwardFrame(150, 0, 3, { once: true });
+      return this.forwardFrameX(150, 0, 3, { once: true });
     });
   }
 
@@ -443,7 +443,7 @@ export class Thief extends Monster {
   attack(): Observable<any> {
     return defer(() => {
       this.frameY = 4;
-      return this.createForwardFrame(this.attackSpeed, 0, 6, {
+      return this.forwardFrameX(this.attackSpeed, 0, 6, {
         once: true,
       }).pipe(
         tap({
@@ -484,7 +484,7 @@ export class Thief extends Monster {
   walking(): Observable<any> {
     return defer(() => {
       this.frameY = 2;
-      return this.createForwardFrame(35, 0, 7);
+      return this.forwardFrameX(35, 0, 7);
     });
   }
 }

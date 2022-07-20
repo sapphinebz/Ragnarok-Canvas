@@ -110,13 +110,13 @@ export class Fabre extends Monster {
   standing(): Observable<any> {
     return defer(() => {
       this.frameY = 0;
-      return this.playFrameX(80, 0, 3);
+      return this.forwardFrameX(80, 0, 3);
     });
   }
   walking(): Observable<any> {
     return defer(() => {
       this.frameY = 0;
-      return this.playFrameX(80, 0, 3);
+      return this.forwardFrameX(80, 0, 3);
     });
   }
 
@@ -126,7 +126,7 @@ export class Fabre extends Monster {
     return defer(() => {
       this.frameY = 2;
 
-      return this.playFrameX(350, 0, 0, { once: true });
+      return this.forwardFrameX(350, 0, 0, { once: true });
     });
   }
 
@@ -134,7 +134,7 @@ export class Fabre extends Monster {
     return defer(() => {
       this.frameY = 2;
 
-      return this.playFrameX(350, 0, 1, { once: true }).pipe(
+      return this.forwardFrameX(350, 0, 1, { once: true }).pipe(
         tap((frameX) => {
           if (frameX === 0) {
             this.dyingAudio.play();
@@ -146,7 +146,7 @@ export class Fabre extends Monster {
   attack(): Observable<any> {
     return defer(() => {
       this.frameY = 1;
-      return this.playFrameX(150, 0, 2, { once: true }).pipe(
+      return this.forwardFrameX(150, 0, 2, { once: true }).pipe(
         tap((frameX) => {
           if (frameX === 1) {
             if (this.direction === DIRECTION.LEFT) {

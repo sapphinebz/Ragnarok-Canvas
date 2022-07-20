@@ -385,7 +385,7 @@ export class Baphomet extends Monster {
   attack(): Observable<any> {
     return defer(() => {
       this.frameY = 3;
-      return this.createForwardFrame(150, 0, 5, { once: true }).pipe(
+      return this.forwardFrameX(150, 0, 5, { once: true }).pipe(
         tap((frameX) => {
           if (frameX === 3) {
             this.attackAudio.play();
@@ -415,14 +415,14 @@ export class Baphomet extends Monster {
   walking() {
     return defer(() => {
       this.frameY = 2;
-      return this.createForwardFrame(80, 0, 3);
+      return this.forwardFrameX(80, 0, 3);
     });
   }
 
   standing() {
     return defer(() => {
       this.frameY = 0;
-      return this.createForwardFrame(120, 0, 7).pipe(
+      return this.forwardFrameX(120, 0, 7).pipe(
         tap((frameX) => {
           if (frameX === 3) {
             this.onPlayBreathAudio$.next();
@@ -437,7 +437,7 @@ export class Baphomet extends Monster {
   hurting(): Observable<any> {
     return defer(() => {
       this.frameY = 5;
-      return this.createForwardFrame(130, 0, 1, { once: true }).pipe(
+      return this.forwardFrameX(130, 0, 1, { once: true }).pipe(
         tap({
           next: (frameX) => {
             if (frameX === 0) {
@@ -455,7 +455,7 @@ export class Baphomet extends Monster {
   dying() {
     return defer(() => {
       this.frameY = 5;
-      return this.createForwardFrame(130, 0, 2, { once: true }).pipe(
+      return this.forwardFrameX(130, 0, 2, { once: true }).pipe(
         tap((frameX) => {
           if (frameX === 0) {
             this.deadAudio.play();
