@@ -89,22 +89,18 @@ const monstersClass: [any, number][] = [
   [Baphomet, 0],
 ];
 
-const itemsOnField$ = new BehaviorSubject<FieldItem[]>([]);
-const onAddItemToField$ = new ReplaySubject<FieldItem>();
-const onRemoveItemFromField$ = new Subject<FieldItem>();
+const fieldItems: FieldItem[] = [];
 
-onAddItemToField$.subscribe((fieldItem) => {
-  itemsOnField$.next([...itemsOnField$.value, fieldItem]);
-});
+const addAddItemToField = (fieldItem: FieldItem) => {
+  fieldItems.push(fieldItem);
+};
 
-onRemoveItemFromField$.subscribe((fieldItem) => {
-  const fieldItems = itemsOnField$.value;
+const removeItemFromField = (fieldItem: FieldItem) => {
   const index = fieldItems.findIndex((i) => i === fieldItem);
   if (index > -1) {
     fieldItems.splice(index);
-    itemsOnField$.next([...itemsOnField$.value]);
   }
-});
+};
 
 const onRespawnMonster$ = new Subject<Monster>();
 
@@ -363,11 +359,11 @@ onToggleBackgroundSound$.subscribe((isOpen) => {
 });
 
 onCanvasRender$.subscribe(() => {
-  for (const itemField of itemsOnField$.value) {
+  for (const fieldItem of fieldItems) {
     ctx.drawImage(
-      itemField.item.image,
-      itemField.location.x,
-      itemField.location.y
+      fieldItem.item.image,
+      fieldItem.location.x,
+      fieldItem.location.y
     );
   }
 
@@ -405,62 +401,84 @@ onCanvasMount$.pipe(switchMap(() => onLoadMonster$)).subscribe((monster) => {
   monster.randomSpawn();
 });
 
-const onLoadUsableItem$ = onAddItemToField$.pipe(
-  filter((fieldItem) => fieldItem.item.usable)
-);
-combineLatest({
-  fieldItem: onLoadUsableItem$.pipe(delay(1000)),
-  player: onLoadPlayer$,
-})
-  .pipe(
-    mergeMap(({ fieldItem, player }) => {
-      return player.onMoving$.pipe(
-        map(() =>
-          rectanglesIntersect(
-            {
-              x: fieldItem.location.x,
-              y: fieldItem.location.y,
-              w: fieldItem.item.width,
-              h: fieldItem.item.height,
-            },
-            player
-          )
-        ),
-        takeWhile((isCollsion) => {
-          if (isCollsion) {
-            onRemoveItemFromField$.next(fieldItem);
-            fieldItem.item.useWith(player);
-          }
-          return !isCollsion;
-        })
-      );
-    })
-  )
-  .subscribe();
-
 // DropItem to Field
-const onMonsterDropItem$ = onLoadMonster$.pipe(
+const onMonsterDropedItems$ = onLoadMonster$.pipe(
   mergeMap((monster) =>
     monster.onDied$.pipe(
-      first(),
-      tap(() => {
+      switchMap(() => {
         const dropItems = monster.dropItems;
+        const droppedItems: FieldItem[] = [];
+
         for (const dropItem of dropItems) {
           const dropRate = dropItem[1];
           const ClassItem = dropItem[0];
           const randomRate = randomMinMax(0, 100);
-          console.log('randomRate', randomRate, 'dropRate', dropRate);
           if (randomRate <= dropRate) {
-            onAddItemToField$.next({
+            const droppedItem = {
               item: new ClassItem(),
               location: {
                 x: monster.x,
                 y: monster.y,
               },
-            });
-            tick();
+            };
+            addAddItemToField(droppedItem);
+            droppedItems.push(droppedItem);
           }
         }
+
+        return from(droppedItems);
+      }),
+      connect((droppedItem$) => {
+        const delayCanPick = 3000;
+
+        const removeUselessItem$ = droppedItem$.pipe(
+          filter((fieldItem) => {
+            return fieldItem.item.usable === false;
+          }),
+          mergeMap((fieldItem) => {
+            return timer(5000).pipe(
+              tap(() => {
+                removeItemFromField(fieldItem);
+              })
+            );
+          })
+        );
+
+        const playerCanPick$ = combineLatest([
+          onLoadPlayer$,
+          droppedItem$.pipe(
+            filter((fieldItem) => fieldItem.item.usable === true),
+            delay(delayCanPick)
+          ),
+        ]).pipe(
+          mergeMap(([player, fieldItem]) => {
+            return player.onMoving$.pipe(
+              map(() =>
+                rectanglesIntersect(
+                  {
+                    x: fieldItem.location.x,
+                    y: fieldItem.location.y,
+                    w: fieldItem.item.width,
+                    h: fieldItem.item.height,
+                  },
+                  player
+                )
+              ),
+              takeWhile((isCollsion) => {
+                if (isCollsion) {
+                  removeItemFromField(fieldItem);
+                  fieldItem.item.useWith(player);
+                }
+                return !isCollsion;
+              })
+            );
+          })
+        );
+        return merge(
+          droppedItem$,
+          playerCanPick$.pipe(ignoreElements()),
+          removeUselessItem$.pipe(ignoreElements())
+        );
       })
     )
   )
@@ -481,6 +499,8 @@ const onPlayerTickRender$ = onLoadPlayer$.pipe(
   mergeMap((player) => player.onActionTick$.pipe(takeUntil(player.onDied$)))
 );
 
-merge(onMonsterTickRender$, onPlayerTickRender$, onMonsterDropItem$).subscribe(
-  () => tick()
-);
+merge(
+  onMonsterTickRender$,
+  onPlayerTickRender$,
+  onMonsterDropedItems$
+).subscribe(() => tick());

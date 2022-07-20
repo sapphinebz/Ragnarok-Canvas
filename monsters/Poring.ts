@@ -261,9 +261,9 @@ export class Poring extends Monster {
     super(canvas, poringSpriteLeftImage, poringSpriteRightImage);
 
     this.dropItems = [
-      [Jellopy, 40],
-      [RedPotion, 100],
-      [Jellopy, 40],
+      [Jellopy, 70],
+      [RedPotion, 20],
+      [Jellopy, 70],
     ];
 
     this.dyingAudio.volume = 0.05;
