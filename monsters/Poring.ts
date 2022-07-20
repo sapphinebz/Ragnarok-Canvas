@@ -262,7 +262,7 @@ export class Poring extends Monster {
 
     this.dropItems = [
       [Jellopy, 70],
-      [RedPotion, 20],
+      [RedPotion, 100],
       [Jellopy, 70],
     ];
 

@@ -82,9 +82,9 @@ const onWindowResize$ = fromEvent(window, 'resize').pipe(
 // number monster in field & class
 const monstersClass: [any, number][] = [
   [Acidus, 0],
-  [Poring, 10],
+  [Poring, 2],
   [SantaPoring, 0],
-  [Angeling, 1],
+  [Angeling, 0],
   [Fabre, 0],
   [Baphomet, 0],
 ];
@@ -98,7 +98,7 @@ const addAddItemToField = (fieldItem: FieldItem) => {
 const removeItemFromField = (fieldItem: FieldItem) => {
   const index = fieldItems.findIndex((i) => i === fieldItem);
   if (index > -1) {
-    fieldItems.splice(index);
+    fieldItems.splice(index, 1);
   }
 };
 
