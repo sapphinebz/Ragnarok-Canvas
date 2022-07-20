@@ -25,13 +25,11 @@ import {
 } from 'rxjs';
 import {
   concatAll,
-  concatMap,
   connect,
   distinctUntilChanged,
   filter,
   mergeAll,
   repeat,
-  takeLast,
   takeUntil,
   takeWhile,
 } from 'rxjs/operators';
@@ -507,25 +505,6 @@ export abstract class Monster {
         this.frameX = nextFrame;
       })
     );
-    // return interval(delay).pipe(
-    //   map(() => this.frameX + 1),
-    //   takeWhile((nextFrame) => {
-    //     if (once && nextFrame > maxFrameX) {
-    //       return false;
-    //     }
-    //     return true;
-    //   }),
-    //   map((nextFrame) => {
-    //     if (nextFrame > maxFrameX) {
-    //       return minFrameX;
-    //     }
-    //     return nextFrame;
-    //   }),
-    //   tap((nextFrame) => {
-    //     this.frameX = nextFrame;
-    //   }),
-    //   startWith(this.frameX)
-    // );
   }
 
   timelineFrames(

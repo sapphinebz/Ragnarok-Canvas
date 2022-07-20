@@ -42,6 +42,8 @@ export class Poring extends Monster {
   isAggressiveOnVision = false;
   dps = 600;
 
+  walkSpeed = 50;
+
   onPlayAttackAudio$ = new Subject<void>();
   attackAudio = loadPoringAttackAudio();
 
@@ -346,7 +348,7 @@ export class Poring extends Monster {
   walking(): Observable<any> {
     return defer(() => {
       this.frameY = 1;
-      return this.forwardFrameX(50, 0, 7).pipe(
+      return this.forwardFrameX(this.walkSpeed, 0, 7).pipe(
         // this.moveLocationOnAttack({
         //   moveY: 40,
         //   maxLocationOnFrame: 3,

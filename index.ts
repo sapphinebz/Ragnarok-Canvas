@@ -69,11 +69,11 @@ const onWindowResize$ = fromEvent(window, 'resize').pipe(
  */
 // number monster in field & class
 const monstersClass: [any, number][] = [
-  [Acidus, 0],
-  [Poring, 0],
-  [Angeling, 0],
-  [Fabre, 0],
-  [Baphomet, 0],
+  [Acidus, 1],
+  [Poring, 5],
+  [Angeling, 1],
+  [Fabre, 7],
+  [Baphomet, 1],
   [SantaPoring, 1],
 ];
 
@@ -376,7 +376,7 @@ const onMonsterTickRender$ = onLoadMonster$.pipe(
     monster.randomAction();
     monster.autoAggressiveOnVisionTarget(onLoadPlayer$);
     return monster.onActionTick$.pipe(takeUntil(monster.onDied$));
-    // monster.direction = DIRECTION.LEFT;
+    // monster.direction = DIRECTION.RIGHT;
     // return monster.standing().pipe(repeat());
   })
 );
