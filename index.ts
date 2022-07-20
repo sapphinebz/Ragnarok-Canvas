@@ -20,11 +20,16 @@ import {
   EMPTY,
   NEVER,
   MonoTypeOperatorFunction,
+  combineLatest,
+  takeWhile,
 } from 'rxjs';
 import {
   connect,
   debounceTime,
+  delay,
   distinctUntilChanged,
+  filter,
+  first,
   map,
   mergeMap,
   repeat,
@@ -32,7 +37,13 @@ import {
   takeUntil,
 } from 'rxjs/operators';
 import { Poring } from './monsters/Poring';
-import { ACTION, Area, DIRECTION, Monster } from './monsters/Monster';
+import {
+  ACTION,
+  Area,
+  DIRECTION,
+  Monster,
+  MoveLocation,
+} from './monsters/Monster';
 import { Fabre } from './monsters/Fabre';
 import { Thief } from './monsters/Thief';
 import { KeyboardController } from './gamepad/keyboard-controller';
@@ -49,6 +60,7 @@ import { loadProteraFieldVol2 } from './sounds/prontera-field-vol2';
 import { Baphomet } from './monsters/Baphomet';
 import { Angeling } from './monsters/Angeling';
 import { SantaPoring } from './monsters/SantaPoring';
+import { FieldItem } from './items/Item';
 
 const canvas = document.querySelector<HTMLCanvasElement>('canvas');
 const ctx = canvas.getContext('2d');
@@ -71,11 +83,28 @@ const onWindowResize$ = fromEvent(window, 'resize').pipe(
 const monstersClass: [any, number][] = [
   [Acidus, 0],
   [Poring, 10],
-  [SantaPoring, 10],
+  [SantaPoring, 0],
   [Angeling, 1],
-  [Fabre, 7],
+  [Fabre, 0],
   [Baphomet, 0],
 ];
+
+const itemsOnField$ = new BehaviorSubject<FieldItem[]>([]);
+const onAddItemToField$ = new ReplaySubject<FieldItem>();
+const onRemoveItemFromField$ = new Subject<FieldItem>();
+
+onAddItemToField$.subscribe((fieldItem) => {
+  itemsOnField$.next([...itemsOnField$.value, fieldItem]);
+});
+
+onRemoveItemFromField$.subscribe((fieldItem) => {
+  const fieldItems = itemsOnField$.value;
+  const index = fieldItems.findIndex((i) => i === fieldItem);
+  if (index > -1) {
+    fieldItems.splice(index);
+    itemsOnField$.next([...itemsOnField$.value]);
+  }
+});
 
 const onRespawnMonster$ = new Subject<Monster>();
 
@@ -334,6 +363,14 @@ onToggleBackgroundSound$.subscribe((isOpen) => {
 });
 
 onCanvasRender$.subscribe(() => {
+  for (const itemField of itemsOnField$.value) {
+    ctx.drawImage(
+      itemField.item.image,
+      itemField.location.x,
+      itemField.location.y
+    );
+  }
+
   for (const monster of monsters) {
     monster.drawImage();
   }
@@ -348,8 +385,6 @@ onCanvasRender$.subscribe(() => {
     backgroundSoundTogglerImagePosition.y
   );
 });
-
-// baphomet.hurting().subscribe(() => tick());
 
 killCount$.subscribe(() => tick());
 
@@ -370,6 +405,67 @@ onCanvasMount$.pipe(switchMap(() => onLoadMonster$)).subscribe((monster) => {
   monster.randomSpawn();
 });
 
+const onLoadUsableItem$ = onAddItemToField$.pipe(
+  filter((fieldItem) => fieldItem.item.usable)
+);
+combineLatest({
+  fieldItem: onLoadUsableItem$.pipe(delay(1000)),
+  player: onLoadPlayer$,
+})
+  .pipe(
+    mergeMap(({ fieldItem, player }) => {
+      return player.onMoving$.pipe(
+        map(() =>
+          rectanglesIntersect(
+            {
+              x: fieldItem.location.x,
+              y: fieldItem.location.y,
+              w: fieldItem.item.width,
+              h: fieldItem.item.height,
+            },
+            player
+          )
+        ),
+        takeWhile((isCollsion) => {
+          if (isCollsion) {
+            onRemoveItemFromField$.next(fieldItem);
+            fieldItem.item.useWith(player);
+          }
+          return !isCollsion;
+        })
+      );
+    })
+  )
+  .subscribe();
+
+// DropItem to Field
+const onMonsterDropItem$ = onLoadMonster$.pipe(
+  mergeMap((monster) =>
+    monster.onDied$.pipe(
+      first(),
+      tap(() => {
+        const dropItems = monster.dropItems;
+        for (const dropItem of dropItems) {
+          const dropRate = dropItem[1];
+          const ClassItem = dropItem[0];
+          const randomRate = randomMinMax(0, 100);
+          console.log('randomRate', randomRate, 'dropRate', dropRate);
+          if (randomRate <= dropRate) {
+            onAddItemToField$.next({
+              item: new ClassItem(),
+              location: {
+                x: monster.x,
+                y: monster.y,
+              },
+            });
+            tick();
+          }
+        }
+      })
+    )
+  )
+);
+
 // Monster Random Action
 const onMonsterTickRender$ = onLoadMonster$.pipe(
   mergeMap((monster) => {
@@ -385,4 +481,6 @@ const onPlayerTickRender$ = onLoadPlayer$.pipe(
   mergeMap((player) => player.onActionTick$.pipe(takeUntil(player.onDied$)))
 );
 
-merge(onMonsterTickRender$, onPlayerTickRender$).subscribe(() => tick());
+merge(onMonsterTickRender$, onPlayerTickRender$, onMonsterDropItem$).subscribe(
+  () => tick()
+);

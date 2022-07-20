@@ -35,6 +35,7 @@ import {
   takeUntil,
   takeWhile,
 } from 'rxjs/operators';
+import { DropItems, Item } from '../items/Item';
 import { loadCriticalAttack } from '../sounds/critical-attack';
 import { distanceBetween } from '../utils/collision';
 import { playAudio } from '../utils/play-audio';
@@ -108,6 +109,9 @@ export abstract class Monster {
   height: number;
 
   showHpGauge = false;
+
+  // class item/rate
+  dropItems: DropItems = [];
 
   // damage per second
   dps = 800;
@@ -917,6 +921,15 @@ export abstract class Monster {
         );
       })
     );
+  }
+
+  restoreHp(value: number) {
+    let hp = this.hp + value;
+    if (hp > this.maxHp) {
+      this.hp = this.maxHp;
+    } else {
+      this.hp = hp;
+    }
   }
 
   private emitStandingAggressive<T>(): MonoTypeOperatorFunction<T> {

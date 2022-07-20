@@ -16,6 +16,8 @@ import {
   takeWhile,
   tap,
 } from 'rxjs/operators';
+import { Jellopy } from '../items/Jellopy';
+import { RedPotion } from '../items/RedPotion';
 import { loadPoringAttackAudio } from '../sounds/poring-attack';
 import { loadPoringDamage } from '../sounds/poring-damage';
 import { loadPoringDeadSound } from '../sounds/poring-dead';
@@ -257,6 +259,12 @@ export class Poring extends Monster {
 
   constructor(canvas: HTMLCanvasElement) {
     super(canvas, poringSpriteLeftImage, poringSpriteRightImage);
+
+    this.dropItems = [
+      [Jellopy, 40],
+      [RedPotion, 100],
+      [Jellopy, 40],
+    ];
 
     this.dyingAudio.volume = 0.05;
     this.walkingAudio.volume = 0.02;

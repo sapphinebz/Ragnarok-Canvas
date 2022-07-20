@@ -11,7 +11,7 @@ export class Angeling extends Poring {
   speedX = 4;
   speedY = 4;
 
-  isAggressiveOnVision = false;
+  isAggressiveOnVision = true;
   dps = 400;
 
   haloFrame = 0;
