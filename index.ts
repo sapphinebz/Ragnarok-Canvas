@@ -55,7 +55,6 @@ import { Baphomet } from './monsters/Baphomet';
 import { Angeling } from './monsters/Angeling';
 import { SantaPoring } from './monsters/SantaPoring';
 import { FieldItem } from './items/Item';
-import { loadDamageNumbersImage } from './sprites/load-damage-numbers';
 
 const canvas = document.querySelector<HTMLCanvasElement>('canvas');
 const ctx = canvas.getContext('2d');
@@ -79,8 +78,8 @@ const monstersClass: [any, number][] = [
   [Acidus, 0],
   [Poring, 10],
   [SantaPoring, 1],
-  [Angeling, 0],
-  [Fabre, 0],
+  [Angeling, 1],
+  [Fabre, 7],
   [Baphomet, 0],
 ];
 
