@@ -31,12 +31,15 @@ import {
   endWith,
   filter,
   mergeAll,
+  mergeMap,
   repeat,
   takeUntil,
   takeWhile,
 } from 'rxjs/operators';
+import { damageMapSprite } from '../gamepad/damage-drawer';
 import { DropItems, Item } from '../items/Item';
 import { loadCriticalAttack } from '../sounds/critical-attack';
+import { loadDamageNumbersImage } from '../sprites/load-damage-numbers';
 import { distanceBetween } from '../utils/collision';
 import { playAudio } from '../utils/play-audio';
 import { randomMinMax } from '../utils/random-minmax';
@@ -72,6 +75,12 @@ export const enum ACTION {
   WALKING_BOTTOM_LEFT,
 }
 
+export interface DrawDamage {
+  damage: number;
+  location: MoveLocation;
+  scale: number;
+}
+
 export const enum DIRECTION {
   LEFT,
   RIGHT,
@@ -83,7 +92,7 @@ export interface Area extends MoveLocation {
 }
 
 export type CropImage = {
-  order: number;
+  order?: number;
   offsetX: number;
   offsetY?: number;
   width: number;
@@ -119,6 +128,7 @@ export abstract class Monster {
 
   onCleanup$ = new ReplaySubject<void>(1);
   onDamageArea$ = new Subject<Area>();
+  onReceiveDamage$ = new Subject<number>();
   onMoving$ = new Subject<MoveLocation>();
   /**
    * just standing and thinking
@@ -189,6 +199,49 @@ export abstract class Monster {
     this.onPlayCriticalAttack$
       .pipe(
         switchMap(() => playAudio(this.criticalAttackSound)),
+        takeUntil(this.onCleanup$)
+      )
+      .subscribe();
+
+    const receiveDamages: DrawDamage[] = [];
+    this.onReceiveDamage$
+      .pipe(
+        mergeMap((damage) => {
+          const maxScale = 3;
+          const dropYDistance = this.height / 2 + 50;
+          let dropXDistance = 80;
+          if (this.direction === DIRECTION.RIGHT) {
+            dropXDistance = -dropXDistance;
+          }
+          const maxLocationY = this.y + this.height / 3;
+          const startY = randomMinMax(maxLocationY - 20, maxLocationY + 20);
+          const startX = this.x;
+          const drawDamage = {
+            damage,
+            location: {
+              x: startX,
+              y: startY,
+            },
+            scale: maxScale,
+          };
+          receiveDamages.push(drawDamage);
+          return this.tween(
+            800,
+            tap({
+              next: (t) => {
+                drawDamage.scale = maxScale - t * maxScale;
+                drawDamage.location.y = startY + t * dropYDistance;
+                drawDamage.location.x = startX + t * dropXDistance;
+              },
+              complete: () => {
+                const index = receiveDamages.findIndex((d) => d === drawDamage);
+                if (index > -1) {
+                  receiveDamages.splice(index, 1);
+                }
+              },
+            })
+          );
+        }),
         takeUntil(this.onCleanup$)
       )
       .subscribe();
@@ -389,7 +442,7 @@ export abstract class Monster {
             width,
             height
           );
-          //
+          // hp Gauge
           if (this.showHpGauge) {
             const gaugeHpRate = this.hp / this.maxHp;
             this.drawGauge(this.width, 'hsl(0deg 0% 10% / 70%)');
@@ -397,6 +450,13 @@ export abstract class Monster {
               this.drawGauge(this.width * (this.hp / this.maxHp), '#d50000');
             } else {
               this.drawGauge(this.width * (this.hp / this.maxHp), 'lime');
+            }
+          }
+
+          // damage
+          if (receiveDamages.length > 0) {
+            for (const damage of receiveDamages) {
+              this.drawDamage(damage);
             }
           }
         }
@@ -743,6 +803,14 @@ export abstract class Monster {
     this.onPlayCriticalAttack$.next();
   }
 
+  receiveDamage(damage: number) {
+    this.onReceiveDamage$.next(damage);
+    this.hp -= damage;
+    if (this.hp < 0) {
+      this.hp = 0;
+    }
+  }
+
   damageTo(monster: Monster) {
     const randomNumber = randomMinMax(0, 100);
     const criticalRate = 10;
@@ -752,10 +820,7 @@ export abstract class Monster {
       damage += damage;
     }
 
-    monster.hp -= damage;
-    if (monster.hp < 0) {
-      monster.hp = 0;
-    }
+    monster.receiveDamage(damage);
   }
 
   aggressiveMonsters(): MonoTypeOperatorFunction<Monster[]> {
@@ -929,6 +994,27 @@ export abstract class Monster {
       this.hp = this.maxHp;
     } else {
       this.hp = hp;
+    }
+  }
+
+  drawDamage(drawDamage: DrawDamage) {
+    const { damage, location, scale } = drawDamage;
+    let x = location.x;
+    for (const num of `${damage}`) {
+      const sprite = damageMapSprite[num];
+      this.ctx.drawImage(
+        loadDamageNumbersImage,
+        sprite.offsetX,
+        sprite.offsetY,
+        sprite.width,
+        sprite.height,
+        x,
+        location.y,
+        sprite.width * scale,
+        sprite.height * scale
+      );
+
+      x += sprite.width * scale + 1;
     }
   }
 

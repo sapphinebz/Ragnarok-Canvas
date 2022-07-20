@@ -37,7 +37,7 @@ import {
   takeUntil,
 } from 'rxjs/operators';
 import { Poring } from './monsters/Poring';
-import { Area, Monster } from './monsters/Monster';
+import { Area, CropImage, Monster, MoveLocation } from './monsters/Monster';
 import { Fabre } from './monsters/Fabre';
 import { Thief } from './monsters/Thief';
 import { KeyboardController } from './gamepad/keyboard-controller';
@@ -55,6 +55,7 @@ import { Baphomet } from './monsters/Baphomet';
 import { Angeling } from './monsters/Angeling';
 import { SantaPoring } from './monsters/SantaPoring';
 import { FieldItem } from './items/Item';
+import { loadDamageNumbersImage } from './sprites/load-damage-numbers';
 
 const canvas = document.querySelector<HTMLCanvasElement>('canvas');
 const ctx = canvas.getContext('2d');
@@ -393,6 +394,8 @@ onToggleBackgroundSound$.subscribe((isOpen) => {
   }
   tick();
 });
+
+const damage = 1931;
 
 onCanvasRender$.subscribe(() => {
   for (const fieldItem of fieldItems) {
