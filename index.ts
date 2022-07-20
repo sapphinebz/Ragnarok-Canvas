@@ -102,6 +102,38 @@ const removeItemFromField = (fieldItem: FieldItem) => {
   }
 };
 
+const playerUseItem = <T>(
+  player: Monster,
+  fieldItem: FieldItem
+): MonoTypeOperatorFunction<T> => {
+  return takeWhile((isCollsion) => {
+    if (isCollsion) {
+      removeItemFromField(fieldItem);
+      fieldItem.item.useWith(player);
+    }
+    return !isCollsion;
+  });
+};
+
+const checkPlayerCollideItem = (
+  player: Monster,
+  fieldItem: FieldItem
+): OperatorFunction<any, boolean> => {
+  return map(() => {
+    return (
+      rectanglesIntersect(
+        {
+          x: fieldItem.location.x,
+          y: fieldItem.location.y,
+          w: fieldItem.item.width,
+          h: fieldItem.item.height,
+        },
+        player
+      ) !== COLLISION_DIRECTION.NOTHING
+    );
+  });
+};
+
 const onRespawnMonster$ = new Subject<Monster>();
 
 const getMonsterClass = (monster: Monster) => {
@@ -414,11 +446,13 @@ const onMonsterDropedItems$ = onLoadMonster$.pipe(
           const ClassItem = dropItem[0];
           const randomRate = randomMinMax(0, 100);
           if (randomRate <= dropRate) {
+            const itemX = randomMinMax(monster.x, monster.x + monster.width);
+            const itemY = randomMinMax(monster.y, monster.y + monster.height);
             const droppedItem = {
               item: new ClassItem(),
               location: {
-                x: monster.x,
-                y: monster.y,
+                x: itemX,
+                y: itemY,
               },
             };
             addAddItemToField(droppedItem);
@@ -429,14 +463,14 @@ const onMonsterDropedItems$ = onLoadMonster$.pipe(
         return from(droppedItems);
       }),
       connect((droppedItem$) => {
-        const delayCanPick = 3000;
+        const delayCanPick = 1000;
 
         const removeUselessItem$ = droppedItem$.pipe(
           filter((fieldItem) => {
             return fieldItem.item.usable === false;
           }),
           mergeMap((fieldItem) => {
-            return timer(5000).pipe(
+            return timer(10000).pipe(
               tap(() => {
                 removeItemFromField(fieldItem);
               })
@@ -453,24 +487,8 @@ const onMonsterDropedItems$ = onLoadMonster$.pipe(
         ]).pipe(
           mergeMap(([player, fieldItem]) => {
             return player.onMoving$.pipe(
-              map(() =>
-                rectanglesIntersect(
-                  {
-                    x: fieldItem.location.x,
-                    y: fieldItem.location.y,
-                    w: fieldItem.item.width,
-                    h: fieldItem.item.height,
-                  },
-                  player
-                )
-              ),
-              takeWhile((isCollsion) => {
-                if (isCollsion) {
-                  removeItemFromField(fieldItem);
-                  fieldItem.item.useWith(player);
-                }
-                return !isCollsion;
-              })
+              checkPlayerCollideItem(player, fieldItem),
+              playerUseItem(player, fieldItem)
             );
           })
         );
