@@ -76,12 +76,12 @@ const onWindowResize$ = fromEvent(window, 'resize').pipe(
  */
 // number monster in field & class
 const monstersClass: [any, number][] = [
-  [Acidus, 0],
+  [Acidus, 1],
   [Poring, 10],
   [SantaPoring, 2],
-  [Angeling, 0],
-  [Fabre, 0],
-  [Baphomet, 0],
+  [Angeling, 1],
+  [Fabre, 7],
+  [Baphomet, 1],
 ];
 
 const fieldItems: FieldItem[] = [];
@@ -419,6 +419,12 @@ onCanvasRender$.subscribe(() => {
     backgroundSoundTogglerImagePosition.x,
     backgroundSoundTogglerImagePosition.y
   );
+
+  for (const monster of monsters) {
+    for (const damage of monster.receiveDamages) {
+      monster.drawDamage(damage);
+    }
+  }
 });
 
 killCount$.subscribe(() => tick());

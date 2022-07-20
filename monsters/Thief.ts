@@ -458,7 +458,7 @@ export class Thief extends Monster {
                 direction: this.direction,
               });
             }
-            if (frameX >= 5) {
+            if (frameX === 5) {
               if (this.direction === DIRECTION.LEFT) {
                 this.onDamageArea$.next({
                   x: this.x - 25,

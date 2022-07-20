@@ -142,6 +142,8 @@ export abstract class Monster {
   attackRange = 70;
   isAggressiveOnVision = false;
 
+  receiveDamages: DrawDamage[] = [];
+
   get aggressiveTarget() {
     return this.aggressiveTarget$.value;
   }
@@ -203,7 +205,6 @@ export abstract class Monster {
       )
       .subscribe();
 
-    const receiveDamages: DrawDamage[] = [];
     this.onReceiveDamage$
       .pipe(
         mergeMap((damage) => {
@@ -224,7 +225,7 @@ export abstract class Monster {
             },
             scale: maxScale,
           };
-          receiveDamages.push(drawDamage);
+          this.receiveDamages.push(drawDamage);
           return this.tween(
             800,
             tap({
@@ -234,9 +235,9 @@ export abstract class Monster {
                 drawDamage.location.x = startX + t * dropXDistance;
               },
               complete: () => {
-                const index = receiveDamages.findIndex((d) => d === drawDamage);
+                const index = this.receiveDamages.findIndex((d) => d === drawDamage);
                 if (index > -1) {
-                  receiveDamages.splice(index, 1);
+                  this.receiveDamages.splice(index, 1);
                 }
               },
             })
@@ -453,12 +454,12 @@ export abstract class Monster {
             }
           }
 
-          // damage
-          if (receiveDamages.length > 0) {
-            for (const damage of receiveDamages) {
-              this.drawDamage(damage);
-            }
-          }
+          // // damage
+          // if (receiveDamages.length > 0) {
+          //   for (const damage of receiveDamages) {
+          //     this.drawDamage(damage);
+          //   }
+          // }
         }
       });
   }
