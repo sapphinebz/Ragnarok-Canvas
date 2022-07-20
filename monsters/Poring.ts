@@ -265,13 +265,12 @@ export class Poring extends Monster {
 
     this.dropItems = [
       [Jellopy, 70],
-      [RedPotion, 100],
+      [RedPotion, 10],
       [Jellopy, 70],
-      [StickyMucus, 20],
-      [StickyMucus, 20],
-      [Apple, 40],
-      [Apple, 40],
-      [EmptyBottle, 20],
+      [StickyMucus, 10],
+      [Apple, 20],
+      [Apple, 20],
+      [EmptyBottle, 10],
     ];
 
     this.dyingAudio.volume = 0.05;

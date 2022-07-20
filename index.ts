@@ -37,13 +37,7 @@ import {
   takeUntil,
 } from 'rxjs/operators';
 import { Poring } from './monsters/Poring';
-import {
-  ACTION,
-  Area,
-  DIRECTION,
-  Monster,
-  MoveLocation,
-} from './monsters/Monster';
+import { Area, Monster } from './monsters/Monster';
 import { Fabre } from './monsters/Fabre';
 import { Thief } from './monsters/Thief';
 import { KeyboardController } from './gamepad/keyboard-controller';
@@ -82,8 +76,8 @@ const onWindowResize$ = fromEvent(window, 'resize').pipe(
 // number monster in field & class
 const monstersClass: [any, number][] = [
   [Acidus, 0],
-  [Poring, 2],
-  [SantaPoring, 0],
+  [Poring, 10],
+  [SantaPoring, 2],
   [Angeling, 0],
   [Fabre, 0],
   [Baphomet, 0],
@@ -129,9 +123,9 @@ const checkPlayerCollideItem = (
           h: fieldItem.item.height,
         },
         {
-          x: player.x,
+          x: player.x + player.width / 4,
           y: player.y + player.height / 2,
-          w: player.width,
+          w: player.width / 2,
           h: player.height,
         }
       ) !== COLLISION_DIRECTION.NOTHING
