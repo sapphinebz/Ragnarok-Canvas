@@ -17,6 +17,7 @@ import {
   tap,
 } from 'rxjs/operators';
 import { Apple } from '../items/Apple';
+import { EmptyBottle } from '../items/EmptyBottle';
 import { Jellopy } from '../items/Jellopy';
 import { RedPotion } from '../items/RedPotion';
 import { StickyMucus } from '../items/StickyMucus';
@@ -270,6 +271,7 @@ export class Poring extends Monster {
       [StickyMucus, 20],
       [Apple, 40],
       [Apple, 40],
+      [EmptyBottle, 20],
     ];
 
     this.dyingAudio.volume = 0.05;

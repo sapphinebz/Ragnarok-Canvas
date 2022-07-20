@@ -1,0 +1,3 @@
+export const emptyBottleImage = new Image();
+emptyBottleImage.src =
+  'data:image/gif;base64,R0lGODlhGAAYALMPACAgLLW1w5WLp3lvjEdDWa+nwWRed87M4Fxdae/w/9LT4T8/S5eYpXl5h////////yH5BAEAAA8ALAAAAAAYABgAAASH8MlJq700qBPYwuCTOI7CACHGKAUCoOnFBA0cW0wS2DeVnz2ciRdsKGiAT1CSM9WWD2OJ0WgoewySjnqNIUYOXdXa+yYUiipD0A0hFImzml1WhNONdRv0JuEbdDd9JWOBMQt2hGN7GAsrR2pkN44MlQgIBAiMFwsDngMGBAQLmxeXVaSkUEsRADs=';
