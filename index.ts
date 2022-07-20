@@ -76,12 +76,12 @@ const onWindowResize$ = fromEvent(window, 'resize').pipe(
  */
 // number monster in field & class
 const monstersClass: [any, number][] = [
-  [Acidus, 1],
-  [Poring, 10],
-  [SantaPoring, 2],
-  [Angeling, 1],
-  [Fabre, 7],
-  [Baphomet, 1],
+  [Acidus, 0],
+  [Poring, 1],
+  [SantaPoring, 1],
+  [Angeling, 0],
+  [Fabre, 0],
+  [Baphomet, 0],
 ];
 
 const fieldItems: FieldItem[] = [];
@@ -406,6 +406,10 @@ onCanvasRender$.subscribe(() => {
     );
   }
 
+  monsters.sort(
+    (monsterA, monsterB) =>
+      monsterA.y + monsterA.height - (monsterB.y + monsterB.height)
+  );
   for (const monster of monsters) {
     monster.drawImage();
   }
