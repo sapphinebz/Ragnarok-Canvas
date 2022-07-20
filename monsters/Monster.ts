@@ -495,7 +495,7 @@ export abstract class Monster {
     }
   }
 
-  playFrameX(
+  forwardFrameX(
     delay: number,
     minFrameX: number,
     maxFrameX: number,
