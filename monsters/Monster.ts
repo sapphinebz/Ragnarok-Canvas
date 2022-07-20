@@ -1,4 +1,5 @@
 import {
+  animationFrames,
   AsyncSubject,
   BehaviorSubject,
   combineLatest,
@@ -27,6 +28,7 @@ import {
   concatAll,
   connect,
   distinctUntilChanged,
+  endWith,
   filter,
   mergeAll,
   repeat,
@@ -881,6 +883,18 @@ export abstract class Monster {
       this.y + (dy ?? 0) + (marginHeight ?? 0),
       cropImage.width,
       cropImage.height
+    );
+  }
+
+  tween(duration: number, nextEffect: MonoTypeOperatorFunction<number>) {
+    return animationFrames().pipe(
+      map((event) => event.elapsed / duration),
+      takeWhile((t) => t < 1),
+      endWith(1),
+      nextEffect,
+      tap(() => {
+        this.onActionTick$.next();
+      })
     );
   }
 

@@ -1,4 +1,4 @@
-import { interval, map, takeUntil, tap } from 'rxjs';
+import { interval, map, switchMap, takeUntil, tap } from 'rxjs';
 import { poringSpriteLeftImage } from '../sprites/load-poring-left';
 import { poringSpriteRightImage } from '../sprites/load-poring-right';
 import { CropImage, DIRECTION } from './Monster';
@@ -11,14 +11,12 @@ export class SantaPoring extends Poring {
     return this.canvas.getContext('2d');
   }
 
+  santaHatY = -8;
   santaHatFrameX = 2;
   santaHatFrames$ = this.timelineFrames(this.walkSpeed * 3, 0, 2).pipe(
     tap({
       next: (frameX) => {
         this.santaHatFrameX = frameX;
-      },
-      unsubscribe: () => {
-        this.santaHatFrameX = null;
       },
     })
   );
@@ -41,6 +39,21 @@ export class SantaPoring extends Poring {
     this.santaHatFrames$
       .pipe(takeUntil(this.onDied$), takeUntil(this.onCleanup$))
       .subscribe();
+
+    this.onDied$
+      .pipe(
+        switchMap(() => {
+          const currentSantaHatY = this.santaHatY;
+          return this.tween(
+            250,
+            tap((t) => {
+              this.santaHatY = currentSantaHatY + (8 - currentSantaHatY) * t;
+            })
+          );
+        }),
+        takeUntil(this.onCleanup$)
+      )
+      .subscribe();
   }
 
   drawEffect(): void {
@@ -56,10 +69,10 @@ export class SantaPoring extends Poring {
       let margin: { x: number; y: number };
       if (this.direction === DIRECTION.LEFT) {
         directionFrame = 0;
-        margin = { y: -8, x: 4 };
+        margin = { y: this.santaHatY, x: 4 };
       } else if (this.direction === DIRECTION.RIGHT) {
         directionFrame = 1;
-        margin = { y: -8, x: -1 };
+        margin = { y: this.santaHatY, x: -1 };
       }
       this.drawCropImage(
         image,
