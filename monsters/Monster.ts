@@ -898,6 +898,27 @@ export abstract class Monster {
     );
   }
 
+  onDieChangeValueEffect(option: {
+    init: () => number;
+    targetValue: number;
+    updated: (value: number) => void;
+  }) {
+    const { init, targetValue, updated } = option;
+    return this.onDied$.pipe(
+      switchMap(() => {
+        const currentLocation = init();
+        return this.tween(
+          250,
+          tap((t) => {
+            const newLocation =
+              currentLocation + (targetValue - currentLocation) * t;
+            updated(newLocation);
+          })
+        );
+      })
+    );
+  }
+
   private emitStandingAggressive<T>(): MonoTypeOperatorFunction<T> {
     return (source: Observable<T>) => {
       if (this.isAggressiveOnVision) {

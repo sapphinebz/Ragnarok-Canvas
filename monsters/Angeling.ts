@@ -5,16 +5,17 @@ import { CropImage, DIRECTION } from './Monster';
 import { Poring } from './Poring';
 
 export class Angeling extends Poring {
-  maxHp = 880;
+  maxHp = 220;
   hp = this.maxHp;
   atk = 120;
   speedX = 4;
   speedY = 4;
 
-  isAggressiveOnVision = true;
+  isAggressiveOnVision = false;
   dps = 400;
 
   haloFrame = 0;
+  haloY = -5;
   // Halo as direction
   haloSprite: CropImage[][] = [
     [{ order: 0, offsetX: 523, offsetY: 480, width: 27, height: 9 }],
@@ -22,6 +23,7 @@ export class Angeling extends Poring {
   ];
 
   // WingA as direction
+  wingA_Y: number;
   wingASprite: CropImage[][] = [
     [
       { order: 0, offsetX: 232, offsetY: 474, width: 14, height: 19 },
@@ -49,6 +51,7 @@ export class Angeling extends Poring {
   ];
 
   // WingB as direction
+  wingB_Y: number;
   wingBSprite: CropImage[][] = [
     [
       { order: 0, offsetX: 278, offsetY: 476, width: 18, height: 19 },
@@ -79,7 +82,6 @@ export class Angeling extends Poring {
   flipWingFrame$ = this.timelineFrames(this.walkSpeed * 4, 0, 1).pipe(
     tap({
       next: (frameX) => (this.frameXFlip = frameX),
-      unsubscribe: () => (this.frameXFlip = null),
     })
   );
 
@@ -94,9 +96,29 @@ export class Angeling extends Poring {
       .pipe(takeUntil(this.onDied$), takeUntil(this.onCleanup$))
       .subscribe();
 
-    this.onDied$.pipe(takeUntil(this.onCleanup$)).subscribe(() => {
-      this.haloFrame = null;
-    });
+    this.onDieChangeValueEffect({
+      init: () => this.haloY,
+      targetValue: this.height,
+      updated: (y) => (this.haloY = y),
+    })
+      .pipe(takeUntil(this.onCleanup$))
+      .subscribe();
+
+    this.onDieChangeValueEffect({
+      init: () => this.wingA_Y,
+      targetValue: this.height,
+      updated: (y) => (this.wingA_Y = y),
+    })
+      .pipe(takeUntil(this.onCleanup$))
+      .subscribe();
+
+    this.onDieChangeValueEffect({
+      init: () => this.wingB_Y,
+      targetValue: this.height,
+      updated: (y) => (this.wingB_Y = y),
+    })
+      .pipe(takeUntil(this.onCleanup$))
+      .subscribe();
   }
 
   drawEffect(): void {
@@ -112,10 +134,10 @@ export class Angeling extends Poring {
       let directionFrame: number;
       if (this.direction === DIRECTION.LEFT) {
         directionFrame = 0;
-        margin = { x: 7, y: -5 };
+        margin = { x: 7, y: this.haloY };
       } else if (this.direction === DIRECTION.RIGHT) {
         directionFrame = 1;
-        margin = { x: 3, y: -5 };
+        margin = { x: 3, y: this.haloY };
       }
 
       this.drawCropImage(
@@ -131,12 +153,22 @@ export class Angeling extends Poring {
       let directionFrame: number;
       if (this.direction === DIRECTION.LEFT) {
         directionFrame = 0;
-        marginWingA = { x: -12, y: -5 };
-        marginWingB = { x: this.width, y: 1 };
+        if (this.isDied === false) {
+          this.wingA_Y = -5;
+          this.wingB_Y = 1;
+        }
+
+        marginWingA = { x: -12, y: this.wingA_Y };
+        marginWingB = { x: this.width, y: this.wingB_Y };
       } else if (this.direction === DIRECTION.RIGHT) {
         directionFrame = 1;
-        marginWingA = { x: this.width - 3, y: -3 };
-        marginWingB = { x: -18 };
+        if (this.isDied === false) {
+          this.wingA_Y = -3;
+          this.wingB_Y = 0;
+        }
+
+        marginWingA = { x: this.width - 3, y: this.wingA_Y };
+        marginWingB = { x: -18, y: this.wingB_Y };
       }
 
       this.drawCropImage(

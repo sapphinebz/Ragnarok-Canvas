@@ -40,19 +40,27 @@ export class SantaPoring extends Poring {
       .pipe(takeUntil(this.onDied$), takeUntil(this.onCleanup$))
       .subscribe();
 
-    this.onDied$
-      .pipe(
-        switchMap(() => {
-          const currentSantaHatY = this.santaHatY;
-          return this.tween(
-            250,
-            tap((t) => {
-              this.santaHatY = currentSantaHatY + (8 - currentSantaHatY) * t;
-            })
-          );
-        }),
-        takeUntil(this.onCleanup$)
-      )
+    // this.onDied$
+    //   .pipe(
+    //     switchMap(() => {
+    //       const currentSantaHatY = this.santaHatY;
+    //       return this.tween(
+    //         250,
+    //         tap((t) => {
+    //           this.santaHatY = currentSantaHatY + (8 - currentSantaHatY) * t;
+    //         })
+    //       );
+    //     }),
+    //     takeUntil(this.onCleanup$)
+    //   )
+    //   .subscribe();
+
+    this.onDieChangeValueEffect({
+      init: () => this.santaHatY,
+      targetValue: 8,
+      updated: (y) => (this.santaHatY = y),
+    })
+      .pipe(takeUntil(this.onCleanup$))
       .subscribe();
   }
 
