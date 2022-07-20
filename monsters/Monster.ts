@@ -209,7 +209,7 @@ export abstract class Monster {
       .pipe(
         mergeMap((damage) => {
           const maxScale = 3;
-          const dropYDistance = this.height / 2 + 50;
+          const dropYDistance = this.height / 2;
           let dropXDistance = 80;
           if (this.direction === DIRECTION.RIGHT) {
             dropXDistance = -dropXDistance;
@@ -226,12 +226,15 @@ export abstract class Monster {
             scale: maxScale,
           };
           this.receiveDamages.push(drawDamage);
+
           return this.tween(
             800,
             tap({
               next: (t) => {
                 drawDamage.scale = maxScale - t * maxScale;
-                drawDamage.location.y = startY + t * dropYDistance;
+                drawDamage.location.y =
+                  startY + Math.sin(t * Math.PI * (3 / 2)) * -dropYDistance;
+
                 drawDamage.location.x = startX + t * dropXDistance;
               },
               complete: () => {
@@ -244,6 +247,24 @@ export abstract class Monster {
               },
             })
           );
+          // return this.tween(
+          //   800,
+          //   tap({
+          //     next: (t) => {
+          //       drawDamage.scale = maxScale - t * maxScale;
+          //       drawDamage.location.y = startY + t * dropYDistance;
+          //       drawDamage.location.x = startX + t * dropXDistance;
+          //     },
+          // complete: () => {
+          //   const index = this.receiveDamages.findIndex(
+          //     (d) => d === drawDamage
+          //   );
+          //   if (index > -1) {
+          //     this.receiveDamages.splice(index, 1);
+          //   }
+          // },
+          //   })
+          // );
         }),
         takeUntil(this.onCleanup$)
       )
