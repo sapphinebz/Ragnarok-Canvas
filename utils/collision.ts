@@ -42,11 +42,11 @@ export function collideWithArea(area: Area, monster: Monster) {
   return COLLISION_DIRECTION.NOTHING;
 }
 
-export function rectanglesIntersect(area: Area, monster: Monster) {
-  const aLeftOfB = area.x + area.w < monster.x;
-  const aRightOfB = area.x > monster.x + monster.width;
-  const aAboveB = area.y > monster.y + monster.height;
-  const aBelowB = area.y + area.h < monster.y;
+export function rectanglesIntersect(area1: Area, area2: Area) {
+  const aLeftOfB = area1.x + area1.w < area2.x;
+  const aRightOfB = area1.x > area2.x + area2.w;
+  const aAboveB = area1.y > area2.y + area2.h;
+  const aBelowB = area1.y + area1.h < area2.y;
   if (!(aLeftOfB || aRightOfB || aAboveB || aBelowB)) {
     return COLLISION_DIRECTION.RIGHT;
   }

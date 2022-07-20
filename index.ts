@@ -128,7 +128,12 @@ const checkPlayerCollideItem = (
           w: fieldItem.item.width,
           h: fieldItem.item.height,
         },
-        player
+        {
+          x: player.x,
+          y: player.y + player.height / 2,
+          w: player.width,
+          h: player.height,
+        }
       ) !== COLLISION_DIRECTION.NOTHING
     );
   });
@@ -239,7 +244,12 @@ const findMonstersBeAttacked = (): OperatorFunction<Area, Monster[]> => {
   return map((area) => {
     return monsters.filter((monster) => {
       if (!monster.isDied) {
-        const collision = rectanglesIntersect(area, monster);
+        const collision = rectanglesIntersect(area, {
+          x: monster.x,
+          y: monster.y,
+          w: monster.width,
+          h: monster.height,
+        });
         return collision !== COLLISION_DIRECTION.NOTHING;
       }
       return false;

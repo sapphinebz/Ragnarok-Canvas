@@ -16,8 +16,10 @@ import {
   takeWhile,
   tap,
 } from 'rxjs/operators';
+import { Apple } from '../items/Apple';
 import { Jellopy } from '../items/Jellopy';
 import { RedPotion } from '../items/RedPotion';
+import { StickyMucus } from '../items/StickyMucus';
 import { loadPoringAttackAudio } from '../sounds/poring-attack';
 import { loadPoringDamage } from '../sounds/poring-damage';
 import { loadPoringDeadSound } from '../sounds/poring-dead';
@@ -264,6 +266,10 @@ export class Poring extends Monster {
       [Jellopy, 70],
       [RedPotion, 100],
       [Jellopy, 70],
+      [StickyMucus, 20],
+      [StickyMucus, 20],
+      [Apple, 40],
+      [Apple, 40],
     ];
 
     this.dyingAudio.volume = 0.05;
