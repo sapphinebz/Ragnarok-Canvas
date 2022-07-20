@@ -77,7 +77,7 @@ const onWindowResize$ = fromEvent(window, 'resize').pipe(
 // number monster in field & class
 const monstersClass: [any, number][] = [
   [Acidus, 0],
-  [Poring, 1],
+  [Poring, 10],
   [SantaPoring, 1],
   [Angeling, 0],
   [Fabre, 0],
@@ -395,8 +395,6 @@ onToggleBackgroundSound$.subscribe((isOpen) => {
   tick();
 });
 
-const damage = 1931;
-
 onCanvasRender$.subscribe(() => {
   for (const fieldItem of fieldItems) {
     ctx.drawImage(
@@ -425,10 +423,10 @@ onCanvasRender$.subscribe(() => {
   );
 
   for (const monster of monsters) {
-    for (const damage of monster.receiveDamages) {
-      monster.drawDamage(damage);
-    }
+    monster.drawDamage();
   }
+
+  thief.drawDamage();
 });
 
 killCount$.subscribe(() => tick());

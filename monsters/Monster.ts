@@ -235,7 +235,9 @@ export abstract class Monster {
                 drawDamage.location.x = startX + t * dropXDistance;
               },
               complete: () => {
-                const index = this.receiveDamages.findIndex((d) => d === drawDamage);
+                const index = this.receiveDamages.findIndex(
+                  (d) => d === drawDamage
+                );
                 if (index > -1) {
                   this.receiveDamages.splice(index, 1);
                 }
@@ -998,24 +1000,26 @@ export abstract class Monster {
     }
   }
 
-  drawDamage(drawDamage: DrawDamage) {
-    const { damage, location, scale } = drawDamage;
-    let x = location.x;
-    for (const num of `${damage}`) {
-      const sprite = damageMapSprite[num];
-      this.ctx.drawImage(
-        loadDamageNumbersImage,
-        sprite.offsetX,
-        sprite.offsetY,
-        sprite.width,
-        sprite.height,
-        x,
-        location.y,
-        sprite.width * scale,
-        sprite.height * scale
-      );
+  drawDamage() {
+    for (const drawDamage of this.receiveDamages) {
+      const { damage, location, scale } = drawDamage;
+      let x = location.x;
+      for (const num of `${damage}`) {
+        const sprite = damageMapSprite[num];
+        this.ctx.drawImage(
+          loadDamageNumbersImage,
+          sprite.offsetX,
+          sprite.offsetY,
+          sprite.width,
+          sprite.height,
+          x,
+          location.y,
+          sprite.width * scale,
+          sprite.height * scale
+        );
 
-      x += sprite.width * scale + 1;
+        x += sprite.width * scale + 1;
+      }
     }
   }
 
