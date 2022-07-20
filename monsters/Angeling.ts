@@ -14,61 +14,74 @@ export class Angeling extends Poring {
   isAggressiveOnVision = true;
   dps = 400;
 
-  haloSpriteLeft = { offsetX: 523, offsetY: 480, width: 27, height: 9 };
-  haloSpriteRight = { offsetX: 79, offsetY: 481, width: 26, height: 8 };
-
-  wingASpriteLeft: CropImage[] = [
-    { order: 0, offsetX: 232, offsetY: 474, width: 14, height: 19 },
-    {
-      order: 1,
-      offsetX: 255,
-      offsetY: 473,
-      width: 14,
-      height: 19,
-      marginLeftWidth: 0,
-      marginLeftHeight: 7,
-    },
+  haloFrame = 0;
+  // Halo as direction
+  haloSprite: CropImage[][] = [
+    [{ order: 0, offsetX: 523, offsetY: 480, width: 27, height: 9 }],
+    [{ order: 1, offsetX: 79, offsetY: 481, width: 26, height: 8 }],
   ];
 
-  wingASpriteRight: CropImage[] = [
-    { order: 0, offsetX: 383, offsetY: 474, width: 14, height: 19 },
-    {
-      order: 1,
-      offsetX: 360,
-      offsetY: 473,
-      width: 14,
-      height: 19,
-      marginRightHeight: 7,
-    },
+  // WingA as direction
+  wingASprite: CropImage[][] = [
+    [
+      { order: 0, offsetX: 232, offsetY: 474, width: 14, height: 19 },
+      {
+        order: 1,
+        offsetX: 255,
+        offsetY: 473,
+        width: 14,
+        height: 19,
+        marginLeftWidth: 0,
+        marginLeftHeight: 7,
+      },
+    ],
+    [
+      { order: 0, offsetX: 383, offsetY: 474, width: 14, height: 19 },
+      {
+        order: 1,
+        offsetX: 360,
+        offsetY: 473,
+        width: 14,
+        height: 19,
+        marginRightHeight: 7,
+      },
+    ],
   ];
 
-  wingBSpriteLeft: CropImage[] = [
-    { order: 0, offsetX: 278, offsetY: 476, width: 18, height: 19 },
-    {
-      order: 1,
-      offsetX: 301,
-      offsetY: 476,
-      width: 15,
-      height: 21,
-      marginLeftWidth: 0,
-      marginLeftHeight: 7,
-    },
+  // WingB as direction
+  wingBSprite: CropImage[][] = [
+    [
+      { order: 0, offsetX: 278, offsetY: 476, width: 18, height: 19 },
+      {
+        order: 1,
+        offsetX: 301,
+        offsetY: 476,
+        width: 15,
+        height: 21,
+        marginLeftWidth: 0,
+        marginLeftHeight: 7,
+      },
+    ],
+    [
+      { order: 0, offsetX: 333, offsetY: 476, width: 18, height: 19 },
+      {
+        order: 1,
+        offsetX: 313,
+        offsetY: 476,
+        width: 15,
+        height: 21,
+        marginRightHeight: 7,
+      },
+    ],
   ];
 
-  wingBSpriteRight: CropImage[] = [
-    { order: 0, offsetX: 333, offsetY: 476, width: 18, height: 19 },
-    {
-      order: 1,
-      offsetX: 313,
-      offsetY: 476,
-      width: 15,
-      height: 21,
-      marginRightHeight: 7,
-    },
-  ];
-
-  flipDirection = 1;
-  flipWing$ = interval(240);
+  frameXFlip = 1;
+  flipWingFrame$ = this.timelineFrames(this.walkSpeed * 4, 0, 1).pipe(
+    tap({
+      next: (frameX) => (this.frameXFlip = frameX),
+      unsubscribe: () => (this.frameXFlip = null),
+    })
+  );
 
   get ctx() {
     return this.canvas.getContext('2d');
@@ -77,71 +90,65 @@ export class Angeling extends Poring {
   constructor(canvas: HTMLCanvasElement) {
     super(canvas);
 
-    this.flipWing$
+    this.flipWingFrame$
       .pipe(takeUntil(this.onDied$), takeUntil(this.onCleanup$))
-      .subscribe(() => {
-        this.flipDirection = -this.flipDirection;
-      });
+      .subscribe();
+
+    this.onDied$.pipe(takeUntil(this.onCleanup$)).subscribe(() => {
+      this.haloFrame = null;
+    });
   }
 
   drawEffect(): void {
     let image: HTMLImageElement;
-
-    const haloMarginY = 5;
     if (this.direction === DIRECTION.RIGHT) {
       image = poringSpriteRightImage;
-      // Halo
-      this.ctx.drawImage(
-        image,
-        this.haloSpriteRight.offsetX,
-        this.haloSpriteRight.offsetY,
-        this.haloSpriteRight.width,
-        this.haloSpriteRight.height,
-        this.x + 3,
-        this.y - haloMarginY,
-        this.haloSpriteRight.width,
-        this.haloSpriteRight.height
-      );
-      const wingARightSprite =
-        this.flipDirection === 1
-          ? this.wingASpriteRight[0]
-          : this.wingASpriteRight[1];
-      const wingBRightSprite =
-        this.flipDirection === 1
-          ? this.wingBSpriteRight[0]
-          : this.wingBSpriteRight[1];
-
-      // Wing
-
-      this.drawCropImage(image, wingARightSprite, { x: this.width - 3, y: -3 });
-      this.drawCropImage(image, wingBRightSprite, { x: -18 });
-    } else {
+    } else if (this.direction === DIRECTION.LEFT) {
       image = poringSpriteLeftImage;
-      // Halo
-      this.ctx.drawImage(
+    }
+
+    if (this.haloFrame !== null) {
+      let margin: { x: number; y: number };
+      let directionFrame: number;
+      if (this.direction === DIRECTION.LEFT) {
+        directionFrame = 0;
+        margin = { x: 7, y: -5 };
+      } else if (this.direction === DIRECTION.RIGHT) {
+        directionFrame = 1;
+        margin = { x: 3, y: -5 };
+      }
+
+      this.drawCropImage(
         image,
-        this.haloSpriteLeft.offsetX,
-        this.haloSpriteLeft.offsetY,
-        this.haloSpriteLeft.width,
-        this.haloSpriteLeft.height,
-        this.x + 7,
-        this.y - haloMarginY,
-        this.haloSpriteLeft.width,
-        this.haloSpriteLeft.height
+        this.haloSprite[directionFrame][this.haloFrame],
+        margin
       );
+    }
 
-      const wingALeftSprite =
-        this.flipDirection === 1
-          ? this.wingASpriteLeft[0]
-          : this.wingASpriteLeft[1];
-      const wingBLeftSprite =
-        this.flipDirection === 1
-          ? this.wingBSpriteLeft[0]
-          : this.wingBSpriteLeft[1];
+    if (this.frameXFlip !== null) {
+      let marginWingA: { x?: number; y?: number };
+      let marginWingB: { x?: number; y?: number };
+      let directionFrame: number;
+      if (this.direction === DIRECTION.LEFT) {
+        directionFrame = 0;
+        marginWingA = { x: -12, y: -5 };
+        marginWingB = { x: this.width, y: 1 };
+      } else if (this.direction === DIRECTION.RIGHT) {
+        directionFrame = 1;
+        marginWingA = { x: this.width - 3, y: -3 };
+        marginWingB = { x: -18 };
+      }
 
-      // Wing
-      this.drawCropImage(image, wingALeftSprite, { x: -12, y: -5 });
-      this.drawCropImage(image, wingBLeftSprite, { x: this.width, y: 1 });
+      this.drawCropImage(
+        image,
+        this.wingASprite[directionFrame][this.frameXFlip],
+        marginWingA
+      );
+      this.drawCropImage(
+        image,
+        this.wingBSprite[directionFrame][this.frameXFlip],
+        marginWingB
+      );
     }
   }
 }
