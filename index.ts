@@ -48,6 +48,7 @@ import { audioIsCloseImage } from './sprites/audio-is-close-image';
 import { loadProteraFieldVol2 } from './sounds/prontera-field-vol2';
 import { Baphomet } from './monsters/Baphomet';
 import { Angeling } from './monsters/Angeling';
+import { SantaPoring } from './monsters/SantaPoring';
 
 const canvas = document.querySelector<HTMLCanvasElement>('canvas');
 const ctx = canvas.getContext('2d');
@@ -68,11 +69,12 @@ const onWindowResize$ = fromEvent(window, 'resize').pipe(
  */
 // number monster in field & class
 const monstersClass: [any, number][] = [
-  [Acidus, 2],
-  [Poring, 19],
-  [Angeling, 1],
-  [Fabre, 7],
-  [Baphomet, 1],
+  [Acidus, 0],
+  [Poring, 0],
+  [Angeling, 0],
+  [Fabre, 0],
+  [Baphomet, 0],
+  [SantaPoring, 1],
 ];
 
 const onRespawnMonster$ = new Subject<Monster>();

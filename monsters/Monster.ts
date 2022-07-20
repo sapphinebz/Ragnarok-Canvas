@@ -495,16 +495,49 @@ export abstract class Monster {
     }
   }
 
-  createForwardFrame(
+  playFrameX(
     delay: number,
     minFrameX: number,
     maxFrameX: number,
     option: { once: boolean } = { once: false }
   ) {
     this.frameX = minFrameX;
+    return this.timelineFrames(delay, minFrameX, maxFrameX, option).pipe(
+      tap((nextFrame) => {
+        this.frameX = nextFrame;
+      })
+    );
+    // return interval(delay).pipe(
+    //   map(() => this.frameX + 1),
+    //   takeWhile((nextFrame) => {
+    //     if (once && nextFrame > maxFrameX) {
+    //       return false;
+    //     }
+    //     return true;
+    //   }),
+    //   map((nextFrame) => {
+    //     if (nextFrame > maxFrameX) {
+    //       return minFrameX;
+    //     }
+    //     return nextFrame;
+    //   }),
+    //   tap((nextFrame) => {
+    //     this.frameX = nextFrame;
+    //   }),
+    //   startWith(this.frameX)
+    // );
+  }
+
+  timelineFrames(
+    delay: number,
+    minFrameX: number,
+    maxFrameX: number,
+    option: { once: boolean } = { once: false }
+  ) {
     const { once } = option;
+    let currentFrameX = minFrameX;
     return interval(delay).pipe(
-      map(() => this.frameX + 1),
+      map(() => currentFrameX + 1),
       takeWhile((nextFrame) => {
         if (once && nextFrame > maxFrameX) {
           return false;
@@ -518,9 +551,9 @@ export abstract class Monster {
         return nextFrame;
       }),
       tap((nextFrame) => {
-        this.frameX = nextFrame;
+        currentFrameX = nextFrame;
       }),
-      startWith(this.frameX)
+      startWith(currentFrameX)
     );
   }
 

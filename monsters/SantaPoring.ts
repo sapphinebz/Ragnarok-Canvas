@@ -14,8 +14,6 @@ export class SantaPoring extends Poring {
   isAggressiveOnVision = false;
   dps = 400;
 
-  frameHat$ = this.createForwardFrame(120, 0, 2);
-
   get ctx() {
     return this.canvas.getContext('2d');
   }

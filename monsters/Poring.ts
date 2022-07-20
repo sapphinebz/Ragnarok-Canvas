@@ -285,7 +285,7 @@ export class Poring extends Monster {
   standing(): Observable<any> {
     return defer(() => {
       this.frameY = 0;
-      return this.createForwardFrame(120, 0, 3);
+      return this.playFrameX(120, 0, 3);
     });
   }
 
@@ -293,7 +293,7 @@ export class Poring extends Monster {
     return defer(() => {
       this.frameY = 3;
 
-      return this.createForwardFrame(100, 0, 5).pipe(
+      return this.playFrameX(100, 0, 5).pipe(
         tap((frameX) => {
           if (frameX === 2) {
             this.dyingAudio.play();
@@ -311,7 +311,7 @@ export class Poring extends Monster {
       this.frameY = 1;
       const maxFrameX = 7;
       const minFrameX = 0;
-      return this.createForwardFrame(100, minFrameX, maxFrameX, {
+      return this.playFrameX(100, minFrameX, maxFrameX, {
         once: true,
       }).pipe(
         this.moveLocationOnAttack({
@@ -333,7 +333,7 @@ export class Poring extends Monster {
   hurting(): Observable<any> {
     return defer(() => {
       this.frameY = 3;
-      return this.createForwardFrame(120, 0, 1, { once: true }).pipe(
+      return this.playFrameX(120, 0, 1, { once: true }).pipe(
         tap((frameX) => {
           if (frameX === 0) {
             this.onPlayDamageAudio$.next();
@@ -346,7 +346,7 @@ export class Poring extends Monster {
   walking(): Observable<any> {
     return defer(() => {
       this.frameY = 1;
-      return this.createForwardFrame(50, 0, 7).pipe(
+      return this.playFrameX(50, 0, 7).pipe(
         // this.moveLocationOnAttack({
         //   moveY: 40,
         //   maxLocationOnFrame: 3,
