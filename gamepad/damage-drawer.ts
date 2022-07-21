@@ -39,7 +39,7 @@ greenRestoreNumberImage.src =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALcAAAALCAYAAAA9ZhyRAAAAAXNSR0IArs4c6QAAAhZJREFUaEPVWTFSxDAMTKrMQUFFdz/g/0/hB3RUFMCkIUxsy7EUexJJ6yFc55vJZrVay7IyDvy3iPUo1polYVkwevAg7hY+rbg9Ma6YMk4ER5R2LW5ejih+xKOJVyZ6mV4fWBLnl691rTVDeNn09hiw5vunFgPFI5gHFFPN3BnbqpPkRi8x4qHj3Wl3MX6H8ZJxYyBPI5kxmvNjGZRCZ5wshM7cKB4xcL7BPBtOmjtjGzdwlV/xEm1B6RUvq4qOgrUZ0e+xXLGPPLuZG2cET+UuxVy5SYNqk162DV6sTdSklXED73DS6eY+7oP5pp9hfv6unTRa7UoMhHboYnOIt5n7/RbbiCTMxNdaYRbn83Gn+ziw5IRWCYMXeK06OfFyfCXRpL9Wb6YXCI+b26+dzCdMv5Znr2puqLHJhMXmtZgnG6hTAeie7Fo5P/Fft1yg8iFjoAJxRXMjxcwtAKByoytP2CyJYGzBfNWxBz/kCdqNHyVZ6tej565dbs5WSkRvt2tH0sTHi80ukezo112au/OjHt55AfTksXYgHPbIJ06Rmnbrf9X7GXpakiulUdidACLgs5uklhjEtORfTw+U5sGbGzOR2zx2gNdjzh1FSTNz0yixkgUlDhegwDPi1CuRLUZWfcBzePRc35rH1j7qxo9eWOZXVkLk1yPr1zv0VztkTDJp1hhbxysdsYYimx9Bx4uI8U/i/QWPH+8bpk7+sgAAAABJRU5ErkJggg==';
 
 const r_zero: CropImage = { offsetX: 1, offsetY: 0, width: 8, height: 11 };
-const r_one: CropImage = { offsetX: 21, offsetY: 0, width: 5, height: 11 };
+const r_one: CropImage = { offsetX: 19, offsetY: 0, width: 7, height: 11 };
 const r_two: CropImage = { offsetX: 35, offsetY: 0, width: 8, height: 11 };
 const r_three: CropImage = { offsetX: 54, offsetY: 0, width: 8, height: 11 };
 const r_four: CropImage = { offsetX: 74, offsetY: 0, width: 8, height: 11 };

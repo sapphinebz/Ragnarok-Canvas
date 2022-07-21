@@ -13,7 +13,7 @@ export class Apple extends Item {
     this.useAudio.volume = 0.05;
   }
   useWith(monster: Monster): void {
-    const hp = randomMinMax(12, 25);
+    const hp = randomMinMax(12, 15);
     monster.restoreHp(hp);
     this.useAudio.play();
   }

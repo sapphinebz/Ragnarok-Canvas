@@ -268,8 +268,8 @@ export class Poring extends Monster {
       [RedPotion, 10],
       [Jellopy, 70],
       [StickyMucus, 10],
-      [Apple, 20],
-      [Apple, 20],
+      [Apple, 70],
+      [Apple, 70],
       [EmptyBottle, 10],
     ];
 
