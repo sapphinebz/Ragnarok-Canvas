@@ -117,7 +117,7 @@ export function drawNumber(
 }
 
 export function animateRestoreHp(restore: number, monster: Monster) {
-  const maxScale = 3.5;
+  const maxScale = 2.5;
 
   const startY = monster.y + monster.height / 2;
   const startX = monster.x;

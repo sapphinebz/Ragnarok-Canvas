@@ -479,7 +479,7 @@ const onMonsterDropedItems$ = onLoadMonster$.pipe(
         return from(droppedItems);
       }),
       connect((droppedItem$) => {
-        const delayCanPick = 1000;
+        // const delayCanPick = 1000;
 
         const removeUselessItem$ = droppedItem$.pipe(
           filter((fieldItem) => {
@@ -497,8 +497,8 @@ const onMonsterDropedItems$ = onLoadMonster$.pipe(
         const playerCanPick$ = combineLatest([
           onLoadPlayer$,
           droppedItem$.pipe(
-            filter((fieldItem) => fieldItem.item.usable === true),
-            delay(delayCanPick)
+            filter((fieldItem) => fieldItem.item.usable === true)
+            // delay(delayCanPick)
           ),
         ]).pipe(
           mergeMap(([player, fieldItem]) => {
