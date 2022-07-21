@@ -1,5 +1,10 @@
-import { CropImage, DrawDamage, Monster } from '../monsters/Monster';
+import { tap } from 'rxjs/operators';
+import { CropImage, DIRECTION, DrawDamage, Monster } from '../monsters/Monster';
 import { loadDamageNumbersImage } from '../sprites/load-damage-numbers';
+
+type CropNumber = { [numberStr: string]: CropImage };
+
+type NumberStyle = 'red' | 'white' | 'green';
 
 const zero: CropImage = { offsetX: 9, offsetY: 10, width: 8, height: 11 };
 const one: CropImage = { offsetX: 27, offsetY: 10, width: 6, height: 11 };
@@ -12,7 +17,7 @@ const seven: CropImage = { offsetX: 142, offsetY: 10, width: 8, height: 11 };
 const eight: CropImage = { offsetX: 162, offsetY: 10, width: 8, height: 11 };
 const nine: CropImage = { offsetX: 182, offsetY: 10, width: 8, height: 11 };
 
-export const damageMapSprite: { [numberStr: string]: CropImage } = {
+export const damageMapSprite: CropNumber = {
   0: zero,
   1: one,
   2: two,
@@ -29,6 +34,10 @@ export const redDamageNumberImage = new Image();
 redDamageNumberImage.src =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALcAAAALCAYAAAA9ZhyRAAAAAXNSR0IArs4c6QAAAhZJREFUaEPNWctOxDAMTPcHFnFCIC78/zdxQaA9Ib5gu0paW46bPuyMRfeCslqmM+OJ8+iQ6s+oxoMaW4aE5cGI4EHcPXzWdPdozJhaJ4Ijyrs1br0cUfyIxyqeLPT4+VLX8ONWxtYwlIcRlgMDxaOEB6SpFW7GdmhscqOHOPHQehfenYzfrl4KbhHyfEnp6WeS8Pea0u89JaPRjENGzHhHJwiKRxGeNeSP1CTGRzk1g03YHXgLfuJBHm4RequuqPy0ckTWloO9lVkONzAIxRCnEdLMzE0XzGzoHBgEFi+DMtgB4bZqrHhdh5SG79Z8NK/AEqS3DhHNZncyc7jHt0kLGaPGVsPHzv8vZgAwuPAFsNZo1cRYGSf71InH+mSKZv893NB4Vbg7tU71fL9MGfu6l79qbNWs87Gox1nDDQ02FUZMXquRi2ADJstucZr9d/1LNF6lGeBd1bAIvGMyN/EkzzOGGxlsZOeOCI+8benVHcEPuYKG8eMiq5U5Ys/d2l8d7ZSIvV21nM4DxJ6buenmaTw0h/MDHqCR9djdI1tXKvH7Zn3RtyU8ibwHSn2wVYKPTpLWBPMeclthLN85NbJHoBuqKLyeJtXK6b/dlhQhwDth7x0w+m4VqUkXzKuxmixAz9E1rPCMV8JrTRhdj0083QmRb4+8b+/Qb+2QmhYBF9se46rKP0fzi8KzrJpbXkTxo2cyzwd4tHgb3Mm63AAAAABJRU5ErkJggg==';
 
+export const greenRestoreNumberImage = new Image();
+greenRestoreNumberImage.src =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALcAAAALCAYAAAA9ZhyRAAAAAXNSR0IArs4c6QAAAhZJREFUaEPVWTFSxDAMTKrMQUFFdz/g/0/hB3RUFMCkIUxsy7EUexJJ6yFc55vJZrVay7IyDvy3iPUo1polYVkwevAg7hY+rbg9Ma6YMk4ER5R2LW5ejih+xKOJVyZ6mV4fWBLnl691rTVDeNn09hiw5vunFgPFI5gHFFPN3BnbqpPkRi8x4qHj3Wl3MX6H8ZJxYyBPI5kxmvNjGZRCZ5wshM7cKB4xcL7BPBtOmjtjGzdwlV/xEm1B6RUvq4qOgrUZ0e+xXLGPPLuZG2cET+UuxVy5SYNqk162DV6sTdSklXED73DS6eY+7oP5pp9hfv6unTRa7UoMhHboYnOIt5n7/RbbiCTMxNdaYRbn83Gn+ziw5IRWCYMXeK06OfFyfCXRpL9Wb6YXCI+b26+dzCdMv5Znr2puqLHJhMXmtZgnG6hTAeie7Fo5P/Fft1yg8iFjoAJxRXMjxcwtAKByoytP2CyJYGzBfNWxBz/kCdqNHyVZ6tej565dbs5WSkRvt2tH0sTHi80ukezo112au/OjHt55AfTksXYgHPbIJ06Rmnbrf9X7GXpakiulUdidACLgs5uklhjEtORfTw+U5sGbGzOR2zx2gNdjzh1FSTNz0yixkgUlDhegwDPi1CuRLUZWfcBzePRc35rH1j7qxo9eWOZXVkLk1yPr1zv0VztkTDJp1hhbxysdsYYimx9Bx4uI8U/i/QWPH+8bpk7+sgAAAABJRU5ErkJggg==';
+
 const r_zero: CropImage = { offsetX: 1, offsetY: 0, width: 8, height: 11 };
 const r_one: CropImage = { offsetX: 21, offsetY: 0, width: 5, height: 11 };
 const r_two: CropImage = { offsetX: 35, offsetY: 0, width: 8, height: 11 };
@@ -40,7 +49,7 @@ const r_seven: CropImage = { offsetX: 134, offsetY: 0, width: 8, height: 11 };
 const r_eight: CropImage = { offsetX: 154, offsetY: 0, width: 8, height: 11 };
 const r_nine: CropImage = { offsetX: 174, offsetY: 0, width: 8, height: 11 };
 
-export const redDamageMapSprite: { [numberStr: string]: CropImage } = {
+export const redDamageMapSprite: CropNumber = {
   0: r_zero,
   1: r_one,
   2: r_two,
@@ -53,15 +62,24 @@ export const redDamageMapSprite: { [numberStr: string]: CropImage } = {
   9: r_nine,
 };
 
+const numberTheme: {
+  [style: string]: [HTMLImageElement, CropNumber];
+} = {
+  red: [redDamageNumberImage, redDamageMapSprite],
+  white: [loadDamageNumbersImage, damageMapSprite],
+  green: [greenRestoreNumberImage, redDamageMapSprite],
+};
+
 export function drawDamage(
   monster: Monster,
-  config: { style: 'red' | 'white' } = { style: 'white' }
+  config: { style: NumberStyle } = { style: 'white' }
 ) {
   const { style } = config;
   const receivedDamages = monster.receivedDamages;
   const ctx = monster.ctx;
-  let spriteMap = style === 'white' ? damageMapSprite : redDamageMapSprite;
-  let image = style === 'white' ? loadDamageNumbersImage : redDamageNumberImage;
+  const theme = numberTheme[style];
+  let image = theme[0];
+  let spriteMap = theme[1];
 
   for (const drawDamage of receivedDamages) {
     const { damage, location, scale } = drawDamage;
@@ -83,4 +101,47 @@ export function drawDamage(
       x += sprite.width * scale + 1;
     }
   }
+}
+
+export function animateReceivedDamage(damage: number, monster: Monster) {
+  const maxScale = 4;
+  const minScale = 1.5;
+  const dropYDistance = 80;
+  let dropXDistance = 80;
+  if (monster.direction === DIRECTION.RIGHT) {
+    dropXDistance = -dropXDistance;
+  }
+  const maxLocationY = monster.y;
+  // const startY = randomMinMax(maxLocationY - 20, maxLocationY + 20);
+  const startY = maxLocationY - 20;
+  const startX = monster.x;
+  const drawDamage = {
+    damage,
+    location: {
+      x: startX,
+      y: startY,
+    },
+    scale: maxScale,
+  };
+  monster.receivedDamages.push(drawDamage);
+
+  return monster.tween(
+    800,
+    tap({
+      next: (t) => {
+        drawDamage.scale = maxScale - t * (maxScale - minScale);
+        drawDamage.location.y = startY + Math.sin(t * Math.PI) * -dropYDistance;
+
+        drawDamage.location.x = startX + t * dropXDistance;
+      },
+      complete: () => {
+        const index = monster.receivedDamages.findIndex(
+          (d) => d === drawDamage
+        );
+        if (index > -1) {
+          monster.receivedDamages.splice(index, 1);
+        }
+      },
+    })
+  );
 }

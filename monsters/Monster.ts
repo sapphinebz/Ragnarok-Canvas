@@ -36,6 +36,7 @@ import {
   takeUntil,
   takeWhile,
 } from 'rxjs/operators';
+import { animateReceivedDamage } from '../gamepad/damage-drawer';
 import { DropItems } from '../items/Item';
 import { loadCriticalAttack } from '../sounds/critical-attack';
 import { distanceBetween } from '../utils/collision';
@@ -206,47 +207,7 @@ export abstract class Monster {
     this.onReceiveDamage$
       .pipe(
         mergeMap((damage) => {
-          const maxScale = 4;
-          const minScale = 1.5;
-          const dropYDistance = 80;
-          let dropXDistance = 80;
-          if (this.direction === DIRECTION.RIGHT) {
-            dropXDistance = -dropXDistance;
-          }
-          const maxLocationY = this.y;
-          // const startY = randomMinMax(maxLocationY - 20, maxLocationY + 20);
-          const startY = maxLocationY - 20;
-          const startX = this.x;
-          const drawDamage = {
-            damage,
-            location: {
-              x: startX,
-              y: startY,
-            },
-            scale: maxScale,
-          };
-          this.receivedDamages.push(drawDamage);
-
-          return this.tween(
-            800,
-            tap({
-              next: (t) => {
-                drawDamage.scale = maxScale - t * (maxScale - minScale);
-                drawDamage.location.y =
-                  startY + Math.sin(t * Math.PI) * -dropYDistance;
-
-                drawDamage.location.x = startX + t * dropXDistance;
-              },
-              complete: () => {
-                const index = this.receivedDamages.findIndex(
-                  (d) => d === drawDamage
-                );
-                if (index > -1) {
-                  this.receivedDamages.splice(index, 1);
-                }
-              },
-            })
-          );
+          return animateReceivedDamage(damage, this);
         }),
         takeUntil(this.onCleanup$)
       )
