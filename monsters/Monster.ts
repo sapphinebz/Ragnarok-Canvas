@@ -458,13 +458,6 @@ export abstract class Monster {
               this.drawGauge(this.width * (this.hp / this.maxHp), 'lime');
             }
           }
-
-          // // damage
-          // if (receiveDamages.length > 0) {
-          //   for (const damage of receiveDamages) {
-          //     this.drawDamage(damage);
-          //   }
-          // }
         }
       });
   }
