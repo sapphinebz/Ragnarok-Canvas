@@ -55,7 +55,7 @@ import { Baphomet } from './monsters/Baphomet';
 import { Angeling } from './monsters/Angeling';
 import { SantaPoring } from './monsters/SantaPoring';
 import { FieldItem } from './items/Item';
-import { drawDamage, drawNumber, drawRestoreHp } from './gamepad/damage-drawer';
+import { drawDamage, drawRestoreHp } from './gamepad/number-drawer';
 
 const canvas = document.querySelector<HTMLCanvasElement>('canvas');
 const ctx = canvas.getContext('2d');
