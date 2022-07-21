@@ -79,9 +79,12 @@ export const enum ACTION {
 
 export interface DrawNumber {
   number: number;
+  isCritical: boolean;
   location: MoveLocation;
   scale: number;
 }
+
+export type DamageNumber = Pick<DrawNumber, 'number' | 'isCritical'>;
 
 export const enum DIRECTION {
   LEFT,
@@ -130,7 +133,7 @@ export abstract class Monster {
 
   onCleanup$ = new AsyncSubject<void>();
   onDamageArea$ = new Subject<Area>();
-  onReceiveDamage$ = new Subject<number>();
+  onReceiveDamage$ = new Subject<DamageNumber>();
   onRestoreHp$ = new Subject<number>();
   onMoving$ = new Subject<MoveLocation>();
   /**
@@ -792,9 +795,9 @@ export abstract class Monster {
     this.onPlayCriticalAttack$.next();
   }
 
-  receiveDamage(damage: number) {
+  receiveDamage(damage: DamageNumber) {
     this.onReceiveDamage$.next(damage);
-    this.hp -= damage;
+    this.hp -= damage.number;
     if (this.hp < 0) {
       this.hp = 0;
     }
@@ -802,14 +805,16 @@ export abstract class Monster {
 
   damageTo(monster: Monster) {
     const randomNumber = randomMinMax(0, 100);
-    const criticalRate = 10;
+    const criticalRate = 20;
     let damage = this.atk;
+    let isCritical = false;
     if (randomNumber <= criticalRate) {
       monster.playCriticalAudio();
       damage += damage;
+      isCritical = true;
     }
 
-    monster.receiveDamage(damage);
+    monster.receiveDamage({ number: damage, isCritical });
   }
 
   aggressiveMonsters(): MonoTypeOperatorFunction<Monster[]> {

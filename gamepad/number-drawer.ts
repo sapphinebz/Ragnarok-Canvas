@@ -1,10 +1,17 @@
 import { tap } from 'rxjs/operators';
-import { CropImage, DIRECTION, DrawNumber, Monster } from '../monsters/Monster';
+import {
+  CropImage,
+  DamageNumber,
+  DIRECTION,
+  DrawNumber,
+  Monster,
+} from '../monsters/Monster';
 import { loadDamageNumbersImage } from '../sprites/load-damage-numbers';
 
 type CropNumber = { [numberStr: string]: CropImage };
 
-type NumberStyle = 'red' | 'white' | 'green';
+type DrawNumberConfig = { style: NumberStyle };
+type NumberStyle = 'red' | 'white' | 'green' | 'yellow';
 
 const zero: CropImage = { offsetX: 9, offsetY: 10, width: 8, height: 11 };
 const one: CropImage = { offsetX: 27, offsetY: 10, width: 6, height: 11 };
@@ -72,11 +79,14 @@ const numberTheme: {
   red: [redDamageNumberImage, redDamageMapSprite],
   white: [loadDamageNumbersImage, damageMapSprite],
   green: [greenRestoreNumberImage, redDamageMapSprite],
+  yellow: [yellowNumberImage, redDamageMapSprite],
 };
+
+const criticalCrop = { offsetX: 9, offsetY: 29, width: 68, height: 57 };
 
 export function drawDamage(
   monster: Monster,
-  config: { style: NumberStyle } = { style: 'white' }
+  config: DrawNumberConfig = { style: 'white' }
 ) {
   const receivedDamages = monster.receivedDamages;
   drawNumber(monster, receivedDamages, config);
@@ -94,15 +104,38 @@ export function drawNumber(
 ) {
   const { style } = config;
   const ctx = monster.ctx;
-  const theme = numberTheme[style];
-  let image = theme[0];
-  let spriteMap = theme[1];
+  const defaultTheme = numberTheme[style];
+  const defaultImage = defaultTheme[0];
+  const defaultSpriteMap = defaultTheme[1];
+
+  const criticalTheme = numberTheme['yellow'];
+  const criticalImage = criticalTheme[0];
+  const criticalSpriteMap = criticalTheme[1];
 
   for (const drawDamage of drawNumbers) {
-    const { number, location, scale } = drawDamage;
+    const { number, location, scale, isCritical } = drawDamage;
     let x = location.x;
+    if (isCritical) {
+      const width = criticalCrop.width * (scale - 0.5);
+      const height = criticalCrop.height * (scale - 0.5);
+      ctx.drawImage(
+        loadDamageNumbersImage,
+        criticalCrop.offsetX,
+        criticalCrop.offsetY,
+        criticalCrop.width,
+        criticalCrop.height,
+        x - width / 2,
+        location.y - height / 2,
+        width,
+        height
+      );
+    }
     for (const num of `${number}`) {
-      const sprite = spriteMap[num];
+      const sprite = isCritical
+        ? criticalSpriteMap[num]
+        : defaultSpriteMap[num];
+      const image = isCritical ? criticalImage : defaultImage;
+
       ctx.drawImage(
         image,
         sprite.offsetX,
@@ -127,6 +160,7 @@ export function animateRestoreHp(restore: number, monster: Monster) {
   const startX = monster.x;
   const drawNumber: DrawNumber = {
     number: restore,
+    isCritical: false,
     location: {
       x: startX,
       y: startY,
@@ -152,7 +186,7 @@ export function animateRestoreHp(restore: number, monster: Monster) {
   );
 }
 
-export function animateReceivedDamage(damage: number, monster: Monster) {
+export function animateReceivedDamage(damage: DamageNumber, monster: Monster) {
   const maxScale = 4;
   const minScale = 1.5;
   const dropYDistance = 80;
@@ -165,7 +199,8 @@ export function animateReceivedDamage(damage: number, monster: Monster) {
   const startY = maxLocationY - 20;
   const startX = monster.x;
   const drawNumber: DrawNumber = {
-    number: damage,
+    isCritical: damage.isCritical,
+    number: damage.number,
     location: {
       x: startX,
       y: startY,

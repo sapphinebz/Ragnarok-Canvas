@@ -11,7 +11,7 @@ import { playAudio } from '../utils/play-audio';
 import { CropImage, DIRECTION, Monster } from './Monster';
 
 export class Thief extends Monster {
-  maxHp = 450;
+  maxHp = 1200;
   hp = this.maxHp;
   atk = 18;
   x = 100;
