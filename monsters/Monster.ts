@@ -627,8 +627,10 @@ export abstract class Monster {
           const currentMoveLocation = { x: this.x, y: this.y };
           let moveNextLocation = { ...currentMoveLocation };
 
-          let targetIsLeftSide = target.x < this.x;
-          let targetIsTopSide = target.y < this.y;
+          let targetIsLeftSide =
+            target.x + target.width / 2 < this.x + this.width / 2;
+          let targetIsTopSide =
+            target.y + target.height / 2 < this.y + this.height / 2;
 
           if (targetIsLeftSide) {
             moveNextLocation.x -= this.speedX;
