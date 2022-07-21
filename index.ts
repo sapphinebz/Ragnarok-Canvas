@@ -426,7 +426,7 @@ onCanvasRender$.subscribe(() => {
     drawDamage(monster);
   }
 
-  drawDamage(thief);
+  drawDamage(thief, { style: 'red' });
 });
 
 killCount$.subscribe(() => tick());

@@ -54,17 +54,22 @@ export const redDamageMapSprite: { [numberStr: string]: CropImage } = {
 };
 
 export function drawDamage(
-  monster:Monster
+  monster: Monster,
+  config: { style: 'red' | 'white' } = { style: 'white' }
 ) {
+  const { style } = config;
   const receivedDamages = monster.receivedDamages;
   const ctx = monster.ctx;
+  let spriteMap = style === 'white' ? damageMapSprite : redDamageMapSprite;
+  let image = style === 'white' ? loadDamageNumbersImage : redDamageNumberImage;
+
   for (const drawDamage of receivedDamages) {
     const { damage, location, scale } = drawDamage;
     let x = location.x;
     for (const num of `${damage}`) {
-      const sprite = damageMapSprite[num];
+      const sprite = spriteMap[num];
       ctx.drawImage(
-        loadDamageNumbersImage,
+        image,
         sprite.offsetX,
         sprite.offsetY,
         sprite.width,
