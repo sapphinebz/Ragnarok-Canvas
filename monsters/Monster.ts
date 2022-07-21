@@ -166,6 +166,10 @@ export abstract class Monster {
 
   actionChange$ = new BehaviorSubject<ACTION>(ACTION.IDLE);
 
+  get currentAction() {
+    return this.actionChange$.value;
+  }
+
   onDied$ = new AsyncSubject<void>();
   isDied = false;
   /**
@@ -829,14 +833,13 @@ export abstract class Monster {
   forceTargetsFaceToMe(): OperatorFunction<Monster[], Monster[]> {
     return tap((monsters) => {
       for (const monster of monsters) {
-        if(monster.actionChange$.value !== ACTION.ATTACK){
+        if (monster.currentAction !== ACTION.ATTACK) {
           if (monster.x > this.x) {
             monster.direction = DIRECTION.LEFT;
           } else if (monster.x < this.x) {
             monster.direction = DIRECTION.RIGHT;
           }
         }
-       
       }
     });
   }
