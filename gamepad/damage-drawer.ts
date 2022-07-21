@@ -117,16 +117,9 @@ export function drawNumber(
 }
 
 export function animateRestoreHp(restore: number, monster: Monster) {
-  const maxScale = 4;
-  const minScale = 1.5;
-  const dropYDistance = 80;
-  let dropXDistance = 80;
-  if (monster.direction === DIRECTION.RIGHT) {
-    dropXDistance = -dropXDistance;
-  }
-  const maxLocationY = monster.y;
-  // const startY = randomMinMax(maxLocationY - 20, maxLocationY + 20);
-  const startY = maxLocationY - 20;
+  const maxScale = 3.5;
+
+  const startY = monster.y + monster.height / 2;
   const startX = monster.x;
   const drawNumber: DrawNumber = {
     number: restore,
@@ -139,13 +132,11 @@ export function animateRestoreHp(restore: number, monster: Monster) {
   monster.restoredHp.push(drawNumber);
 
   return monster.tween(
-    800,
+    1000,
     tap({
       next: (t) => {
-        drawNumber.scale = maxScale - t * (maxScale - minScale);
-        drawNumber.location.y = startY + Math.sin(t * Math.PI) * -dropYDistance;
-
-        drawNumber.location.x = startX + t * dropXDistance;
+        drawNumber.scale = maxScale;
+        drawNumber.location.y = startY - t * 130;
       },
       complete: () => {
         const index = monster.restoredHp.findIndex((d) => d === drawNumber);
