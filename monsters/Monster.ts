@@ -39,7 +39,7 @@ import {
 import {
   animateReceivedDamage,
   animateRestoreHp,
-} from '../gamepad/damage-drawer';
+} from '../gamepad/number-drawer';
 import { DropItems } from '../items/Item';
 import { loadCriticalAttack } from '../sounds/critical-attack';
 import { distanceBetween } from '../utils/collision';
@@ -361,7 +361,7 @@ export abstract class Monster {
             tap({
               next: () => {
                 this.render();
-              }
+              },
             })
           )
         )
