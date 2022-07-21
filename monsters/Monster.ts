@@ -829,11 +829,14 @@ export abstract class Monster {
   forceTargetsFaceToMe(): OperatorFunction<Monster[], Monster[]> {
     return tap((monsters) => {
       for (const monster of monsters) {
-        if (monster.x > this.x) {
-          monster.direction = DIRECTION.LEFT;
-        } else if (monster.x < this.x) {
-          monster.direction = DIRECTION.RIGHT;
+        if(monster.actionChange$.value !== ACTION.ATTACK){
+          if (monster.x > this.x) {
+            monster.direction = DIRECTION.LEFT;
+          } else if (monster.x < this.x) {
+            monster.direction = DIRECTION.RIGHT;
+          }
         }
+       
       }
     });
   }
