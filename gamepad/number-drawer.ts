@@ -116,16 +116,16 @@ export function drawNumber(
     const { number, location, scale, isCritical } = drawDamage;
     let x = location.x;
     if (isCritical) {
-      const width = criticalCrop.width * (scale - 0.5);
-      const height = criticalCrop.height * (scale - 0.5);
+      const width = (criticalCrop.width * scale) / 2;
+      const height = (criticalCrop.height * scale) / 2;
       ctx.drawImage(
         loadDamageNumbersImage,
         criticalCrop.offsetX,
         criticalCrop.offsetY,
         criticalCrop.width,
         criticalCrop.height,
-        x - width / 2,
-        location.y - height / 2,
+        x - width / 3.5,
+        location.y - height / 3.5,
         width,
         height
       );

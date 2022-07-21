@@ -805,7 +805,7 @@ export abstract class Monster {
 
   damageTo(monster: Monster) {
     const randomNumber = randomMinMax(0, 100);
-    const criticalRate = 20;
+    const criticalRate = 15;
     let damage = this.atk;
     let isCritical = false;
     if (randomNumber <= criticalRate) {
