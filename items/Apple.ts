@@ -14,6 +14,7 @@ export class Apple extends Item {
   }
   useWith(monster: Monster): void {
     const hp = randomMinMax(12, 25);
+    console.log(hp);
     monster.restoreHp(hp);
     this.useAudio.play();
   }

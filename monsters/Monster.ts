@@ -963,8 +963,8 @@ export abstract class Monster {
   }
 
   restoreHp(value: number) {
+    this.onRestoreHp$.next(value);
     let hp = this.hp + value;
-    this.onRestoreHp$.next(hp);
     if (hp > this.maxHp) {
       this.hp = this.maxHp;
     } else {
