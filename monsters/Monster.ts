@@ -36,7 +36,10 @@ import {
   takeUntil,
   takeWhile,
 } from 'rxjs/operators';
-import { animateReceivedDamage } from '../gamepad/damage-drawer';
+import {
+  animateReceivedDamage,
+  animateRestoreHp,
+} from '../gamepad/damage-drawer';
 import { DropItems } from '../items/Item';
 import { loadCriticalAttack } from '../sounds/critical-attack';
 import { distanceBetween } from '../utils/collision';
@@ -74,8 +77,8 @@ export const enum ACTION {
   WALKING_BOTTOM_LEFT,
 }
 
-export interface DrawDamage {
-  damage: number;
+export interface DrawNumber {
+  number: number;
   location: MoveLocation;
   scale: number;
 }
@@ -128,6 +131,7 @@ export abstract class Monster {
   onCleanup$ = new ReplaySubject<void>(1);
   onDamageArea$ = new Subject<Area>();
   onReceiveDamage$ = new Subject<number>();
+  onRestoreHp$ = new Subject<number>();
   onMoving$ = new Subject<MoveLocation>();
   /**
    * just standing and thinking
@@ -173,7 +177,8 @@ export abstract class Monster {
   criticalAttackSound = loadCriticalAttack();
   onPlayCriticalAttack$ = new Subject<void>();
 
-  receivedDamages: DrawDamage[] = [];
+  receivedDamages: DrawNumber[] = [];
+  restoredHp: DrawNumber[] = [];
 
   get ctx() {
     return this.canvas.getContext('2d');
@@ -208,6 +213,15 @@ export abstract class Monster {
       .pipe(
         mergeMap((damage) => {
           return animateReceivedDamage(damage, this);
+        }),
+        takeUntil(this.onCleanup$)
+      )
+      .subscribe();
+
+    this.onRestoreHp$
+      .pipe(
+        mergeMap((restore) => {
+          return animateRestoreHp(restore, this);
         }),
         takeUntil(this.onCleanup$)
       )
@@ -950,6 +964,7 @@ export abstract class Monster {
 
   restoreHp(value: number) {
     let hp = this.hp + value;
+    this.onRestoreHp$.next(hp);
     if (hp > this.maxHp) {
       this.hp = this.maxHp;
     } else {

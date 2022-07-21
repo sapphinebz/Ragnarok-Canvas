@@ -1,5 +1,5 @@
 import { tap } from 'rxjs/operators';
-import { CropImage, DIRECTION, DrawDamage, Monster } from '../monsters/Monster';
+import { CropImage, DIRECTION, DrawNumber, Monster } from '../monsters/Monster';
 import { loadDamageNumbersImage } from '../sprites/load-damage-numbers';
 
 type CropNumber = { [numberStr: string]: CropImage };
@@ -74,17 +74,30 @@ export function drawDamage(
   monster: Monster,
   config: { style: NumberStyle } = { style: 'white' }
 ) {
-  const { style } = config;
   const receivedDamages = monster.receivedDamages;
+  drawNumber(monster, receivedDamages, config);
+}
+
+export function drawRestoreHp(monster: Monster) {
+  const restoredHp = monster.restoredHp;
+  drawNumber(monster, restoredHp, { style: 'green' });
+}
+
+export function drawNumber(
+  monster: Monster,
+  drawNumbers: DrawNumber[],
+  config: { style: NumberStyle } = { style: 'white' }
+) {
+  const { style } = config;
   const ctx = monster.ctx;
   const theme = numberTheme[style];
   let image = theme[0];
   let spriteMap = theme[1];
 
-  for (const drawDamage of receivedDamages) {
-    const { damage, location, scale } = drawDamage;
+  for (const drawDamage of drawNumbers) {
+    const { number, location, scale } = drawDamage;
     let x = location.x;
-    for (const num of `${damage}`) {
+    for (const num of `${number}`) {
       const sprite = spriteMap[num];
       ctx.drawImage(
         image,
@@ -103,6 +116,47 @@ export function drawDamage(
   }
 }
 
+export function animateRestoreHp(restore: number, monster: Monster) {
+  const maxScale = 4;
+  const minScale = 1.5;
+  const dropYDistance = 80;
+  let dropXDistance = 80;
+  if (monster.direction === DIRECTION.RIGHT) {
+    dropXDistance = -dropXDistance;
+  }
+  const maxLocationY = monster.y;
+  // const startY = randomMinMax(maxLocationY - 20, maxLocationY + 20);
+  const startY = maxLocationY - 20;
+  const startX = monster.x;
+  const drawNumber: DrawNumber = {
+    number: restore,
+    location: {
+      x: startX,
+      y: startY,
+    },
+    scale: maxScale,
+  };
+  monster.restoredHp.push(drawNumber);
+
+  return monster.tween(
+    800,
+    tap({
+      next: (t) => {
+        drawNumber.scale = maxScale - t * (maxScale - minScale);
+        drawNumber.location.y = startY + Math.sin(t * Math.PI) * -dropYDistance;
+
+        drawNumber.location.x = startX + t * dropXDistance;
+      },
+      complete: () => {
+        const index = monster.restoredHp.findIndex((d) => d === drawNumber);
+        if (index > -1) {
+          monster.restoredHp.splice(index, 1);
+        }
+      },
+    })
+  );
+}
+
 export function animateReceivedDamage(damage: number, monster: Monster) {
   const maxScale = 4;
   const minScale = 1.5;
@@ -115,28 +169,28 @@ export function animateReceivedDamage(damage: number, monster: Monster) {
   // const startY = randomMinMax(maxLocationY - 20, maxLocationY + 20);
   const startY = maxLocationY - 20;
   const startX = monster.x;
-  const drawDamage = {
-    damage,
+  const drawNumber: DrawNumber = {
+    number: damage,
     location: {
       x: startX,
       y: startY,
     },
     scale: maxScale,
   };
-  monster.receivedDamages.push(drawDamage);
+  monster.receivedDamages.push(drawNumber);
 
   return monster.tween(
     800,
     tap({
       next: (t) => {
-        drawDamage.scale = maxScale - t * (maxScale - minScale);
-        drawDamage.location.y = startY + Math.sin(t * Math.PI) * -dropYDistance;
+        drawNumber.scale = maxScale - t * (maxScale - minScale);
+        drawNumber.location.y = startY + Math.sin(t * Math.PI) * -dropYDistance;
 
-        drawDamage.location.x = startX + t * dropXDistance;
+        drawNumber.location.x = startX + t * dropXDistance;
       },
       complete: () => {
         const index = monster.receivedDamages.findIndex(
-          (d) => d === drawDamage
+          (d) => d === drawNumber
         );
         if (index > -1) {
           monster.receivedDamages.splice(index, 1);
