@@ -1,5 +1,7 @@
 import { defer, EMPTY, Observable, takeWhile, timer } from 'rxjs';
 import { onErrorResumeNext, tap } from 'rxjs/operators';
+import { Feather } from '../items/Feather';
+import { Fluff } from '../items/Fluff';
 import { GreenHerb } from '../items/GreenHerb';
 import { loadFabreDeadSound } from '../sounds/fabre-dead';
 import { fabreSpriteLeftImage } from '../sprites/load-fabre-left';
@@ -103,8 +105,10 @@ export class Fabre extends Monster {
     super(canvas, fabreSpriteLeftImage, fabreSpriteRightImage);
 
     this.dropItems = [
-      [GreenHerb, 70],
-      [GreenHerb, 70],
+      [GreenHerb, 30],
+      [GreenHerb, 30],
+      [Fluff, 70],
+      [Feather, 20],
     ];
 
     this.dyingAudio.volume = 0.05;
