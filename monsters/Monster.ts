@@ -989,13 +989,16 @@ export abstract class Monster {
   }
 
   restoreHp(value: number) {
-    this.onRestoreHp$.next(value);
+    const hpBefore = this.hp;
     let hp = this.hp + value;
+
     if (hp > this.maxHp) {
       this.hp = this.maxHp;
     } else {
       this.hp = hp;
     }
+
+    this.onRestoreHp$.next(this.hp - hpBefore);
   }
 
   private emitStandingAggressive<T>(): MonoTypeOperatorFunction<T> {

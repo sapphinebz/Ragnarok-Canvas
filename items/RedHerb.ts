@@ -1,18 +1,19 @@
 import { Monster } from '../monsters/Monster';
 import { loadHealAudio } from '../sounds/heal-effect';
-import { whitePotionImage } from './images/white-potion-image';
+import { randomMinMax } from '../utils/random-minmax';
+import { redHerbImage } from './images/red-herb-image';
 import { Item } from './Item';
 
-export class WhitePotion extends Item {
+export class RedHerb extends Item {
   usable = true;
   useAudio = loadHealAudio();
   constructor(public canvas: HTMLCanvasElement) {
-    super(canvas, whitePotionImage);
+    super(canvas, redHerbImage);
     this.useAudio.volume = 0.05;
   }
   useWith(monster: Monster): void {
-    // restore 100%
-    monster.restoreHp(monster.maxHp);
+    const hp = randomMinMax(20, 30);
+    monster.restoreHp(hp);
     this.useAudio.play();
   }
 }

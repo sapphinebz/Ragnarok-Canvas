@@ -1,18 +1,18 @@
 import { Monster } from '../monsters/Monster';
 import { loadHealAudio } from '../sounds/heal-effect';
-import { whitePotionImage } from './images/white-potion-image';
+import { candyCaneImage } from './images/candy-cane-image';
 import { Item } from './Item';
 
-export class WhitePotion extends Item {
+export class CandyCane extends Item {
   usable = true;
   useAudio = loadHealAudio();
   constructor(public canvas: HTMLCanvasElement) {
-    super(canvas, whitePotionImage);
+    super(canvas, candyCaneImage);
     this.useAudio.volume = 0.05;
   }
   useWith(monster: Monster): void {
-    // restore 100%
-    monster.restoreHp(monster.maxHp);
+    monster.restoreHp(monster.maxHp * 0.075);
+
     this.useAudio.play();
   }
 }

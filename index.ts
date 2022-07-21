@@ -480,7 +480,7 @@ const onMonsterDropedItems$ = onLoadMonster$.pipe(
         return from(droppedItems);
       }),
       connect((droppedItem$) => {
-        // const delayCanPick = 1000;
+        // const delayCanPick = 200;
 
         const removeUselessItem$ = droppedItem$.pipe(
           filter((fieldItem) => {

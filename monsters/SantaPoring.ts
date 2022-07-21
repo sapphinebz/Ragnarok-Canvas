@@ -1,4 +1,8 @@
-import { interval, map, switchMap, takeUntil, tap } from 'rxjs';
+import { takeUntil, tap } from 'rxjs';
+import { Apple } from '../items/Apple';
+import { Candy } from '../items/Candy';
+import { CandyCane } from '../items/CandyCane';
+import { RedHerb } from '../items/RedHerb';
 import { poringSpriteLeftImage } from '../sprites/load-poring-left';
 import { poringSpriteRightImage } from '../sprites/load-poring-right';
 import { CropImage, DIRECTION } from './Monster';
@@ -40,20 +44,12 @@ export class SantaPoring extends Poring {
       .pipe(takeUntil(this.onDied$), takeUntil(this.onCleanup$))
       .subscribe();
 
-    // this.onDied$
-    //   .pipe(
-    //     switchMap(() => {
-    //       const currentSantaHatY = this.santaHatY;
-    //       return this.tween(
-    //         250,
-    //         tap((t) => {
-    //           this.santaHatY = currentSantaHatY + (8 - currentSantaHatY) * t;
-    //         })
-    //       );
-    //     }),
-    //     takeUntil(this.onCleanup$)
-    //   )
-    //   .subscribe();
+    this.dropItems = [
+      [CandyCane, 15],
+      [Apple, 30],
+      [RedHerb, 30],
+      [Candy, 15],
+    ];
 
     this.onDieChangeValueEffect({
       init: () => this.santaHatY,
