@@ -169,6 +169,7 @@ const corpseDisappearAfterAnimationEnd = <T>(
             .subscribe(() => {
               const index = monsters.findIndex((p) => p === monster);
               if (index > -1) {
+                monster.cleanup();
                 monsters.splice(index, 1);
                 tick();
               }
@@ -523,7 +524,7 @@ const onMonsterTickRender$ = onLoadMonster$.pipe(
   mergeMap((monster) => {
     monster.randomAction();
     monster.autoAggressiveOnVisionTarget(onLoadPlayer$);
-    return monster.onActionTick$.pipe(takeUntil(monster.onDied$));
+    return monster.onActionTick$.pipe(takeUntil(monster.onCleanup$));
     // monster.direction = DIRECTION.RIGHT;
     // return monster.standing().pipe(repeat());
   })

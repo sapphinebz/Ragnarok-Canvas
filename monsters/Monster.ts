@@ -128,7 +128,7 @@ export abstract class Monster {
   dps = 800;
   attackSpeed = 120;
 
-  onCleanup$ = new ReplaySubject<void>(1);
+  onCleanup$ = new AsyncSubject<void>();
   onDamageArea$ = new Subject<Area>();
   onReceiveDamage$ = new Subject<number>();
   onRestoreHp$ = new Subject<number>();
@@ -350,14 +350,23 @@ export abstract class Monster {
       takeUntil(this.onDied$)
     );
 
-    const dieAnimation$ = this.onDied$.pipe(
-      switchMap(() => this.dying()),
-      takeUntil(this.onCleanup$)
-    );
+    action$.pipe(takeUntil(this.onCleanup$)).subscribe(() => {
+      this.render();
+    });
 
-    merge(action$, dieAnimation$)
-      .pipe(takeUntil(this.onCleanup$))
-      .subscribe(() => this.onActionTick$.next());
+    this.onDied$
+      .pipe(
+        switchMap(() =>
+          this.dying().pipe(
+            tap({
+              next: () => {
+                this.render();
+              }
+            })
+          )
+        )
+      )
+      .subscribe();
 
     // Aggressive do damage to target
     this.aggressiveTarget$
@@ -944,7 +953,7 @@ export abstract class Monster {
       endWith(1),
       nextEffect,
       tap(() => {
-        this.onActionTick$.next();
+        this.render();
       })
     );
   }
@@ -968,6 +977,10 @@ export abstract class Monster {
         );
       })
     );
+  }
+
+  render() {
+    this.onActionTick$.next();
   }
 
   restoreHp(value: number) {
