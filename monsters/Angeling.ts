@@ -1,4 +1,6 @@
 import { interval, map, takeUntil, tap } from 'rxjs';
+import { Apple } from '../items/Apple';
+import { WhiteHerb } from '../items/WhiteHerb';
 import { poringSpriteLeftImage } from '../sprites/load-poring-left';
 import { poringSpriteRightImage } from '../sprites/load-poring-right';
 import { CropImage, DIRECTION } from './Monster';
@@ -91,6 +93,12 @@ export class Angeling extends Poring {
 
   constructor(canvas: HTMLCanvasElement) {
     super(canvas);
+
+    this.dropItems = [
+      [WhiteHerb, 70],
+      [Apple, 70],
+      [Apple, 70],
+    ];
 
     this.flipWingFrame$
       .pipe(takeUntil(this.onDied$), takeUntil(this.onCleanup$))
