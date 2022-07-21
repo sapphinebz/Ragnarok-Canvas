@@ -1,0 +1,3 @@
+export const whitePotionImage = new Image();
+whitePotionImage.src =
+  'data:image/gif;base64,R0lGODlhGAAYAMQZAL+rp//z7+fTlrfHt/Lj6Munj19fX19zX5urm3uPe//z566uvv/xrbW9sa9/Y6+Pe8O2u5+bx+fn/6+vr7+/44eHh0hJT9fX1////////wAAAAAAAAAAAAAAAAAAAAAAACH5BAEAABkALAAAAAAYABgAAAWsYCaOZGmeaKquLFkUj9OaBYYJgjG7Nm7towKD4QMiEIcCLmE5smwEwuKQSBwig+ggZQsQJJLpFUsIBLYmm8UyoIDBFAp2fU6vK+63JC6v0O0WFxIXhIQRhxEXfyUBFhWENpF8ERJ+ASYQjheRknwUfgAnDRUTm5wYFIITFaEoF6WFrxcRE6utKKOwhKW0FQa3rqSFvBO/LRcVpLWrxjMKyMm/wM4KANNA2NkiIQA7';

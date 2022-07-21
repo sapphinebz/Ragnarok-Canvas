@@ -21,6 +21,7 @@ import { EmptyBottle } from '../items/EmptyBottle';
 import { Jellopy } from '../items/Jellopy';
 import { RedPotion } from '../items/RedPotion';
 import { StickyMucus } from '../items/StickyMucus';
+import { WhitePotion } from '../items/WhitePotion';
 import { loadPoringAttackAudio } from '../sounds/poring-attack';
 import { loadPoringDamage } from '../sounds/poring-damage';
 import { loadPoringDeadSound } from '../sounds/poring-dead';
@@ -264,6 +265,7 @@ export class Poring extends Monster {
     super(canvas, poringSpriteLeftImage, poringSpriteRightImage);
 
     this.dropItems = [
+      [WhitePotion, 1],
       [Jellopy, 70],
       [RedPotion, 10],
       [Jellopy, 70],
