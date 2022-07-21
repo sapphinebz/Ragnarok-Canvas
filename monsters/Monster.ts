@@ -208,14 +208,16 @@ export abstract class Monster {
     this.onReceiveDamage$
       .pipe(
         mergeMap((damage) => {
-          const maxScale = 3;
-          const dropYDistance = this.height / 2;
+          const maxScale = 4;
+          const minScale = 1.5;
+          const dropYDistance = 80;
           let dropXDistance = 80;
           if (this.direction === DIRECTION.RIGHT) {
             dropXDistance = -dropXDistance;
           }
-          const maxLocationY = this.y + this.height / 3;
-          const startY = randomMinMax(maxLocationY - 20, maxLocationY + 20);
+          const maxLocationY = this.y;
+          // const startY = randomMinMax(maxLocationY - 20, maxLocationY + 20);
+          const startY = maxLocationY - 20;
           const startX = this.x;
           const drawDamage = {
             damage,
@@ -231,9 +233,9 @@ export abstract class Monster {
             800,
             tap({
               next: (t) => {
-                drawDamage.scale = maxScale - t * maxScale;
+                drawDamage.scale = maxScale - t * (maxScale - minScale);
                 drawDamage.location.y =
-                  startY + Math.sin(t * Math.PI * (3 / 2)) * -dropYDistance;
+                  startY + Math.sin(t * Math.PI) * -dropYDistance;
 
                 drawDamage.location.x = startX + t * dropXDistance;
               },
