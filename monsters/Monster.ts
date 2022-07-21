@@ -36,10 +36,8 @@ import {
   takeUntil,
   takeWhile,
 } from 'rxjs/operators';
-import { damageMapSprite } from '../gamepad/damage-drawer';
-import { DropItems, Item } from '../items/Item';
+import { DropItems } from '../items/Item';
 import { loadCriticalAttack } from '../sounds/critical-attack';
-import { loadDamageNumbersImage } from '../sprites/load-damage-numbers';
 import { distanceBetween } from '../utils/collision';
 import { playAudio } from '../utils/play-audio';
 import { randomMinMax } from '../utils/random-minmax';
@@ -142,8 +140,6 @@ export abstract class Monster {
   attackRange = 70;
   isAggressiveOnVision = false;
 
-  receiveDamages: DrawDamage[] = [];
-
   get aggressiveTarget() {
     return this.aggressiveTarget$.value;
   }
@@ -175,6 +171,8 @@ export abstract class Monster {
 
   criticalAttackSound = loadCriticalAttack();
   onPlayCriticalAttack$ = new Subject<void>();
+
+  receivedDamages: DrawDamage[] = [];
 
   get ctx() {
     return this.canvas.getContext('2d');
@@ -227,7 +225,7 @@ export abstract class Monster {
             },
             scale: maxScale,
           };
-          this.receiveDamages.push(drawDamage);
+          this.receivedDamages.push(drawDamage);
 
           return this.tween(
             800,
@@ -240,33 +238,15 @@ export abstract class Monster {
                 drawDamage.location.x = startX + t * dropXDistance;
               },
               complete: () => {
-                const index = this.receiveDamages.findIndex(
+                const index = this.receivedDamages.findIndex(
                   (d) => d === drawDamage
                 );
                 if (index > -1) {
-                  this.receiveDamages.splice(index, 1);
+                  this.receivedDamages.splice(index, 1);
                 }
               },
             })
           );
-          // return this.tween(
-          //   800,
-          //   tap({
-          //     next: (t) => {
-          //       drawDamage.scale = maxScale - t * maxScale;
-          //       drawDamage.location.y = startY + t * dropYDistance;
-          //       drawDamage.location.x = startX + t * dropXDistance;
-          //     },
-          // complete: () => {
-          //   const index = this.receiveDamages.findIndex(
-          //     (d) => d === drawDamage
-          //   );
-          //   if (index > -1) {
-          //     this.receiveDamages.splice(index, 1);
-          //   }
-          // },
-          //   })
-          // );
         }),
         takeUntil(this.onCleanup$)
       )
@@ -1020,29 +1000,6 @@ export abstract class Monster {
       this.hp = this.maxHp;
     } else {
       this.hp = hp;
-    }
-  }
-
-  drawDamage() {
-    for (const drawDamage of this.receiveDamages) {
-      const { damage, location, scale } = drawDamage;
-      let x = location.x;
-      for (const num of `${damage}`) {
-        const sprite = damageMapSprite[num];
-        this.ctx.drawImage(
-          loadDamageNumbersImage,
-          sprite.offsetX,
-          sprite.offsetY,
-          sprite.width,
-          sprite.height,
-          x,
-          location.y,
-          sprite.width * scale,
-          sprite.height * scale
-        );
-
-        x += sprite.width * scale + 1;
-      }
     }
   }
 

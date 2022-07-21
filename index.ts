@@ -55,6 +55,7 @@ import { Baphomet } from './monsters/Baphomet';
 import { Angeling } from './monsters/Angeling';
 import { SantaPoring } from './monsters/SantaPoring';
 import { FieldItem } from './items/Item';
+import { drawDamage } from './gamepad/damage-drawer';
 
 const canvas = document.querySelector<HTMLCanvasElement>('canvas');
 const ctx = canvas.getContext('2d');
@@ -422,10 +423,10 @@ onCanvasRender$.subscribe(() => {
   );
 
   for (const monster of monsters) {
-    monster.drawDamage();
+    drawDamage(monster);
   }
 
-  thief.drawDamage();
+  drawDamage(thief);
 });
 
 killCount$.subscribe(() => tick());
