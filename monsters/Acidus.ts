@@ -1,11 +1,16 @@
-import { defer, Observable, Subject, switchMap } from 'rxjs';
-import { takeUntil, tap } from 'rxjs/operators';
-import { loadAcidusAttackSound } from '../sounds/acidus-attack';
-import { loadAcidusDeadSound } from '../sounds/acidus-dead';
-import { acidusLeftSpriteImage } from '../sprites/load-acidus-left';
-import { acidusSpriteRightImage } from '../sprites/load-acidus-right';
-import { playAudio } from '../utils/play-audio';
-import { CropImage, DIRECTION, Monster } from './Monster';
+import { defer, Observable, Subject, switchMap } from "rxjs";
+import { takeUntil, tap } from "rxjs/operators";
+import { DragonCanine } from "../items/DragonCanine";
+import { DragonScale } from "../items/DragonScale";
+import { RoughWind } from "../items/RoughWind";
+import { WhiteHerb } from "../items/WhiteHerb";
+import { WhitePotion } from "../items/WhitePotion";
+import { loadAcidusAttackSound } from "../sounds/acidus-attack";
+import { loadAcidusDeadSound } from "../sounds/acidus-dead";
+import { acidusLeftSpriteImage } from "../sprites/load-acidus-left";
+import { acidusSpriteRightImage } from "../sprites/load-acidus-right";
+import { playAudio } from "../utils/play-audio";
+import { CropImage, DIRECTION, Monster } from "./Monster";
 
 export class Acidus extends Monster {
   maxHp = 350;
@@ -201,6 +206,14 @@ export class Acidus extends Monster {
     super(canvas, acidusLeftSpriteImage, acidusSpriteRightImage);
     this.deadAudio.volume = 0.05;
     this.attackAudio.volume = 0.05;
+
+    this.dropItems = [
+      [DragonScale, 30],
+      [RoughWind, 10],
+      [DragonCanine, 30],
+      [WhitePotion, 10],
+      [WhiteHerb, 15],
+    ];
 
     this.onPlayDeadAudio$
       .pipe(

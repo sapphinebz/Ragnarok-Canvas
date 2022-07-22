@@ -9,16 +9,19 @@ import {
   switchMap,
   takeUntil,
   tap,
-} from 'rxjs';
-import { connect, filter, mergeMap } from 'rxjs/operators';
-import { loadBaphometAttackAudio } from '../sounds/baphomet-attack';
-import { loadBaphometBreath } from '../sounds/baphomet-breath';
-import { loadBaphometDamagedAudio } from '../sounds/baphomet-damaged';
-import { loadBaphometDeadAudio } from '../sounds/baphomet-dead';
-import { baphometSpriteLeft } from '../sprites/baphomet-sprite-left';
-import { baphometSpriteRight } from '../sprites/baphomet-sprite-right';
-import { playAudio, stopAudio } from '../utils/play-audio';
-import { CropImage, DIRECTION, Monster } from './Monster';
+} from "rxjs";
+import { connect, filter, mergeMap } from "rxjs/operators";
+import { EvilHorn } from "../items/EvilHorn";
+import { WhiteHerb } from "../items/WhiteHerb";
+import { YggdrasilBerry } from "../items/YggdrasilBerry";
+import { loadBaphometAttackAudio } from "../sounds/baphomet-attack";
+import { loadBaphometBreath } from "../sounds/baphomet-breath";
+import { loadBaphometDamagedAudio } from "../sounds/baphomet-damaged";
+import { loadBaphometDeadAudio } from "../sounds/baphomet-dead";
+import { baphometSpriteLeft } from "../sprites/baphomet-sprite-left";
+import { baphometSpriteRight } from "../sprites/baphomet-sprite-right";
+import { playAudio, stopAudio } from "../utils/play-audio";
+import { CropImage, DIRECTION, Monster } from "./Monster";
 
 export class Baphomet extends Monster {
   maxHp = 450;
@@ -363,6 +366,12 @@ export class Baphomet extends Monster {
   weaponSprite = { offsetX: 772, offsetY: 822, width: 74, height: 99 };
   constructor(public canvas: HTMLCanvasElement) {
     super(canvas, baphometSpriteLeft, baphometSpriteRight);
+
+    this.dropItems = [
+      [YggdrasilBerry, 70],
+      [EvilHorn, 80],
+      [WhiteHerb, 15],
+    ];
 
     this.onPlayBreathAudio$
       .pipe(
