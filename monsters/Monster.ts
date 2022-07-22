@@ -683,30 +683,21 @@ export abstract class Monster {
             return true;
           }
 
-          const distanceY = distanceBetween(
-            {
-              x: 0,
-              y: targetY,
-            },
-            { x: 0, y: sourceY }
-          );
+          // if next step less than speed
+          // will next step with remaining distance
 
-          if (distanceY <= this.speedY) {
-            this.y = this.y + distanceY * (targetIsTopSide ? -1 : 1);
+          const distanceY = targetY - sourceY;
+
+          if (Math.abs(distanceY) <= this.speedY) {
+            this.y = this.y + distanceY;
           } else {
             this.y = moveNextLocation.y;
           }
 
-          const distanceX = distanceBetween(
-            {
-              x: 0,
-              y: targetX,
-            },
-            { x: 0, y: sourceX }
-          );
+          const distanceX = targetX - sourceX;
 
-          if (distanceX <= this.speedX) {
-            this.x = this.x + distanceX * (targetIsLeftSide ? -1 : 1);
+          if (Math.abs(distanceX) <= this.speedX) {
+            this.x = this.x + distanceX;
           } else {
             this.x = moveNextLocation.x;
           }
