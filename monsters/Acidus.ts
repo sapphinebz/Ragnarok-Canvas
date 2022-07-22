@@ -24,7 +24,8 @@ export class Acidus extends Monster {
   width = 119;
   height = 120;
   atk = 50;
-  visionRange = 300;
+  visionRange = 150;
+  trackRange = 500;
   isAggressiveOnVision = true;
   dps = 300;
 

@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
+    "serve": "webpack --watch --progress",
     "build": "webpack"
   },
   "dependencies": {

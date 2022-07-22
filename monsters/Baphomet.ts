@@ -37,7 +37,8 @@ export class Baphomet extends Monster {
   height = 118;
 
   atk = 150;
-  visionRange = 200;
+  visionRange = 150;
+  trackRange = 500;
   isAggressiveOnVision = true;
   dps = 300;
 
@@ -424,7 +425,7 @@ export class Baphomet extends Monster {
   walking() {
     return defer(() => {
       this.frameY = 2;
-      return this.forwardFrameX(80, 0, 3);
+      return this.forwardFrameX(50, 0, 3);
     });
   }
 

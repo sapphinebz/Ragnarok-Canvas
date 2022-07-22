@@ -145,6 +145,8 @@ export abstract class Monster {
    */
   aggressiveTarget$ = new BehaviorSubject<Monster | null>(null);
   visionRange = 150;
+  trackRange = 500;
+
   attackRange = 70;
   isAggressiveOnVision = false;
 
@@ -528,7 +530,12 @@ export abstract class Monster {
         .pipe(
           map(({ target, self }) => {
             const distance = distanceBetween(target, self);
-            if (distance <= this.visionRange) {
+            if (this.aggressiveTarget !== null && distance <= this.trackRange) {
+              return target;
+            } else if (
+              this.aggressiveTarget === null &&
+              distance <= this.visionRange
+            ) {
               return target;
             }
             return null;
@@ -676,8 +683,34 @@ export abstract class Monster {
             return true;
           }
 
-          this.x = moveNextLocation.x;
-          this.y = moveNextLocation.y;
+          const distanceY = distanceBetween(
+            {
+              x: 0,
+              y: targetY,
+            },
+            { x: 0, y: sourceY }
+          );
+
+          if (distanceY <= this.speedY) {
+            this.y = this.y + distanceY * (targetIsTopSide ? -1 : 1);
+          } else {
+            this.y = moveNextLocation.y;
+          }
+
+          const distanceX = distanceBetween(
+            {
+              x: 0,
+              y: targetX,
+            },
+            { x: 0, y: sourceX }
+          );
+
+          if (distanceX <= this.speedX) {
+            this.x = this.x + distanceX * (targetIsLeftSide ? -1 : 1);
+          } else {
+            this.x = moveNextLocation.x;
+          }
+
           this.onMoving$.next(moveNextLocation);
 
           return false;

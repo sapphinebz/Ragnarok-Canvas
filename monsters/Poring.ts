@@ -6,7 +6,7 @@ import {
   NEVER,
   Observable,
   Subject,
-} from 'rxjs';
+} from "rxjs";
 import {
   concatMap,
   connect,
@@ -15,21 +15,21 @@ import {
   takeUntil,
   takeWhile,
   tap,
-} from 'rxjs/operators';
-import { Apple } from '../items/Apple';
-import { EmptyBottle } from '../items/EmptyBottle';
-import { Jellopy } from '../items/Jellopy';
-import { RedPotion } from '../items/RedPotion';
-import { StickyMucus } from '../items/StickyMucus';
-import { WhitePotion } from '../items/WhitePotion';
-import { loadPoringAttackAudio } from '../sounds/poring-attack';
-import { loadPoringDamage } from '../sounds/poring-damage';
-import { loadPoringDeadSound } from '../sounds/poring-dead';
-import { loadPoringWalkSound } from '../sounds/poring-walk';
-import { poringSpriteLeftImage } from '../sprites/load-poring-left';
-import { poringSpriteRightImage } from '../sprites/load-poring-right';
-import { playAudio } from '../utils/play-audio';
-import { CropImage, DIRECTION, Monster } from './Monster';
+} from "rxjs/operators";
+import { Apple } from "../items/Apple";
+import { EmptyBottle } from "../items/EmptyBottle";
+import { Jellopy } from "../items/Jellopy";
+import { RedPotion } from "../items/RedPotion";
+import { StickyMucus } from "../items/StickyMucus";
+import { WhitePotion } from "../items/WhitePotion";
+import { loadPoringAttackAudio } from "../sounds/poring-attack";
+import { loadPoringDamage } from "../sounds/poring-damage";
+import { loadPoringDeadSound } from "../sounds/poring-dead";
+import { loadPoringWalkSound } from "../sounds/poring-walk";
+import { poringSpriteLeftImage } from "../sprites/load-poring-left";
+import { poringSpriteRightImage } from "../sprites/load-poring-right";
+import { playAudio } from "../utils/play-audio";
+import { CropImage, DIRECTION, Monster } from "./Monster";
 
 export class Poring extends Monster {
   x = 100;
@@ -45,6 +45,8 @@ export class Poring extends Monster {
   height = 37;
 
   attackRange = 30;
+  visionRange = 150;
+  trackRange = 450;
   isAggressiveOnVision = false;
   dps = 600;
 
