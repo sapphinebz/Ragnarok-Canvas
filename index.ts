@@ -76,12 +76,12 @@ const onWindowResize$ = fromEvent(window, "resize").pipe(
  */
 // number monster in field & class
 const monstersClass: [any, number][] = [
-  [Acidus, 0],
-  [Poring, 5],
+  [Acidus, 1],
+  [Poring, 10],
   [SantaPoring, 5],
   [Angeling, 1],
   [Fabre, 7],
-  [Baphomet, 0],
+  [Baphomet, 1],
 ];
 
 const fieldItems: FieldItem[] = [];
@@ -197,7 +197,9 @@ const respawnMonsterRandomTime = (
     return timer(respawnTime).pipe(
       tap(() => {
         const Class = getMonsterClass(monster);
-        onRespawnMonster$.next(new Class(canvas));
+        if (Class) {
+          onRespawnMonster$.next(new Class(canvas));
+        }
       })
     );
   });
