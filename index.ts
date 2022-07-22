@@ -18,7 +18,6 @@ import {
   Observable,
   ReplaySubject,
   EMPTY,
-  NEVER,
   MonoTypeOperatorFunction,
   combineLatest,
   takeWhile,
@@ -26,13 +25,9 @@ import {
 import {
   connect,
   debounceTime,
-  delay,
-  distinctUntilChanged,
   filter,
-  first,
   map,
   mergeMap,
-  repeat,
   shareReplay,
   takeUntil,
 } from "rxjs/operators";
@@ -56,12 +51,10 @@ import { Angeling } from "./monsters/Angeling";
 import { SantaPoring } from "./monsters/SantaPoring";
 import { FieldItem } from "./items/Item";
 import { drawDamage, drawRestoreHp } from "./gamepad/number-drawer";
+import { canvasHover, onClickCanvasArea } from "./utils/canvas";
 
 const canvas = document.querySelector<HTMLCanvasElement>("canvas")!;
 const ctx = canvas.getContext("2d")!;
-const onCanvasMouseMove$ = fromEvent<MouseEvent>(canvas, "mousemove").pipe(
-  share()
-);
 
 const onWindowResize$ = fromEvent(window, "resize").pipe(
   startWith(0),
@@ -345,58 +338,43 @@ const onCanvasRender$ = onWindowResize$.pipe(
   share()
 );
 
-const isHoverBackgroundSoundToggler$ = onCanvasMouseMove$.pipe(
-  map((event) => {
-    if (
-      isMouseHoverArea(event, {
-        x: backgroundSoundTogglerImagePosition.x,
-        y: backgroundSoundTogglerImagePosition.y,
-        w: backgroundSoundTogglerImage.width,
-        h: backgroundSoundTogglerImage.height,
-      })
-    ) {
-      canvas.style.cursor = "pointer";
-      return true;
-    } else {
-      canvas.style.cursor = "default";
-    }
-    return false;
-  }),
-  distinctUntilChanged(),
-  shareReplay(1)
-);
-
-const onToggleBackgroundSound$ = isHoverBackgroundSoundToggler$.pipe(
-  switchMap((isHover) => {
-    if (isHover) {
-      return fromEvent(canvas, "click");
-    }
-    return NEVER;
-  }),
-  map(() => backgroundSoundTogglerImage === audioIsOpenImage),
-  share()
-);
-
 let backgroundMusic: HTMLAudioElement;
-onToggleBackgroundSound$.subscribe((isOpen) => {
-  if (isOpen) {
-    backgroundSoundTogglerImage = audioIsCloseImage;
-    if (backgroundMusic) {
-      backgroundMusic.pause();
+canvasHover(canvas, {
+  x: backgroundSoundTogglerImagePosition.x,
+  y: backgroundSoundTogglerImagePosition.y,
+  w: backgroundSoundTogglerImage.width,
+  h: backgroundSoundTogglerImage.height,
+})
+  .pipe(
+    tap((isHover) => {
+      if (isHover) {
+        canvas.style.cursor = "pointer";
+      } else {
+        canvas.style.cursor = "default";
+      }
+    }),
+    onClickCanvasArea(canvas),
+    map(() => backgroundSoundTogglerImage === audioIsOpenImage)
+  )
+  .subscribe((isOpen) => {
+    if (isOpen) {
+      backgroundSoundTogglerImage = audioIsCloseImage;
+      if (backgroundMusic) {
+        backgroundMusic.pause();
+      }
+    } else {
+      backgroundSoundTogglerImage = audioIsOpenImage;
+      if (!backgroundMusic) {
+        backgroundMusic = loadProteraFieldVol2();
+        backgroundMusic.volume = 0.05;
+        backgroundMusic.loop = true;
+      }
+      if (backgroundMusic) {
+        backgroundMusic.play();
+      }
     }
-  } else {
-    backgroundSoundTogglerImage = audioIsOpenImage;
-    if (!backgroundMusic) {
-      backgroundMusic = loadProteraFieldVol2();
-      backgroundMusic.volume = 0.05;
-      backgroundMusic.loop = true;
-    }
-    if (backgroundMusic) {
-      backgroundMusic.play();
-    }
-  }
-  tick();
-});
+    tick();
+  });
 
 onCanvasRender$.subscribe(() => {
   for (const fieldItem of fieldItems) {

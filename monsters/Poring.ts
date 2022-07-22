@@ -60,6 +60,7 @@ export class Poring extends Monster {
   onPlayDamageAudio$ = new Subject<void>();
   damageAudio = loadPoringDamage();
 
+  onPlayWalkAudio$ = new Subject<void>();
   walkingAudio = loadPoringWalkSound();
 
   frames: CropImage[][] = [
@@ -298,6 +299,13 @@ export class Poring extends Monster {
         takeUntil(this.onCleanup$)
       )
       .subscribe();
+
+    this.onPlayWalkAudio$
+      .pipe(
+        switchMap(() => playAudio(this.walkingAudio)),
+        takeUntil(this.onCleanup$)
+      )
+      .subscribe();
   }
 
   getFrameEntry(frameY: number, frameX: number) {
@@ -368,35 +376,14 @@ export class Poring extends Monster {
     return defer(() => {
       this.frameY = 1;
       return this.forwardFrameX(this.walkSpeed, 0, 7).pipe(
-        // this.moveLocationOnAttack({
-        //   moveY: 40,
-        //   maxLocationOnFrame: 3,
-        // }),
-        connect((xframe$) => {
-          const sound$ = xframe$.pipe(
-            filter((xframe) => xframe === 3),
-            concatMap(() => this.playWalkingAudio())
-          );
-          return merge(xframe$, sound$.pipe(ignoreElements()));
+        tap({
+          next: (frameX) => {
+            if (frameX === 3) {
+              this.onPlayWalkAudio$.next();
+            }
+          },
         })
       );
-    });
-  }
-
-  private playWalkingAudio() {
-    return new Observable((subscriber) => {
-      this.walkingAudio.play();
-      const stopAudio = () => {
-        this.walkingAudio.pause();
-        this.walkingAudio.currentTime = 0;
-        subscriber.next();
-        subscriber.complete();
-      };
-      const timeoutIndex = setTimeout(stopAudio, 270);
-      return () => {
-        clearTimeout(timeoutIndex);
-        stopAudio();
-      };
     });
   }
 }
