@@ -22,7 +22,7 @@ export class Thief extends Monster {
   frameY = 0;
   width = 80;
   height = 107;
-  attackSpeed = 80;
+  attackSpeed = 60;
   dps = 0;
   showHpGauge = true;
 

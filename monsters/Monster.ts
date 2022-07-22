@@ -27,6 +27,7 @@ import {
 import {
   concatAll,
   connect,
+  debounceTime,
   distinctUntilChanged,
   endWith,
   filter,
@@ -45,6 +46,7 @@ import { loadCriticalAttack } from "../sounds/critical-attack";
 import { distanceBetween } from "../utils/collision";
 import { playAudio } from "../utils/play-audio";
 import { randomMinMax } from "../utils/random-minmax";
+import { repeatUntil } from "../utils/repeat-util";
 import { shuffle } from "../utils/shuffle";
 
 export interface MoveLocation {
@@ -243,6 +245,8 @@ export abstract class Monster {
           return false;
         } else if (preAction === ACTION.HURT && action === ACTION.HURT) {
           return false;
+        } else if (preAction === ACTION.ATTACK && action === ACTION.ATTACK) {
+          return false;
         }
         return true;
       }),
@@ -306,7 +310,27 @@ export abstract class Monster {
             })
           );
         } else if (action === ACTION.ATTACK) {
+          // For Monster
+          if (this.aggressiveTarget !== null) {
+            return this.attack().pipe(
+              tap({
+                complete: () => {
+                  if (this.aggressiveTarget !== null) {
+                    this.actionChange$.next(ACTION.MOVE_TO_TARGET);
+                  } else {
+                    this.actionChange$.next(ACTION.STANDING);
+                  }
+                },
+              })
+            );
+          }
+          // For Player
+          const onStopAttack$ = this.actionChange$.pipe(
+            filter((action) => action === ACTION.ATTACK),
+            debounceTime(400)
+          );
           return this.attack().pipe(
+            repeatUntil(onStopAttack$),
             tap({
               complete: () => {
                 if (this.aggressiveTarget !== null) {
