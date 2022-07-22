@@ -1,14 +1,14 @@
-import { defer, Observable, Subject, switchMap, timer } from 'rxjs';
-import { map, mergeMap, takeUntil, takeWhile, tap } from 'rxjs/operators';
-import { loadDaggerHitSound } from '../sounds/dagger-hit-sound';
-import { loadThiefFamaleDamagedAudio } from '../sounds/thief-famale-damaged';
-import { loadThiefFamaleDeadAudio } from '../sounds/thief-famale-dead';
-import { thiefLeftSpriteImage } from '../sprites/load-thief-left';
-import { loadLeftThiefDagger } from '../sprites/load-thief-left-dagger';
-import { thiefRightSpriteImage } from '../sprites/load-thief-right';
-import { loadRightThiefDagger } from '../sprites/load-thief-right-dagger';
-import { playAudio } from '../utils/play-audio';
-import { CropImage, DIRECTION, Monster } from './Monster';
+import { defer, Observable, Subject, switchMap, timer } from "rxjs";
+import { map, mergeMap, takeUntil, takeWhile, tap } from "rxjs/operators";
+import { loadDaggerHitSound } from "../sounds/dagger-hit-sound";
+import { loadThiefFamaleDamagedAudio } from "../sounds/thief-famale-damaged";
+import { loadThiefFamaleDeadAudio } from "../sounds/thief-famale-dead";
+import { thiefLeftSpriteImage } from "../sprites/load-thief-left";
+import { loadLeftThiefDagger } from "../sprites/load-thief-left-dagger";
+import { thiefRightSpriteImage } from "../sprites/load-thief-right";
+import { loadRightThiefDagger } from "../sprites/load-thief-right-dagger";
+import { playAudio } from "../utils/play-audio";
+import { CropImage, DIRECTION, Monster } from "./Monster";
 
 export class Thief extends Monster {
   maxHp = 1200;
@@ -327,7 +327,7 @@ export class Thief extends Monster {
   ];
 
   hasEffect = false;
-  effectFrame: number[];
+  effectFrame: number[] = [];
   onSoundEffectAttackPlay$ = new Subject<void>();
   onStopSoundEffectAttack$ = new Subject<void>();
   onEffectAttack = new Subject<{

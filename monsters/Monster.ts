@@ -23,7 +23,7 @@ import {
   take,
   tap,
   timer,
-} from 'rxjs';
+} from "rxjs";
 import {
   concatAll,
   connect,
@@ -35,17 +35,17 @@ import {
   repeat,
   takeUntil,
   takeWhile,
-} from 'rxjs/operators';
+} from "rxjs/operators";
 import {
   animateReceivedDamage,
   animateRestoreHp,
-} from '../gamepad/number-drawer';
-import { DropItems } from '../items/Item';
-import { loadCriticalAttack } from '../sounds/critical-attack';
-import { distanceBetween } from '../utils/collision';
-import { playAudio } from '../utils/play-audio';
-import { randomMinMax } from '../utils/random-minmax';
-import { shuffle } from '../utils/shuffle';
+} from "../gamepad/number-drawer";
+import { DropItems } from "../items/Item";
+import { loadCriticalAttack } from "../sounds/critical-attack";
+import { distanceBetween } from "../utils/collision";
+import { playAudio } from "../utils/play-audio";
+import { randomMinMax } from "../utils/random-minmax";
+import { shuffle } from "../utils/shuffle";
 
 export interface MoveLocation {
   x: number;
@@ -58,7 +58,7 @@ export interface WalkingConfig {
   stopIfOutOfCanvas?: boolean;
 }
 
-export type WalkingStoppable = Pick<WalkingConfig, 'stopIfOutOfCanvas'>;
+export type WalkingStoppable = Pick<WalkingConfig, "stopIfOutOfCanvas">;
 
 export const enum ACTION {
   IDLE,
@@ -84,7 +84,7 @@ export interface DrawNumber {
   scale: number;
 }
 
-export type DamageNumber = Pick<DrawNumber, 'number' | 'isCritical'>;
+export type DamageNumber = Pick<DrawNumber, "number" | "isCritical">;
 
 export const enum DIRECTION {
   LEFT,
@@ -113,14 +113,14 @@ export abstract class Monster {
   atk = 1;
   hp = 20;
   maxHp = this.hp;
-  x: number;
-  y: number;
-  speedX: number;
-  speedY: number;
+  x: number = 0;
+  y: number = 0;
+  speedX: number = 0;
+  speedY: number = 0;
   frameX = 0;
   frameY = 0;
-  width: number;
-  height: number;
+  width: number = 0;
+  height: number = 0;
 
   showHpGauge = false;
 
@@ -188,7 +188,7 @@ export abstract class Monster {
   restoredHp: DrawNumber[] = [];
 
   get ctx() {
-    return this.canvas.getContext('2d');
+    return this.canvas.getContext("2d")!;
   }
 
   constructor(
@@ -442,11 +442,11 @@ export abstract class Monster {
           // hp Gauge
           if (this.showHpGauge) {
             const gaugeHpRate = this.hp / this.maxHp;
-            this.drawGauge(this.width, 'hsl(0deg 0% 10% / 70%)');
+            this.drawGauge(this.width, "hsl(0deg 0% 10% / 70%)");
             if (gaugeHpRate <= 0.2) {
-              this.drawGauge(this.width * (this.hp / this.maxHp), '#d50000');
+              this.drawGauge(this.width * (this.hp / this.maxHp), "#d50000");
             } else {
-              this.drawGauge(this.width * (this.hp / this.maxHp), 'lime');
+              this.drawGauge(this.width * (this.hp / this.maxHp), "lime");
             }
           }
         }
@@ -461,7 +461,7 @@ export abstract class Monster {
     if (image.complete) {
       return of(image);
     } else {
-      return fromEvent(image, 'load').pipe(
+      return fromEvent(image, "load").pipe(
         take(1),
         map(() => image)
       );
@@ -617,7 +617,7 @@ export abstract class Monster {
    */
   testArea(area: Area) {
     this.ctx.beginPath();
-    this.ctx.fillStyle = 'red';
+    this.ctx.fillStyle = "red";
     this.ctx.fillRect(area.x, area.y, area.w, area.h);
     this.ctx.closePath();
   }
@@ -941,13 +941,13 @@ export abstract class Monster {
     this.ctx.drawImage(
       image,
       offsetX,
-      cropImage.offsetY,
+      cropImage.offsetY ?? 0,
       cropImage.width,
-      cropImage.height,
+      cropImage.height ?? 0,
       this.x + (dx ?? 0) + (marginWidth ?? 0),
       this.y + (dy ?? 0) + (marginHeight ?? 0),
       cropImage.width,
-      cropImage.height
+      cropImage.height ?? 0
     );
   }
 
@@ -1029,7 +1029,7 @@ export abstract class Monster {
     this.ctx.fill();
 
     this.ctx.beginPath();
-    this.ctx.strokeStyle = 'hsl(0deg 0% 10% / 70%)';
+    this.ctx.strokeStyle = "hsl(0deg 0% 10% / 70%)";
     // this.ctx.strokeStyle = 'blue';
     this.ctx.strokeRect(this.x, this.y + this.height + 5, value, 5);
     this.ctx.fill();

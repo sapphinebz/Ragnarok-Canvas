@@ -1,4 +1,5 @@
-import { animationFrames, combineLatest, connect, map, takeWhile } from "rxjs";
+import { animationFrames, combineLatest } from "rxjs";
+import { endWith, map, takeWhile, connect } from "rxjs/operators";
 
 function animationDrop(option: { delay: number; x: number; y: number }) {
   return tween(option.delay).pipe(

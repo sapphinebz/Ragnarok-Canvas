@@ -1,11 +1,11 @@
-import { interval, map, takeUntil, tap } from 'rxjs';
-import { Apple } from '../items/Apple';
-import { WhiteHerb } from '../items/WhiteHerb';
-import { WhitePotion } from '../items/WhitePotion';
-import { poringSpriteLeftImage } from '../sprites/load-poring-left';
-import { poringSpriteRightImage } from '../sprites/load-poring-right';
-import { CropImage, DIRECTION } from './Monster';
-import { Poring } from './Poring';
+import { interval, map, takeUntil, tap } from "rxjs";
+import { Apple } from "../items/Apple";
+import { WhiteHerb } from "../items/WhiteHerb";
+import { WhitePotion } from "../items/WhitePotion";
+import { poringSpriteLeftImage } from "../sprites/load-poring-left";
+import { poringSpriteRightImage } from "../sprites/load-poring-right";
+import { CropImage, DIRECTION } from "./Monster";
+import { Poring } from "./Poring";
 
 export class Angeling extends Poring {
   maxHp = 220;
@@ -26,7 +26,7 @@ export class Angeling extends Poring {
   ];
 
   // WingA as direction
-  wingA_Y: number;
+  wingA_Y: number = 0;
   wingASprite: CropImage[][] = [
     [
       { order: 0, offsetX: 232, offsetY: 474, width: 14, height: 19 },
@@ -54,7 +54,7 @@ export class Angeling extends Poring {
   ];
 
   // WingB as direction
-  wingB_Y: number;
+  wingB_Y: number = 0;
   wingBSprite: CropImage[][] = [
     [
       { order: 0, offsetX: 278, offsetY: 476, width: 18, height: 19 },
@@ -89,7 +89,7 @@ export class Angeling extends Poring {
   );
 
   get ctx() {
-    return this.canvas.getContext('2d');
+    return this.canvas.getContext("2d")!;
   }
 
   constructor(canvas: HTMLCanvasElement) {
@@ -132,7 +132,7 @@ export class Angeling extends Poring {
   }
 
   drawEffect(): void {
-    let image: HTMLImageElement;
+    let image: HTMLImageElement | null = null;
     if (this.direction === DIRECTION.RIGHT) {
       image = poringSpriteRightImage;
     } else if (this.direction === DIRECTION.LEFT) {
@@ -140,8 +140,8 @@ export class Angeling extends Poring {
     }
 
     if (this.haloFrame !== null) {
-      let margin: { x: number; y: number };
-      let directionFrame: number;
+      let margin: { x: number; y: number } = { x: 0, y: this.haloY };
+      let directionFrame: number = 0;
       if (this.direction === DIRECTION.LEFT) {
         directionFrame = 0;
         margin = { x: 7, y: this.haloY };
@@ -150,17 +150,25 @@ export class Angeling extends Poring {
         margin = { x: 3, y: this.haloY };
       }
 
-      this.drawCropImage(
-        image,
-        this.haloSprite[directionFrame][this.haloFrame],
-        margin
-      );
+      if (image !== null) {
+        this.drawCropImage(
+          image,
+          this.haloSprite[directionFrame][this.haloFrame],
+          margin
+        );
+      }
     }
 
     if (this.frameXFlip !== null) {
-      let marginWingA: { x?: number; y?: number };
-      let marginWingB: { x?: number; y?: number };
-      let directionFrame: number;
+      let marginWingA: { x?: number; y?: number } = {
+        x: this.width,
+        y: this.wingA_Y,
+      };
+      let marginWingB: { x?: number; y?: number } = {
+        x: this.width,
+        y: this.wingB_Y,
+      };
+      let directionFrame: number = 0;
       if (this.direction === DIRECTION.LEFT) {
         directionFrame = 0;
         if (this.isDied === false) {
@@ -181,16 +189,18 @@ export class Angeling extends Poring {
         marginWingB = { x: -18, y: this.wingB_Y };
       }
 
-      this.drawCropImage(
-        image,
-        this.wingASprite[directionFrame][this.frameXFlip],
-        marginWingA
-      );
-      this.drawCropImage(
-        image,
-        this.wingBSprite[directionFrame][this.frameXFlip],
-        marginWingB
-      );
+      if (image !== null) {
+        this.drawCropImage(
+          image,
+          this.wingASprite[directionFrame][this.frameXFlip],
+          marginWingA
+        );
+        this.drawCropImage(
+          image,
+          this.wingBSprite[directionFrame][this.frameXFlip],
+          marginWingB
+        );
+      }
     }
   }
 }

@@ -1,18 +1,18 @@
-import { takeUntil, tap } from 'rxjs';
-import { Apple } from '../items/Apple';
-import { Candy } from '../items/Candy';
-import { CandyCane } from '../items/CandyCane';
-import { RedHerb } from '../items/RedHerb';
-import { poringSpriteLeftImage } from '../sprites/load-poring-left';
-import { poringSpriteRightImage } from '../sprites/load-poring-right';
-import { CropImage, DIRECTION } from './Monster';
-import { Poring } from './Poring';
+import { takeUntil, tap } from "rxjs";
+import { Apple } from "../items/Apple";
+import { Candy } from "../items/Candy";
+import { CandyCane } from "../items/CandyCane";
+import { RedHerb } from "../items/RedHerb";
+import { poringSpriteLeftImage } from "../sprites/load-poring-left";
+import { poringSpriteRightImage } from "../sprites/load-poring-right";
+import { CropImage, DIRECTION } from "./Monster";
+import { Poring } from "./Poring";
 
 export class SantaPoring extends Poring {
   isAggressiveOnVision = true;
 
   get ctx() {
-    return this.canvas.getContext('2d');
+    return this.canvas.getContext("2d")!;
   }
 
   santaHatY = -8;
@@ -69,8 +69,8 @@ export class SantaPoring extends Poring {
     }
 
     if (this.santaHatFrameX !== null) {
-      let directionFrame: number;
-      let margin: { x: number; y: number };
+      let directionFrame: number = 0;
+      let margin: { x: number; y: number } = { y: this.santaHatY, x: 0 };
       if (this.direction === DIRECTION.LEFT) {
         directionFrame = 0;
         margin = { y: this.santaHatY, x: 4 };

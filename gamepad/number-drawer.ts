@@ -1,17 +1,17 @@
-import { tap } from 'rxjs/operators';
+import { tap } from "rxjs/operators";
 import {
   CropImage,
   DamageNumber,
   DIRECTION,
   DrawNumber,
   Monster,
-} from '../monsters/Monster';
-import { loadDamageNumbersImage } from '../sprites/load-damage-numbers';
+} from "../monsters/Monster";
+import { loadDamageNumbersImage } from "../sprites/load-damage-numbers";
 
 type CropNumber = { [numberStr: string]: CropImage };
 
 type DrawNumberConfig = { style: NumberStyle };
-type NumberStyle = 'red' | 'white' | 'green' | 'yellow';
+type NumberStyle = "red" | "white" | "green" | "yellow";
 
 const zero: CropImage = { offsetX: 9, offsetY: 10, width: 8, height: 11 };
 const one: CropImage = { offsetX: 27, offsetY: 10, width: 6, height: 11 };
@@ -39,15 +39,15 @@ export const damageMapSprite: CropNumber = {
 
 export const redDamageNumberImage = new Image();
 redDamageNumberImage.src =
-  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALcAAAALCAYAAAA9ZhyRAAAAAXNSR0IArs4c6QAAAhZJREFUaEPNWctOxDAMTPcHFnFCIC78/zdxQaA9Ib5gu0paW46bPuyMRfeCslqmM+OJ8+iQ6s+oxoMaW4aE5cGI4EHcPXzWdPdozJhaJ4Ijyrs1br0cUfyIxyqeLPT4+VLX8ONWxtYwlIcRlgMDxaOEB6SpFW7GdmhscqOHOPHQehfenYzfrl4KbhHyfEnp6WeS8Pea0u89JaPRjENGzHhHJwiKRxGeNeSP1CTGRzk1g03YHXgLfuJBHm4RequuqPy0ckTWloO9lVkONzAIxRCnEdLMzE0XzGzoHBgEFi+DMtgB4bZqrHhdh5SG79Z8NK/AEqS3DhHNZncyc7jHt0kLGaPGVsPHzv8vZgAwuPAFsNZo1cRYGSf71InH+mSKZv893NB4Vbg7tU71fL9MGfu6l79qbNWs87Gox1nDDQ02FUZMXquRi2ADJstucZr9d/1LNF6lGeBd1bAIvGMyN/EkzzOGGxlsZOeOCI+8benVHcEPuYKG8eMiq5U5Ys/d2l8d7ZSIvV21nM4DxJ6buenmaTw0h/MDHqCR9djdI1tXKvH7Zn3RtyU8ibwHSn2wVYKPTpLWBPMeclthLN85NbJHoBuqKLyeJtXK6b/dlhQhwDth7x0w+m4VqUkXzKuxmixAz9E1rPCMV8JrTRhdj0083QmRb4+8b+/Qb+2QmhYBF9se46rKP0fzi8KzrJpbXkTxo2cyzwd4tHgb3Mm63AAAAABJRU5ErkJggg==';
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALcAAAALCAYAAAA9ZhyRAAAAAXNSR0IArs4c6QAAAhZJREFUaEPNWctOxDAMTPcHFnFCIC78/zdxQaA9Ib5gu0paW46bPuyMRfeCslqmM+OJ8+iQ6s+oxoMaW4aE5cGI4EHcPXzWdPdozJhaJ4Ijyrs1br0cUfyIxyqeLPT4+VLX8ONWxtYwlIcRlgMDxaOEB6SpFW7GdmhscqOHOPHQehfenYzfrl4KbhHyfEnp6WeS8Pea0u89JaPRjENGzHhHJwiKRxGeNeSP1CTGRzk1g03YHXgLfuJBHm4RequuqPy0ckTWloO9lVkONzAIxRCnEdLMzE0XzGzoHBgEFi+DMtgB4bZqrHhdh5SG79Z8NK/AEqS3DhHNZncyc7jHt0kLGaPGVsPHzv8vZgAwuPAFsNZo1cRYGSf71InH+mSKZv893NB4Vbg7tU71fL9MGfu6l79qbNWs87Gox1nDDQ02FUZMXquRi2ADJstucZr9d/1LNF6lGeBd1bAIvGMyN/EkzzOGGxlsZOeOCI+8benVHcEPuYKG8eMiq5U5Ys/d2l8d7ZSIvV21nM4DxJ6buenmaTw0h/MDHqCR9djdI1tXKvH7Zn3RtyU8ibwHSn2wVYKPTpLWBPMeclthLN85NbJHoBuqKLyeJtXK6b/dlhQhwDth7x0w+m4VqUkXzKuxmixAz9E1rPCMV8JrTRhdj0083QmRb4+8b+/Qb+2QmhYBF9se46rKP0fzi8KzrJpbXkTxo2cyzwd4tHgb3Mm63AAAAABJRU5ErkJggg==";
 
 export const yellowNumberImage = new Image();
 yellowNumberImage.src =
-  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALcAAAALCAYAAAA9ZhyRAAAAAXNSR0IArs4c6QAAAi5JREFUaEPNWcFSxCAMpePeO3rXb/Kwn+nBb9K7Tj2rdciWGAK0EB4z7a27w+MleSQhnVz8rOp9Uu8trwHLgjGCR+Bu4VOyu8dGj6ntRHBE+a7ErZcjil/gUcSTgV4/3p6jID48vfr3VjHQZgHLgIHiQeIB2ZQTN2MbbMxyC5sY8dD2Jr47Gb9De4NwyZB5vri7+YVs+Fmublm+XaOjCef+8cJimCbCqz0gvH5b59b16j7fm3mw4Z6LxCIybZyywva8OIXZ8NaAEfiJjWr9JbkleD6G/tliasKUG3TioTTGGftIsyxuRZzEbXQMZW4VuFrHyhLj1+iA1eLokoXAYkwp7I7DUhJ3q40Jr8xhaUkw2cPcoQfmB9QYSewIj8Wts4hRnCVHWwLWK+woq3UcOB1s4uUFhPKR3KCjqrC/QHh7VQERT5j/SpX5rOKGChvQQkSHFtTmJJkbdVhA/JCJCl31iniykp5R3EhhR+3JCcUjpy29dqMPC1rcw/j9E7210qH6jei5bx3AduFqLLPWdbk+kXhsfyB6bu7x9GaACxuUnxwKGO9NaGFX9cilIBZ+T+5n+l6AnpaULg+1PdreBKH1UpSdvMiT3ehMeVhoaeclK5ke+ITw+2WebqCnET1JKudaNL9DvBFzbnKKcc6Nnq2eec4d+SmooXH0qkWEttcax2IlBX932LVXZ1Tk1yPr1zv0VzukTYmYRNtjKAS0BM1vFF5t9T3ywyh+YV/m+QeI5vYbUvll0AAAAABJRU5ErkJggg==';
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALcAAAALCAYAAAA9ZhyRAAAAAXNSR0IArs4c6QAAAi5JREFUaEPNWcFSxCAMpePeO3rXb/Kwn+nBb9K7Tj2rdciWGAK0EB4z7a27w+MleSQhnVz8rOp9Uu8trwHLgjGCR+Bu4VOyu8dGj6ntRHBE+a7ErZcjil/gUcSTgV4/3p6jID48vfr3VjHQZgHLgIHiQeIB2ZQTN2MbbMxyC5sY8dD2Jr47Gb9De4NwyZB5vri7+YVs+Fmublm+XaOjCef+8cJimCbCqz0gvH5b59b16j7fm3mw4Z6LxCIybZyywva8OIXZ8NaAEfiJjWr9JbkleD6G/tliasKUG3TioTTGGftIsyxuRZzEbXQMZW4VuFrHyhLj1+iA1eLokoXAYkwp7I7DUhJ3q40Jr8xhaUkw2cPcoQfmB9QYSewIj8Wts4hRnCVHWwLWK+woq3UcOB1s4uUFhPKR3KCjqrC/QHh7VQERT5j/SpX5rOKGChvQQkSHFtTmJJkbdVhA/JCJCl31iniykp5R3EhhR+3JCcUjpy29dqMPC1rcw/j9E7210qH6jei5bx3AduFqLLPWdbk+kXhsfyB6bu7x9GaACxuUnxwKGO9NaGFX9cilIBZ+T+5n+l6AnpaULg+1PdreBKH1UpSdvMiT3ehMeVhoaeclK5ke+ITw+2WebqCnET1JKudaNL9DvBFzbnKKcc6Nnq2eec4d+SmooXH0qkWEttcax2IlBX932LVXZ1Tk1yPr1zv0VzukTYmYRNtjKAS0BM1vFF5t9T3ywyh+YV/m+QeI5vYbUvll0AAAAABJRU5ErkJggg==";
 
 export const greenRestoreNumberImage = new Image();
 greenRestoreNumberImage.src =
-  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALcAAAALCAYAAAA9ZhyRAAAAAXNSR0IArs4c6QAAAhZJREFUaEPVWTFSxDAMTKrMQUFFdz/g/0/hB3RUFMCkIUxsy7EUexJJ6yFc55vJZrVay7IyDvy3iPUo1polYVkwevAg7hY+rbg9Ma6YMk4ER5R2LW5ejih+xKOJVyZ6mV4fWBLnl691rTVDeNn09hiw5vunFgPFI5gHFFPN3BnbqpPkRi8x4qHj3Wl3MX6H8ZJxYyBPI5kxmvNjGZRCZ5wshM7cKB4xcL7BPBtOmjtjGzdwlV/xEm1B6RUvq4qOgrUZ0e+xXLGPPLuZG2cET+UuxVy5SYNqk162DV6sTdSklXED73DS6eY+7oP5pp9hfv6unTRa7UoMhHboYnOIt5n7/RbbiCTMxNdaYRbn83Gn+ziw5IRWCYMXeK06OfFyfCXRpL9Wb6YXCI+b26+dzCdMv5Znr2puqLHJhMXmtZgnG6hTAeie7Fo5P/Fft1yg8iFjoAJxRXMjxcwtAKByoytP2CyJYGzBfNWxBz/kCdqNHyVZ6tej565dbs5WSkRvt2tH0sTHi80ukezo112au/OjHt55AfTksXYgHPbIJ06Rmnbrf9X7GXpakiulUdidACLgs5uklhjEtORfTw+U5sGbGzOR2zx2gNdjzh1FSTNz0yixkgUlDhegwDPi1CuRLUZWfcBzePRc35rH1j7qxo9eWOZXVkLk1yPr1zv0VztkTDJp1hhbxysdsYYimx9Bx4uI8U/i/QWPH+8bpk7+sgAAAABJRU5ErkJggg==';
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALcAAAALCAYAAAA9ZhyRAAAAAXNSR0IArs4c6QAAAhZJREFUaEPVWTFSxDAMTKrMQUFFdz/g/0/hB3RUFMCkIUxsy7EUexJJ6yFc55vJZrVay7IyDvy3iPUo1polYVkwevAg7hY+rbg9Ma6YMk4ER5R2LW5ejih+xKOJVyZ6mV4fWBLnl691rTVDeNn09hiw5vunFgPFI5gHFFPN3BnbqpPkRi8x4qHj3Wl3MX6H8ZJxYyBPI5kxmvNjGZRCZ5wshM7cKB4xcL7BPBtOmjtjGzdwlV/xEm1B6RUvq4qOgrUZ0e+xXLGPPLuZG2cET+UuxVy5SYNqk162DV6sTdSklXED73DS6eY+7oP5pp9hfv6unTRa7UoMhHboYnOIt5n7/RbbiCTMxNdaYRbn83Gn+ziw5IRWCYMXeK06OfFyfCXRpL9Wb6YXCI+b26+dzCdMv5Znr2puqLHJhMXmtZgnG6hTAeie7Fo5P/Fft1yg8iFjoAJxRXMjxcwtAKByoytP2CyJYGzBfNWxBz/kCdqNHyVZ6tej565dbs5WSkRvt2tH0sTHi80ukezo112au/OjHt55AfTksXYgHPbIJ06Rmnbrf9X7GXpakiulUdidACLgs5uklhjEtORfTw+U5sGbGzOR2zx2gNdjzh1FSTNz0yixkgUlDhegwDPi1CuRLUZWfcBzePRc35rH1j7qxo9eWOZXVkLk1yPr1zv0VztkTDJp1hhbxysdsYYimx9Bx4uI8U/i/QWPH+8bpk7+sgAAAABJRU5ErkJggg==";
 
 const r_zero: CropImage = { offsetX: 1, offsetY: 0, width: 8, height: 11 };
 const r_one: CropImage = { offsetX: 19, offsetY: 0, width: 7, height: 11 };
@@ -86,7 +86,7 @@ const criticalCrop = { offsetX: 9, offsetY: 29, width: 68, height: 57 };
 
 export function drawDamage(
   monster: Monster,
-  config: DrawNumberConfig = { style: 'white' }
+  config: DrawNumberConfig = { style: "white" }
 ) {
   const receivedDamages = monster.receivedDamages;
   drawNumber(monster, receivedDamages, config);
@@ -94,13 +94,13 @@ export function drawDamage(
 
 export function drawRestoreHp(monster: Monster) {
   const restoredHp = monster.restoredHp;
-  drawNumber(monster, restoredHp, { style: 'green' });
+  drawNumber(monster, restoredHp, { style: "green" });
 }
 
 export function drawNumber(
   monster: Monster,
   drawNumbers: DrawNumber[],
-  config: { style: NumberStyle } = { style: 'white' }
+  config: { style: NumberStyle } = { style: "white" }
 ) {
   const { style } = config;
   const ctx = monster.ctx;
@@ -108,7 +108,7 @@ export function drawNumber(
   const defaultImage = defaultTheme[0];
   const defaultSpriteMap = defaultTheme[1];
 
-  const criticalTheme = numberTheme['yellow'];
+  const criticalTheme = numberTheme["yellow"];
   const criticalImage = criticalTheme[0];
   const criticalSpriteMap = criticalTheme[1];
 
@@ -139,13 +139,13 @@ export function drawNumber(
       ctx.drawImage(
         image,
         sprite.offsetX,
-        sprite.offsetY,
+        sprite.offsetY ?? 0,
         sprite.width,
-        sprite.height,
+        sprite.height ?? 0,
         x,
         location.y,
         sprite.width * scale,
-        sprite.height * scale
+        (sprite.height ?? 0) * scale
       );
 
       x += sprite.width * scale + 1;

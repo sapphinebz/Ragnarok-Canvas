@@ -1,4 +1,4 @@
-import './style.css';
+import "./style.css";
 
 import {
   fromEvent,
@@ -22,7 +22,7 @@ import {
   MonoTypeOperatorFunction,
   combineLatest,
   takeWhile,
-} from 'rxjs';
+} from "rxjs";
 import {
   connect,
   debounceTime,
@@ -35,35 +35,35 @@ import {
   repeat,
   shareReplay,
   takeUntil,
-} from 'rxjs/operators';
-import { Poring } from './monsters/Poring';
-import { Area, CropImage, Monster, MoveLocation } from './monsters/Monster';
-import { Fabre } from './monsters/Fabre';
-import { Thief } from './monsters/Thief';
-import { KeyboardController } from './gamepad/keyboard-controller';
+} from "rxjs/operators";
+import { Poring } from "./monsters/Poring";
+import { Area, CropImage, Monster, MoveLocation } from "./monsters/Monster";
+import { Fabre } from "./monsters/Fabre";
+import { Thief } from "./monsters/Thief";
+import { KeyboardController } from "./gamepad/keyboard-controller";
 import {
   COLLISION_DIRECTION,
   isMouseHoverArea,
   rectanglesIntersect,
-} from './utils/collision';
-import { Acidus } from './monsters/Acidus';
-import { randomMinMax } from './utils/random-minmax';
-import { audioIsOpenImage } from './sprites/audio-is-open-image';
-import { audioIsCloseImage } from './sprites/audio-is-close-image';
-import { loadProteraFieldVol2 } from './sounds/prontera-field-vol2';
-import { Baphomet } from './monsters/Baphomet';
-import { Angeling } from './monsters/Angeling';
-import { SantaPoring } from './monsters/SantaPoring';
-import { FieldItem } from './items/Item';
-import { drawDamage, drawRestoreHp } from './gamepad/number-drawer';
+} from "./utils/collision";
+import { Acidus } from "./monsters/Acidus";
+import { randomMinMax } from "./utils/random-minmax";
+import { audioIsOpenImage } from "./sprites/audio-is-open-image";
+import { audioIsCloseImage } from "./sprites/audio-is-close-image";
+import { loadProteraFieldVol2 } from "./sounds/prontera-field-vol2";
+import { Baphomet } from "./monsters/Baphomet";
+import { Angeling } from "./monsters/Angeling";
+import { SantaPoring } from "./monsters/SantaPoring";
+import { FieldItem } from "./items/Item";
+import { drawDamage, drawRestoreHp } from "./gamepad/number-drawer";
 
-const canvas = document.querySelector<HTMLCanvasElement>('canvas');
-const ctx = canvas.getContext('2d');
-const onCanvasMouseMove$ = fromEvent<MouseEvent>(canvas, 'mousemove').pipe(
+const canvas = document.querySelector<HTMLCanvasElement>("canvas")!;
+const ctx = canvas.getContext("2d")!;
+const onCanvasMouseMove$ = fromEvent<MouseEvent>(canvas, "mousemove").pipe(
   share()
 );
 
-const onWindowResize$ = fromEvent(window, 'resize').pipe(
+const onWindowResize$ = fromEvent(window, "resize").pipe(
   startWith(0),
   tap(() => {
     canvas.width = window.innerWidth;
@@ -140,7 +140,7 @@ const getMonsterClass = (monster: Monster) => {
   const fentry = monstersClass.find(
     (entry) => entry[0].name === monster.constructor.name
   );
-  return fentry[0];
+  return fentry && fentry[0];
 };
 
 const generateMonsters = () =>
@@ -309,9 +309,9 @@ let backgroundSoundTogglerImage = audioIsCloseImage;
 const backgroundSoundTogglerImagePosition = { x: 16, y: 16 };
 
 const drawScore = () => {
-  ctx.textAlign = 'center';
-  ctx.font = 'bold 24px Arial';
-  ctx.fillStyle = 'white';
+  ctx.textAlign = "center";
+  ctx.font = "bold 24px Arial";
+  ctx.fillStyle = "white";
   ctx.fillText(
     `kill: ${killCount$.value}`,
     canvas.width - canvas.width * 0.1,
@@ -353,10 +353,10 @@ const isHoverBackgroundSoundToggler$ = onCanvasMouseMove$.pipe(
         h: backgroundSoundTogglerImage.height,
       })
     ) {
-      canvas.style.cursor = 'pointer';
+      canvas.style.cursor = "pointer";
       return true;
     } else {
-      canvas.style.cursor = 'default';
+      canvas.style.cursor = "default";
     }
     return false;
   }),
@@ -367,7 +367,7 @@ const isHoverBackgroundSoundToggler$ = onCanvasMouseMove$.pipe(
 const onToggleBackgroundSound$ = isHoverBackgroundSoundToggler$.pipe(
   switchMap((isHover) => {
     if (isHover) {
-      return fromEvent(canvas, 'click');
+      return fromEvent(canvas, "click");
     }
     return NEVER;
   }),
@@ -427,7 +427,7 @@ onCanvasRender$.subscribe(() => {
     drawDamage(monster);
   }
 
-  drawDamage(thief, { style: 'red' });
+  drawDamage(thief, { style: "red" });
   drawRestoreHp(thief);
 });
 
