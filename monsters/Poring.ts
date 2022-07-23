@@ -17,6 +17,7 @@ import {
   tap,
 } from "rxjs/operators";
 import { Apple } from "../items/Apple";
+import { ConcentrationPotion } from "../items/ConcentrationPotion";
 import { EmptyBottle } from "../items/EmptyBottle";
 import { Jellopy } from "../items/Jellopy";
 import { RedPotion } from "../items/RedPotion";

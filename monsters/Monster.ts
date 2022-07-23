@@ -133,7 +133,21 @@ export abstract class Monster {
 
   // damage per second
   dps = 800;
-  attackSpeed = 120;
+  attackSpeed = 80;
+
+  statusEffect: string[] = [];
+
+  get delayAnimationAttack() {
+    const delay = 200 - this.attackSpeed;
+    if (delay < 0) {
+      return 0;
+    }
+    return delay;
+  }
+
+  set delayAnimationAttack(value: number) {
+    this.attackSpeed = 200 - value;
+  }
 
   onCleanup$ = new AsyncSubject<void>();
   onDamageArea$ = new Subject<Area>();
@@ -148,10 +162,25 @@ export abstract class Monster {
    * if aggressive true will move to player and attack
    */
   aggressiveTarget$ = new BehaviorSubject<Monster | null>(null);
+
+  /**
+   * vision when monster see player and charge with aggressive
+   */
   visionRange = 150;
+
+  /**
+   * when monster walking to player and this is distance when monster lost tracking
+   */
   trackRange = 500;
 
+  /**
+   * distance of monster can attack to player
+   */
   attackRange = 70;
+
+  /**
+   * monster auto aggressive to player if player stay within "visionRange"
+   */
   isAggressiveOnVision = false;
 
   get aggressiveTarget() {

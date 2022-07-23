@@ -1,0 +1,3 @@
+export const concentrationPotionImage = new Image();
+concentrationPotionImage.src =
+  "data:image/gif;base64,R0lGODlhGAAYAMQcANzLw9qXczsjMa+nwYNeX8V6YP///+jHpe3t/0dDWbijm7JpR4lna1Q2QM+FXJWLp///y41OOc7M4K+Gf//7yPvLnMq3r21JT6mPi//z6/3jsnpvjP///wAAAAAAAAAAACH5BAEAABwALAAAAAAYABgAAAWZICeOZGme57ahLLkpwNqyapLM6PBkwCPjpAFA8hjcgEFLJmM8ICZI0UuxORA2z+gGoNEQRIgvcpDR/MJRsnmEuCA3kiVGdhAgGYZljEOoAxkaBgYVATFWb4EGFBoBCmI4gBpLEIwFPzORGhCUAZZIDYxdlQV2QA0AAamdCwClOA0ZCwUOtKyur7ERuq1RUksSe71SGwK3wkAhADs=";

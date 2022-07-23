@@ -1,5 +1,6 @@
 import { interval, map, takeUntil, tap } from "rxjs";
 import { Apple } from "../items/Apple";
+import { ConcentrationPotion } from "../items/ConcentrationPotion";
 import { WhiteHerb } from "../items/WhiteHerb";
 import { WhitePotion } from "../items/WhitePotion";
 import { poringSpriteLeftImage } from "../sprites/load-poring-left";
@@ -98,6 +99,7 @@ export class Angeling extends Poring {
     super(canvas);
 
     this.dropItems = [
+      [ConcentrationPotion, 50],
       [WhiteHerb, 70],
       [Apple, 70],
       [Apple, 70],

@@ -1,5 +1,6 @@
 import { defer, Observable, Subject, switchMap } from "rxjs";
 import { takeUntil, tap } from "rxjs/operators";
+import { ConcentrationPotion } from "../items/ConcentrationPotion";
 import { DragonCanine } from "../items/DragonCanine";
 import { DragonScale } from "../items/DragonScale";
 import { RoughWind } from "../items/RoughWind";
@@ -209,6 +210,7 @@ export class Acidus extends Monster {
     this.attackAudio.volume = 0.05;
 
     this.dropItems = [
+      [ConcentrationPotion, 50],
       [DragonScale, 30],
       [RoughWind, 10],
       [DragonCanine, 30],

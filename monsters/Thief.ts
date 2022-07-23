@@ -22,7 +22,9 @@ export class Thief extends Monster {
   frameY = 0;
   width = 80;
   height = 107;
-  attackSpeed = 60;
+
+  attackSpeed = 140;
+
   dps = 0;
   showHpGauge = true;
 
@@ -360,7 +362,7 @@ export class Thief extends Monster {
     this.onEffectAttack
       .pipe(
         mergeMap(({ x, y, direction }) => {
-          return timer(0, this.attackSpeed).pipe(
+          return timer(0, this.delayAnimationAttack).pipe(
             map((_, index) => index),
             takeWhile((frameX) => {
               if (this.attackEffectFrames[frameX] !== undefined) {
@@ -443,7 +445,7 @@ export class Thief extends Monster {
   attack(): Observable<any> {
     return defer(() => {
       this.frameY = 4;
-      return this.forwardFrameX(this.attackSpeed, 0, 6, {
+      return this.forwardFrameX(this.delayAnimationAttack, 0, 6, {
         once: true,
       }).pipe(
         tap({

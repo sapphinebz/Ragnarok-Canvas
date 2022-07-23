@@ -1,4 +1,4 @@
-import { Monster, MoveLocation } from '../monsters/Monster';
+import { Monster, MoveLocation } from "../monsters/Monster";
 
 export interface FieldItem {
   item: Item;
@@ -19,7 +19,7 @@ export abstract class Item {
   }
 
   get ctx() {
-    return this.canvas.getContext('2d');
+    return this.canvas.getContext("2d");
   }
   constructor(
     public canvas: HTMLCanvasElement,
@@ -27,4 +27,28 @@ export abstract class Item {
   ) {}
 
   abstract useWith(monster: Monster): void;
+
+  addStatusEffect(
+    monster: Monster,
+    option: {
+      statusEffect: string;
+      timeout: number;
+      onEffect: () => void;
+      onTimeoutEffect: () => void;
+    }
+  ) {
+    const { statusEffect, timeout, onEffect, onTimeoutEffect } = option;
+
+    if (!monster.statusEffect.includes(statusEffect)) {
+      onEffect();
+      monster.statusEffect.push(statusEffect);
+      setTimeout(() => {
+        onTimeoutEffect();
+        const index = monster.statusEffect.findIndex((e) => e === statusEffect);
+        if (index > -1) {
+          monster.statusEffect.splice(index, 1);
+        }
+      }, timeout);
+    }
+  }
 }
