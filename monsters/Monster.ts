@@ -38,6 +38,7 @@ import {
   takeWhile,
 } from "rxjs/operators";
 import {
+  animateMissDamage,
   animateReceivedDamage,
   animateRestoreHp,
 } from "../gamepad/number-drawer";
@@ -82,11 +83,12 @@ export const enum ACTION {
 export interface DrawNumber {
   number: number;
   isCritical: boolean;
+  isMiss?: boolean;
   location: MoveLocation;
   scale: number;
 }
 
-export type DamageNumber = Pick<DrawNumber, "number" | "isCritical">;
+export type DamageNumber = Pick<DrawNumber, "number" | "isCritical" | "isMiss">;
 
 export const enum DIRECTION {
   LEFT,
@@ -223,6 +225,9 @@ export abstract class Monster {
     this.onReceiveDamage$
       .pipe(
         mergeMap((damage) => {
+          if (damage.isMiss === true) {
+            return animateMissDamage(this);
+          }
           return animateReceivedDamage(damage, this);
         }),
         takeUntil(this.onCleanup$)
@@ -845,24 +850,39 @@ export abstract class Monster {
 
   receiveDamage(damage: DamageNumber) {
     this.onReceiveDamage$.next(damage);
-    this.hp -= damage.number;
-    if (this.hp < 0) {
-      this.hp = 0;
+    if (damage.number >= 0) {
+      this.hp -= damage.number;
+      if (this.hp < 0) {
+        this.hp = 0;
+      }
     }
   }
 
   damageTo(monster: Monster) {
-    const randomNumber = randomMinMax(0, 100);
-    const criticalRate = 15;
-    let damage = this.atk;
-    let isCritical = false;
-    if (randomNumber <= criticalRate) {
-      monster.playCriticalAudio();
-      damage += damage;
-      isCritical = true;
+    const randomMissNumber = randomMinMax(0, 100);
+    const missRate = 5;
+    if (randomMissNumber <= missRate) {
+      return monster.receiveDamage({
+        number: 0,
+        isCritical: false,
+        isMiss: true,
+      });
     }
 
-    monster.receiveDamage({ number: damage, isCritical });
+    const randomCriticalNumber = randomMinMax(0, 100);
+    const criticalRate = 15;
+
+    let damage = Math.round(this.atk * (Math.random() * 0.8 + 1.2));
+    let isCritical = false;
+
+    if (randomCriticalNumber)
+      if (randomCriticalNumber <= criticalRate) {
+        monster.playCriticalAudio();
+        damage += damage;
+        isCritical = true;
+      }
+
+    monster.receiveDamage({ number: damage, isCritical, isMiss: false });
   }
 
   aggressiveMonsters(): MonoTypeOperatorFunction<Monster[]> {

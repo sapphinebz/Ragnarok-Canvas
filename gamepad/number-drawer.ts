@@ -84,6 +84,8 @@ const numberTheme: {
 
 const criticalCrop = { offsetX: 9, offsetY: 29, width: 68, height: 57 };
 
+const missCrop = { offsetX: 37, offsetY: 118, width: 49, height: 16 };
+
 export function drawDamage(
   monster: Monster,
   config: DrawNumberConfig = { style: "white" }
@@ -104,53 +106,95 @@ export function drawNumber(
 ) {
   const { style } = config;
   const ctx = monster.ctx;
-  const defaultTheme = numberTheme[style];
-  const defaultImage = defaultTheme[0];
-  const defaultSpriteMap = defaultTheme[1];
 
+  for (const drawDamage of drawNumbers) {
+    const { isCritical, isMiss } = drawDamage;
+
+    if (isMiss === true) {
+      drawMissImage(ctx, drawDamage);
+    } else {
+      if (isCritical) {
+        drawCriticalBackgroundImage(ctx, drawDamage);
+      }
+      drawNumberImage(ctx, drawDamage, style);
+    }
+  }
+}
+
+function drawMissImage(ctx: CanvasRenderingContext2D, drawDamage: DrawNumber) {
+  const { location, scale } = drawDamage;
+  const x = location.x;
+  const standardTheme = numberTheme["white"];
+  const standardImage = standardTheme[0];
+
+  ctx.drawImage(
+    standardImage,
+    missCrop.offsetX,
+    missCrop.offsetY ?? 0,
+    missCrop.width,
+    missCrop.height ?? 0,
+    x,
+    location.y,
+    missCrop.width * scale,
+    (missCrop.height ?? 0) * scale
+  );
+}
+
+function drawNumberImage(
+  ctx: CanvasRenderingContext2D,
+  drawDamage: DrawNumber,
+  style: NumberStyle
+) {
+  const { number, location, scale, isCritical } = drawDamage;
+
+  let x = location.x;
   const criticalTheme = numberTheme["yellow"];
   const criticalImage = criticalTheme[0];
   const criticalSpriteMap = criticalTheme[1];
 
-  for (const drawDamage of drawNumbers) {
-    const { number, location, scale, isCritical } = drawDamage;
-    let x = location.x;
-    if (isCritical) {
-      const width = (criticalCrop.width * scale) / 2;
-      const height = (criticalCrop.height * scale) / 2;
-      ctx.drawImage(
-        loadDamageNumbersImage,
-        criticalCrop.offsetX,
-        criticalCrop.offsetY,
-        criticalCrop.width,
-        criticalCrop.height,
-        x - width / 3.5,
-        location.y - height / 3.5,
-        width,
-        height
-      );
-    }
-    for (const num of `${number}`) {
-      const sprite = isCritical
-        ? criticalSpriteMap[num]
-        : defaultSpriteMap[num];
-      const image = isCritical ? criticalImage : defaultImage;
+  const defaultTheme = numberTheme[style];
+  const defaultImage = defaultTheme[0];
+  const defaultSpriteMap = defaultTheme[1];
 
-      ctx.drawImage(
-        image,
-        sprite.offsetX,
-        sprite.offsetY ?? 0,
-        sprite.width,
-        sprite.height ?? 0,
-        x,
-        location.y,
-        sprite.width * scale,
-        (sprite.height ?? 0) * scale
-      );
+  for (const num of `${number}`) {
+    const sprite = isCritical ? criticalSpriteMap[num] : defaultSpriteMap[num];
+    const image = isCritical ? criticalImage : defaultImage;
 
-      x += sprite.width * scale + 1;
-    }
+    ctx.drawImage(
+      image,
+      sprite.offsetX,
+      sprite.offsetY ?? 0,
+      sprite.width,
+      sprite.height ?? 0,
+      x,
+      location.y,
+      sprite.width * scale,
+      (sprite.height ?? 0) * scale
+    );
+
+    x += sprite.width * scale + 1;
   }
+}
+
+function drawCriticalBackgroundImage(
+  ctx: CanvasRenderingContext2D,
+  drawDamage: DrawNumber
+) {
+  const { location, scale } = drawDamage;
+  const x = location.x;
+  const width = (criticalCrop.width * scale) / 2;
+  const height = (criticalCrop.height * scale) / 2;
+  ctx.drawImage(
+    loadDamageNumbersImage,
+    criticalCrop.offsetX,
+    criticalCrop.offsetY,
+    criticalCrop.width,
+    criticalCrop.height,
+    x - width / 3.5,
+    location.y - height / 3.5,
+    width,
+    height
+  );
 }
 
 export function animateRestoreHp(restore: number, monster: Monster) {
@@ -167,6 +211,9 @@ export function animateRestoreHp(restore: number, monster: Monster) {
     },
     scale: maxScale,
   };
+
+  // push data for rendering
+  // look at rendering function "drawRestoreHp"
   monster.restoredHp.push(drawNumber);
 
   return monster.tween(
@@ -186,6 +233,46 @@ export function animateRestoreHp(restore: number, monster: Monster) {
   );
 }
 
+export function animateMissDamage(monster: Monster) {
+  const maxScale = 0.6;
+
+  const startY = monster.y + monster.height / 2;
+  const startX = monster.x;
+  const targetY = 130;
+  const drawNumber: DrawNumber = {
+    number: 0,
+    isCritical: false,
+    location: {
+      x: startX,
+      y: startY,
+    },
+    scale: maxScale,
+    isMiss: true,
+  };
+
+  // push data for rendering
+  // look at rendering function "drawDamage"
+  monster.receivedDamages.push(drawNumber);
+
+  return monster.tween(
+    1000,
+    tap({
+      next: (t) => {
+        drawNumber.scale = maxScale;
+        drawNumber.location.y = startY - t * targetY;
+      },
+      complete: () => {
+        const index = monster.receivedDamages.findIndex(
+          (d) => d === drawNumber
+        );
+        if (index > -1) {
+          monster.receivedDamages.splice(index, 1);
+        }
+      },
+    })
+  );
+}
+
 export function animateReceivedDamage(damage: DamageNumber, monster: Monster) {
   const maxScale = 4;
   const minScale = 1.5;
@@ -195,7 +282,6 @@ export function animateReceivedDamage(damage: DamageNumber, monster: Monster) {
     dropXDistance = -dropXDistance;
   }
   const maxLocationY = monster.y;
-  // const startY = randomMinMax(maxLocationY - 20, maxLocationY + 20);
   const startY = maxLocationY - 20;
   const startX = monster.x;
   const drawNumber: DrawNumber = {
@@ -207,6 +293,9 @@ export function animateReceivedDamage(damage: DamageNumber, monster: Monster) {
     },
     scale: maxScale,
   };
+
+  // push data for rendering
+  // look at rendering function "drawDamage"
   monster.receivedDamages.push(drawNumber);
 
   return monster.tween(
