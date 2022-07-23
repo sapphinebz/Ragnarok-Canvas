@@ -904,7 +904,7 @@ export abstract class Monster {
     const randomCriticalNumber = randomMinMax(0, 100);
     const criticalRate = 15;
 
-    const inconstantDamageRate = Math.random() * 0.9 + 0.4;
+    const inconstantDamageRate = Math.random() * 1 + 0.4;
     let damage = this.atk;
     let isCritical = false;
 
