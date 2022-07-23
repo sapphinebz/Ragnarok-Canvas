@@ -33,7 +33,7 @@ import {
   takeUntil,
 } from "rxjs/operators";
 import { Poring } from "./monsters/Poring";
-import { Area, CropImage, Monster, MoveLocation } from "./monsters/Monster";
+import { Area, Monster } from "./monsters/Monster";
 import { Fabre } from "./monsters/Fabre";
 import { Thief } from "./monsters/Thief";
 import { KeyboardController } from "./gamepad/keyboard-controller";
@@ -53,6 +53,7 @@ import { SantaPoring } from "./monsters/SantaPoring";
 import { FieldItem } from "./items/Item";
 import { drawDamage, drawRestoreHp } from "./gamepad/number-drawer";
 import { canvasHover, onClickCanvasArea } from "./utils/canvas";
+import { ChonChon } from "./monsters/ChonChon";
 
 const canvas = document.querySelector<HTMLCanvasElement>("canvas")!;
 const ctx = canvas.getContext("2d")!;
@@ -71,11 +72,12 @@ const onWindowResize$ = fromEvent(window, "resize").pipe(
 // number monster in field & class
 const monstersClass: [any, number][] = [
   [Acidus, 1],
-  [Poring, 10],
+  [Poring, 5],
   [SantaPoring, 5],
   [Angeling, 1],
   [Fabre, 7],
   [Baphomet, 1],
+  [ChonChon, 5],
 ];
 
 const fieldItems: FieldItem[] = [];

@@ -892,7 +892,7 @@ export abstract class Monster {
 
   damageTo(monster: Monster) {
     const randomMissNumber = randomMinMax(0, 100);
-    const missRate = 5;
+    const missRate = 2;
     if (randomMissNumber <= missRate) {
       return monster.receiveDamage({
         number: 0,
