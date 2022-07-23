@@ -875,16 +875,17 @@ export abstract class Monster {
     const randomCriticalNumber = randomMinMax(0, 100);
     const criticalRate = 15;
 
-    const inconstantDamageRate = Math.random() * 0.8 + 0.4;
-    let damage = Math.round(this.atk * inconstantDamageRate);
+    const inconstantDamageRate = Math.random() * 0.9 + 0.4;
+    let damage = this.atk;
     let isCritical = false;
 
-    if (randomCriticalNumber)
-      if (randomCriticalNumber <= criticalRate) {
-        monster.playCriticalAudio();
-        damage += damage;
-        isCritical = true;
-      }
+    if (randomCriticalNumber <= criticalRate) {
+      monster.playCriticalAudio();
+      damage += damage;
+      isCritical = true;
+    } else {
+      damage = Math.round(this.atk * inconstantDamageRate);
+    }
 
     monster.receiveDamage({ number: damage, isCritical, isMiss: false });
   }
