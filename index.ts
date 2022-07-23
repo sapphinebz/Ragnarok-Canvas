@@ -224,8 +224,11 @@ const monstersBeHurtOrDie = (): OperatorFunction<Monster[], any> =>
           killCount$.next(killCount$.value + 1);
           return showAnimationDieAndRespawn(monster);
         }
-        monster.hurt();
+        if (Boolean(monster.latestDamageReceived.isMiss) === false) {
+          monster.hurt();
+        }
         monster.showHpGauge = true;
+
         return EMPTY;
       })
     );

@@ -191,6 +191,9 @@ export abstract class Monster {
   onPlayCriticalAttack$ = new Subject<void>();
 
   receivedDamages: DrawNumber[] = [];
+  get latestDamageReceived() {
+    return this.receivedDamages[this.receiveDamage.length - 1];
+  }
   restoredHp: DrawNumber[] = [];
 
   get ctx() {
@@ -872,7 +875,7 @@ export abstract class Monster {
     const randomCriticalNumber = randomMinMax(0, 100);
     const criticalRate = 15;
 
-    let damage = Math.round(this.atk * (Math.random() * 0.8 + 1.2));
+    let damage = Math.round(this.atk * (Math.random() * 0.8 + 0.4));
     let isCritical = false;
 
     if (randomCriticalNumber)
@@ -899,7 +902,7 @@ export abstract class Monster {
       for (const monster of monsters) {
         if (monster.hp <= 0) {
           monster.die();
-        } else {
+        } else if (Boolean(monster.latestDamageReceived.isMiss) === false) {
           monster.hurt();
         }
       }
