@@ -210,7 +210,7 @@ export class Acidus extends Monster {
     this.attackAudio.volume = 0.05;
 
     this.dropItems = [
-      [ConcentrationPotion, 50],
+      [ConcentrationPotion, 100],
       [DragonScale, 30],
       [RoughWind, 10],
       [DragonCanine, 30],
