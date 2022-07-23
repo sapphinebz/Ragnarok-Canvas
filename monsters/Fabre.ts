@@ -1,12 +1,15 @@
-import { defer, EMPTY, Observable, takeWhile, timer } from 'rxjs';
-import { onErrorResumeNext, tap } from 'rxjs/operators';
-import { Feather } from '../items/Feather';
-import { Fluff } from '../items/Fluff';
-import { GreenHerb } from '../items/GreenHerb';
-import { loadFabreDeadSound } from '../sounds/fabre-dead';
-import { fabreSpriteLeftImage } from '../sprites/load-fabre-left';
-import { fabreSpriteRightImage } from '../sprites/load-fabre-right';
-import { CropImage, DIRECTION, Monster } from './Monster';
+import { defer, Observable, Subject } from "rxjs";
+import { switchMap, takeUntil, tap } from "rxjs/operators";
+import { Feather } from "../items/Feather";
+import { Fluff } from "../items/Fluff";
+import { GreenHerb } from "../items/GreenHerb";
+import { loadFabreAttackAudio } from "../sounds/fabre-attack";
+import { loadFabreDamagedAudio } from "../sounds/fabre-damaged";
+import { loadFabreDieAudio } from "../sounds/fabre-die";
+import { fabreSpriteLeftImage } from "../sprites/load-fabre-left";
+import { fabreSpriteRightImage } from "../sprites/load-fabre-right";
+import { playAudio } from "../utils/play-audio";
+import { CropImage, DIRECTION, Monster } from "./Monster";
 
 export class Fabre extends Monster {
   x = 100;
@@ -22,7 +25,10 @@ export class Fabre extends Monster {
   atk = 25;
   dps = 800;
 
-  dyingAudio = loadFabreDeadSound();
+  dyingAudio = loadFabreDieAudio();
+  attackAudio = loadFabreAttackAudio();
+  damagedAudio = loadFabreDamagedAudio();
+  onPlayDamageAudio$ = new Subject<void>();
 
   frames: CropImage[][] = [
     // Walking
@@ -112,6 +118,13 @@ export class Fabre extends Monster {
     ];
 
     this.dyingAudio.volume = 0.05;
+    this.attackAudio.volume = 0.05;
+    this.damagedAudio.volume = 0.05;
+
+    this.onPlayDamageAudio$
+      .pipe(switchMap(() => playAudio(this.damagedAudio)))
+      .pipe(takeUntil(this.onCleanup$))
+      .subscribe();
   }
 
   getFrameEntry(frameY: number, frameX: number): CropImage {
@@ -135,7 +148,7 @@ export class Fabre extends Monster {
   hurting(): Observable<any> {
     return defer(() => {
       this.frameY = 2;
-
+      this.onPlayDamageAudio$.next();
       return this.forwardFrameX(350, 0, 0, { once: true });
     });
   }
@@ -143,19 +156,14 @@ export class Fabre extends Monster {
   dying(): Observable<any> {
     return defer(() => {
       this.frameY = 2;
-
-      return this.forwardFrameX(350, 0, 1, { once: true }).pipe(
-        tap((frameX) => {
-          if (frameX === 0) {
-            this.dyingAudio.play();
-          }
-        })
-      );
+      this.dyingAudio.play();
+      return this.forwardFrameX(350, 0, 1, { once: true });
     });
   }
   attack(): Observable<any> {
     return defer(() => {
       this.frameY = 1;
+      this.attackAudio.play();
       return this.forwardFrameX(150, 0, 2, { once: true }).pipe(
         tap((frameX) => {
           if (frameX === 1) {
