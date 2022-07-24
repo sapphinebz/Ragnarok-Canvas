@@ -10,6 +10,7 @@ import {
 import { ConcentrationPotion } from "../items/ConcentrationPotion";
 import { Jellopy } from "../items/Jellopy";
 import { RedHerb } from "../items/RedHerb";
+import { Shell } from "../items/Shell";
 import { loadChonchonAttackAudio } from "../sounds/chonchon-attack";
 import { loadChonchonDamaged } from "../sounds/chonchon-damaged";
 import { loadChonchonDieAudio } from "../sounds/chonchon-die";
@@ -240,7 +241,6 @@ export class ChonChon extends Monster {
   constructor(canvas: HTMLCanvasElement) {
     super(canvas, chonchonLeftImage, chonchonRightImage);
 
-    this.dropItems = [];
     this.attackAudio.volume = 0.05;
     this.damagedAudio.volume = 0.05;
     this.flyingAudio.volume = 0.05;
@@ -249,6 +249,7 @@ export class ChonChon extends Monster {
     this.dropItems = [
       [Jellopy, 70],
       [Jellopy, 70],
+      [Shell, 40],
       [RedHerb, 15],
       [ConcentrationPotion, 5],
     ];

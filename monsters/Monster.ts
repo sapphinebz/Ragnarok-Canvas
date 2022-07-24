@@ -126,6 +126,9 @@ export abstract class Monster {
   width: number = 0;
   height: number = 0;
 
+  respawnTimeMin = 5000;
+  respawnTimeMax = 20000;
+
   showHpGauge = false;
 
   // class item/rate
@@ -952,9 +955,9 @@ export abstract class Monster {
     return tap((monsters) => {
       for (const monster of monsters) {
         if (monster.currentAction !== ACTION.ATTACK) {
-          if (monster.x > this.x) {
+          if (monster.x + monster.width / 2 > this.x + this.width / 2) {
             monster.direction = DIRECTION.LEFT;
-          } else if (monster.x < this.x) {
+          } else {
             monster.direction = DIRECTION.RIGHT;
           }
         }

@@ -209,7 +209,11 @@ const showAnimationDieAndRespawn = (monster: Monster) => {
         corpseDisappearAfterAnimationEnd(monster)
       );
       const respawnMonster$ = onRemoveMonsterFromField$.pipe(
-        respawnMonsterRandomTime(monster, 5000, 20000)
+        respawnMonsterRandomTime(
+          monster,
+          monster.respawnTimeMin,
+          monster.respawnTimeMax
+        )
       );
       return merge(
         onRemoveMonsterFromField$.pipe(ignoreElements()),

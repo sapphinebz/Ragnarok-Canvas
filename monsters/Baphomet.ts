@@ -36,6 +36,9 @@ export class Baphomet extends Monster {
   width = 83;
   height = 118;
 
+  respawnTimeMin = 20000;
+  respawnTimeMax = 25000;
+
   atk = 150;
   visionRange = 150;
   trackRange = 500;

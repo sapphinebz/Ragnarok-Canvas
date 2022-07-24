@@ -30,6 +30,9 @@ export class Acidus extends Monster {
   isAggressiveOnVision = true;
   dps = 300;
 
+  respawnTimeMin = 10000;
+  respawnTimeMax = 25000;
+
   attackAudio = loadAcidusAttackSound();
   deadAudio = loadAcidusDeadSound();
 

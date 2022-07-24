@@ -53,6 +53,9 @@ export class Poring extends Monster {
 
   walkSpeed = 50;
 
+  respawnTimeMin = 5000;
+  respawnTimeMax = 10000;
+
   onPlayAttackAudio$ = new Subject<void>();
   attackAudio = loadPoringAttackAudio();
 

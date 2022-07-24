@@ -15,6 +15,9 @@ export class Angeling extends Poring {
   speedX = 4;
   speedY = 4;
 
+  respawnTimeMin = 15000;
+  respawnTimeMax = 25000;
+
   isAggressiveOnVision = true;
   visionRange = 300;
   trackRange = 500;
