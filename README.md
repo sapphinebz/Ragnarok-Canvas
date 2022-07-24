@@ -1,7 +1,7 @@
 # เกม Ragnarok
 
 สานฝันวัยเด็กพัฒนาเกม Ragnarok ด้วยตัวเอง
-[Edit on StackBlitz ⚡️](https://stackblitz.com/edit/rxjs-xvxhyq)
+https://sapphinebz.github.io/Ragnarok-Canvas/
 
 ## _technology_
 
