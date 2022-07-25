@@ -196,7 +196,6 @@ const respawnMonsterRandomTime = (
 };
 
 const showAnimationDieAndRespawn = (monster: Monster) => {
-  monster.die();
   return monster.onDied$.pipe(
     connect((dieAnimation$) => {
       const onRemoveMonsterFromField$ = dieAnimation$.pipe(
@@ -217,58 +216,43 @@ const showAnimationDieAndRespawn = (monster: Monster) => {
   );
 };
 
-const monstersBeHurtOrDie = (): OperatorFunction<Monster[], any> =>
-  mergeMap((damagedMonsters) => {
-    return from(damagedMonsters).pipe(
-      mergeMap((monster) => {
-        if (monster.hp <= 0) {
-          killCount$.next(killCount$.value + 1);
-          return showAnimationDieAndRespawn(monster);
-        }
-        if (Boolean(monster.latestDamageReceived.isMiss) === false) {
-          monster.hurt();
-        }
-        monster.showHpGauge = true;
+const onMonsterDied$ = new Subject<Monster>();
 
-        return EMPTY;
-      })
-    );
-  });
+onMonsterDied$
+  .pipe(
+    mergeMap((monster) => {
+      killCount$.next(killCount$.value + 1);
+      return showAnimationDieAndRespawn(monster);
+    })
+  )
+  .subscribe();
 
-const findMonstersBeAttacked = (): OperatorFunction<Area, Monster[]> => {
-  return map((area) => {
-    return monsters.filter((monster) => {
+const onMonstersBeAttacked = (option: {
+  onEachMonster: (monster: Monster) => void;
+  onPreviousDamagedMonsters: (latestDamagedMonster: Monster[]) => void;
+}): MonoTypeOperatorFunction<Area> => {
+  let latestDamagedMonster: Monster[];
+  return tap((area) => {
+    if (latestDamagedMonster) {
+      option.onPreviousDamagedMonsters(latestDamagedMonster);
+    }
+    latestDamagedMonster = [];
+    for (const monster of monsters) {
       if (!monster.isDied) {
-        return rectanglesIntersect(area, {
+        const monsterIsBeAttacked = rectanglesIntersect(area, {
           x: monster.x,
           y: monster.y,
           w: monster.width,
           h: monster.height,
         });
-      }
-      return false;
-    });
-  });
-};
 
-const showGaugeHpLatestDamagedMonster = (): MonoTypeOperatorFunction<
-  Monster[]
-> => {
-  let latestDamagedMonster: Monster[];
-  return (source: Observable<Monster[]>) =>
-    source.pipe(
-      tap((monsters) => {
-        if (latestDamagedMonster) {
-          for (const monster of latestDamagedMonster) {
-            monster.showHpGauge = false;
-          }
+        if (monsterIsBeAttacked) {
+          option.onEachMonster(monster);
+          latestDamagedMonster.push(monster);
         }
-        latestDamagedMonster = monsters;
-        for (const monster of latestDamagedMonster) {
-          monster.showHpGauge = true;
-        }
-      })
-    );
+      }
+    }
+  });
 };
 
 const monsters = generateMonsters();
@@ -284,12 +268,23 @@ onLoadPlayer$
   .pipe(
     mergeMap((player) => {
       return player.onDamageArea$.pipe(
-        findMonstersBeAttacked(),
-        thief.aggressiveMonsters(),
-        thief.decreaseTargetsHp(),
-        thief.forceTargetsFaceToMe(),
-        showGaugeHpLatestDamagedMonster(),
-        monstersBeHurtOrDie()
+        onMonstersBeAttacked({
+          onPreviousDamagedMonsters: (monsters) => {
+            for (const monster of monsters) {
+              monster.showHpGauge = false;
+            }
+          },
+          onEachMonster: (monster) => {
+            player.aggressiveWith(monster);
+            player.damageTo(monster);
+            monster.faceTo(player);
+            monster.showHpGauge = true;
+            const isDied = monster.animateDieOrHurt();
+            if (isDied) {
+              onMonsterDied$.next(monster);
+            }
+          },
+        })
       );
     })
   )

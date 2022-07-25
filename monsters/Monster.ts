@@ -14,7 +14,6 @@ import {
   MonoTypeOperatorFunction,
   Observable,
   of,
-  OperatorFunction,
   pairwise,
   ReplaySubject,
   startWith,
@@ -443,10 +442,11 @@ export abstract class Monster {
         switchMap((target) => {
           if (target !== null) {
             return this.onDamageArea$.pipe(
-              map(() => [target]),
-              this.decreaseTargetsHp(),
-              this.forceTargetsFaceToMe(),
-              this.targetsBeHurtOrDie(),
+              tap(() => {
+                this.damageTo(target);
+                target.faceTo(this);
+                target.animateDieOrHurt();
+              }),
               takeUntil(target.onDied$)
             );
           }
@@ -879,10 +879,6 @@ export abstract class Monster {
     this.onCleanup$.complete();
   }
 
-  playCriticalAudio() {
-    this.onPlayCriticalAttack$.next();
-  }
-
   receiveDamage(damage: DamageNumber) {
     this.onReceiveDamage$.next(damage);
     if (damage.number >= 0) {
@@ -897,29 +893,29 @@ export abstract class Monster {
     const randomMissNumber = randomMinMax(0, 100);
     const missRate = 2;
     if (randomMissNumber <= missRate) {
-      return monster.receiveDamage({
+      monster.receiveDamage({
         number: 0,
         isCritical: false,
         isMiss: true,
       });
-    }
-
-    const randomCriticalNumber = randomMinMax(0, 100);
-    const criticalRate = 15;
-
-    const inconstantDamageRate = Math.random() * 1 + 0.4;
-    let damage = this.atk;
-    let isCritical = false;
-
-    if (randomCriticalNumber <= criticalRate) {
-      monster.playCriticalAudio();
-      damage += damage;
-      isCritical = true;
     } else {
-      damage = Math.round(this.atk * inconstantDamageRate);
-    }
+      const randomCriticalNumber = randomMinMax(0, 100);
+      const criticalRate = 15;
 
-    monster.receiveDamage({ number: damage, isCritical, isMiss: false });
+      const inconstantDamageRate = Math.random() * 1 + 0.4;
+      let damage = this.atk;
+      let isCritical = false;
+
+      if (randomCriticalNumber <= criticalRate) {
+        monster.playCriticalAudio();
+        damage += damage;
+        isCritical = true;
+      } else {
+        damage = Math.round(this.atk * inconstantDamageRate);
+      }
+
+      monster.receiveDamage({ number: damage, isCritical, isMiss: false });
+    }
   }
 
   aggressiveMonsters(): MonoTypeOperatorFunction<Monster[]> {
@@ -931,38 +927,29 @@ export abstract class Monster {
     });
   }
 
-  targetsBeHurtOrDie(): OperatorFunction<Monster[], any> {
-    return tap((monsters) => {
-      for (const monster of monsters) {
-        if (monster.hp <= 0) {
-          monster.die();
-        } else if (Boolean(monster.latestDamageReceived.isMiss) === false) {
-          monster.hurt();
-        }
-      }
-    });
+  aggressiveWith(monster: Monster) {
+    monster.aggressiveTarget = this;
+    monster.actionChange$.next(ACTION.MOVE_TO_TARGET);
   }
 
-  decreaseTargetsHp(): OperatorFunction<Monster[], Monster[]> {
-    return tap((monsters) => {
-      for (const monster of monsters) {
-        this.damageTo(monster);
+  faceTo(monster: Monster) {
+    if (this.currentAction !== ACTION.ATTACK) {
+      if (this.x + this.width / 2 > monster.x + monster.width / 2) {
+        this.direction = DIRECTION.LEFT;
+      } else {
+        this.direction = DIRECTION.RIGHT;
       }
-    });
+    }
   }
 
-  forceTargetsFaceToMe(): OperatorFunction<Monster[], Monster[]> {
-    return tap((monsters) => {
-      for (const monster of monsters) {
-        if (monster.currentAction !== ACTION.ATTACK) {
-          if (monster.x + monster.width / 2 > this.x + this.width / 2) {
-            monster.direction = DIRECTION.LEFT;
-          } else {
-            monster.direction = DIRECTION.RIGHT;
-          }
-        }
-      }
-    });
+  animateDieOrHurt() {
+    if (this.hp <= 0) {
+      this.die();
+      return true;
+    } else if (Boolean(this.latestDamageReceived.isMiss) === false) {
+      this.hurt();
+    }
+    return false;
   }
 
   moveLocationOnAttack(option: {
@@ -1104,6 +1091,10 @@ export abstract class Monster {
     }
 
     this.onRestoreHp$.next(this.hp - hpBefore);
+  }
+
+  private playCriticalAudio() {
+    this.onPlayCriticalAttack$.next();
   }
 
   private emitStandingAggressive<T>(): MonoTypeOperatorFunction<T> {
