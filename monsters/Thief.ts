@@ -347,7 +347,12 @@ export class Thief extends Monster {
     this.damagedAudio.volume = 0.05;
     this.deadAudio.volume = 0.05;
 
-    this.skills$.next([new DoubleAttack()]);
+    const doubleAttackSkill = new DoubleAttack();
+    this.skills$.next([doubleAttackSkill]);
+
+    doubleAttackSkill.onUse.pipe(takeUntil(this.onCleanup$)).subscribe(() => {
+      this.playAttackAudio();
+    });
 
     this.onSoundEffectAttackPlay$
       .pipe(

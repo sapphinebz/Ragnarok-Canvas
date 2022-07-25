@@ -22,6 +22,7 @@ export class DoubleAttack extends Skill {
             return timer(monster.delayAnimationAttack).pipe(
               tap(() => {
                 monster.onDamageArea$.next({ ...area, skill: "DoubleAttack" });
+                this.onUse.next();
               })
             );
           }
