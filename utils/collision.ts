@@ -1,46 +1,4 @@
-import { Area, Monster, MoveLocation } from '../monsters/Monster';
-
-export const enum COLLISION_DIRECTION {
-  NOTHING,
-  LEFT,
-  RIGHT,
-  TOP,
-  BOTTOM,
-}
-
-/**
- * @deprecated
- */
-export function collideWithArea(area: Area, monster: Monster) {
-  if (
-    area.x > monster.x &&
-    area.x < monster.x + monster.width &&
-    area.y + area.h > monster.y &&
-    area.y < monster.y
-  ) {
-    return COLLISION_DIRECTION.TOP;
-  } else if (
-    area.x > monster.x &&
-    area.x < monster.x + monster.width &&
-    area.y < monster.y + monster.height &&
-    area.y > monster.y
-  ) {
-    return COLLISION_DIRECTION.BOTTOM;
-  } else if (
-    Math.abs(monster.x - area.x) <= area.w / 2 &&
-    area.y + area.h > monster.y &&
-    area.y < monster.y + monster.height
-  ) {
-    return COLLISION_DIRECTION.LEFT;
-  } else if (
-    Math.abs(monster.x + monster.width - area.x) <= area.w / 2 &&
-    area.y + area.h > monster.y &&
-    area.y < monster.y + monster.height
-  ) {
-    return COLLISION_DIRECTION.RIGHT;
-  }
-  return COLLISION_DIRECTION.NOTHING;
-}
+import { Area, Monster, MoveLocation } from "../monsters/Monster";
 
 export function rectanglesIntersect(area1: Area, area2: Area) {
   const aLeftOfB = area1.x + area1.w < area2.x;
@@ -48,9 +6,9 @@ export function rectanglesIntersect(area1: Area, area2: Area) {
   const aAboveB = area1.y > area2.y + area2.h;
   const aBelowB = area1.y + area1.h < area2.y;
   if (!(aLeftOfB || aRightOfB || aAboveB || aBelowB)) {
-    return COLLISION_DIRECTION.RIGHT;
+    return true;
   }
-  return COLLISION_DIRECTION.NOTHING;
+  return false;
 }
 
 export function isMouseHoverArea(event: MouseEvent, area: Area) {

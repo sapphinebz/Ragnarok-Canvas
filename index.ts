@@ -37,11 +37,7 @@ import { Area, Monster } from "./monsters/Monster";
 import { Fabre } from "./monsters/Fabre";
 import { Thief } from "./monsters/Thief";
 import { KeyboardController } from "./gamepad/keyboard-controller";
-import {
-  COLLISION_DIRECTION,
-  isMouseHoverArea,
-  rectanglesIntersect,
-} from "./utils/collision";
+import { rectanglesIntersect } from "./utils/collision";
 import { Acidus } from "./monsters/Acidus";
 import { randomMinMax } from "./utils/random-minmax";
 import { audioIsOpenImage } from "./sprites/audio-is-open-image";
@@ -111,21 +107,19 @@ const checkPlayerCollideItem = (
   fieldItem: FieldItem
 ): OperatorFunction<any, boolean> => {
   return map(() => {
-    return (
-      rectanglesIntersect(
-        {
-          x: fieldItem.location.x,
-          y: fieldItem.location.y,
-          w: fieldItem.item.width,
-          h: fieldItem.item.height,
-        },
-        {
-          x: player.x + player.width / 4,
-          y: player.y + player.height / 2,
-          w: player.width / 2,
-          h: player.height,
-        }
-      ) !== COLLISION_DIRECTION.NOTHING
+    return rectanglesIntersect(
+      {
+        x: fieldItem.location.x,
+        y: fieldItem.location.y,
+        w: fieldItem.item.width,
+        h: fieldItem.item.height,
+      },
+      {
+        x: player.x + player.width / 4,
+        y: player.y + player.height / 2,
+        w: player.width / 2,
+        h: player.height,
+      }
     );
   });
 };
@@ -245,13 +239,12 @@ const findMonstersBeAttacked = (): OperatorFunction<Area, Monster[]> => {
   return map((area) => {
     return monsters.filter((monster) => {
       if (!monster.isDied) {
-        const collision = rectanglesIntersect(area, {
+        return rectanglesIntersect(area, {
           x: monster.x,
           y: monster.y,
           w: monster.width,
           h: monster.height,
         });
-        return collision !== COLLISION_DIRECTION.NOTHING;
       }
       return false;
     });
