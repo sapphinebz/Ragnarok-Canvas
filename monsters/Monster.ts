@@ -37,11 +37,13 @@ import {
   takeWhile,
 } from "rxjs/operators";
 import {
+  animateComboDamage,
   animateMissDamage,
   animateReceivedDamage,
   animateRestoreHp,
 } from "../gamepad/number-drawer";
 import { DropItems } from "../items/Item";
+import { Skill, Skills } from "../skills/Skill";
 import { loadCriticalAttack } from "../sounds/critical-attack";
 import { distanceBetween } from "../utils/collision";
 import { playAudio } from "../utils/play-audio";
@@ -99,6 +101,10 @@ export interface Area extends MoveLocation {
   h: number;
 }
 
+export interface DamageArea extends Area {
+  skill?: Skills;
+}
+
 export type CropImage = {
   order?: number;
   offsetX: number;
@@ -152,8 +158,9 @@ export abstract class Monster {
   }
 
   onCleanup$ = new AsyncSubject<void>();
-  onDamageArea$ = new Subject<Area>();
+  onDamageArea$ = new Subject<DamageArea>();
   onReceiveDamage$ = new Subject<DamageNumber>();
+  onComboDamage$ = new Subject<number>();
   onRestoreHp$ = new Subject<number>();
   onMoving$ = new Subject<MoveLocation>();
   /**
@@ -220,8 +227,10 @@ export abstract class Monster {
 
   criticalAttackSound = loadCriticalAttack();
   onPlayCriticalAttack$ = new Subject<void>();
+  skills$ = new BehaviorSubject<Skill[]>([]);
 
   receivedDamages: DrawNumber[] = [];
+  comboDamages: DrawNumber[] = [];
   get latestDamageReceived() {
     return this.receivedDamages[this.receiveDamage.length - 1];
   }
@@ -248,6 +257,14 @@ export abstract class Monster {
         this.rightImage$.next(image);
       });
 
+    this.skills$.pipe(takeUntil(this.onCleanup$)).subscribe((skills) => {
+      for (const skill of skills) {
+        if (skill.passive) {
+          skill.useWith(this);
+        }
+      }
+    });
+
     this.criticalAttackSound.volume = 0.05;
     this.onPlayCriticalAttack$
       .pipe(
@@ -263,6 +280,15 @@ export abstract class Monster {
             return animateMissDamage(this);
           }
           return animateReceivedDamage(damage, this);
+        }),
+        takeUntil(this.onCleanup$)
+      )
+      .subscribe();
+
+    this.onComboDamage$
+      .pipe(
+        mergeMap((damage) => {
+          return animateComboDamage(damage, this);
         }),
         takeUntil(this.onCleanup$)
       )
@@ -523,6 +549,16 @@ export abstract class Monster {
 
   abstract drawEffect(): void;
 
+  abstract standing(): Observable<any>;
+
+  abstract walking(): Observable<any>;
+
+  abstract dying(): Observable<any>;
+
+  abstract attack(): Observable<any>;
+
+  abstract hurting(): Observable<any>;
+
   loadSprite(image: HTMLImageElement) {
     if (image.complete) {
       return of(image);
@@ -557,16 +593,6 @@ export abstract class Monster {
       this.y = randomMinMax(minHeight, maxHeight - this.height);
     }
   }
-
-  abstract standing(): Observable<any>;
-
-  abstract walking(): Observable<any>;
-
-  abstract dying(): Observable<any>;
-
-  abstract attack(): Observable<any>;
-
-  abstract hurting(): Observable<any>;
 
   autoAggressiveOnVisionTarget(target$: Observable<Monster>) {
     if (this.isAggressiveOnVision) {
@@ -889,7 +915,7 @@ export abstract class Monster {
     }
   }
 
-  damageTo(monster: Monster) {
+  damageTo(monster: Monster, skill?: Skills) {
     const randomMissNumber = randomMinMax(0, 100);
     const missRate = 2;
     if (randomMissNumber <= missRate) {
@@ -912,6 +938,14 @@ export abstract class Monster {
         isCritical = true;
       } else {
         damage = Math.round(this.atk * inconstantDamageRate);
+      }
+
+      if (skill === "DoubleAttack") {
+        if (monster.receivedDamages.length > 0) {
+          const previousDamaged =
+            monster.receivedDamages[monster.receivedDamages.length - 1];
+          monster.onComboDamage$.next(damage + previousDamaged.number);
+        }
       }
 
       monster.receiveDamage({ number: damage, isCritical, isMiss: false });

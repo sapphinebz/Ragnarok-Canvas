@@ -92,6 +92,10 @@ export function drawDamage(
 ) {
   const receivedDamages = monster.receivedDamages;
   drawNumber(monster, receivedDamages, config);
+
+  if (monster.comboDamages.length > 0) {
+    drawNumber(monster, monster.comboDamages, { style: "yellow" });
+  }
 }
 
 export function drawRestoreHp(monster: Monster) {
@@ -194,6 +198,42 @@ function drawCriticalBackgroundImage(
     location.y - height / 3.5,
     width,
     height
+  );
+}
+
+export function animateComboDamage(damage: number, monster: Monster) {
+  const maxScale = 4;
+
+  const startY = monster.y - 50;
+  const startX = monster.x;
+  const drawNumber: DrawNumber = {
+    number: damage,
+    isCritical: false,
+    location: {
+      x: startX,
+      y: startY,
+    },
+    scale: maxScale,
+  };
+
+  // push data for rendering
+  // look at rendering function "drawRestoreHp"
+  monster.comboDamages.push(drawNumber);
+
+  return monster.tween(
+    1000,
+    tap({
+      next: (t) => {
+        drawNumber.scale = maxScale;
+        drawNumber.location.y = startY - t * 130;
+      },
+      complete: () => {
+        const index = monster.comboDamages.findIndex((d) => d === drawNumber);
+        if (index > -1) {
+          monster.comboDamages.splice(index, 1);
+        }
+      },
+    })
   );
 }
 

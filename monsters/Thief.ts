@@ -1,5 +1,6 @@
 import { defer, Observable, Subject, switchMap, timer } from "rxjs";
 import { map, mergeMap, takeUntil, takeWhile, tap } from "rxjs/operators";
+import { DoubleAttack } from "../skills/DoubleAttack";
 import { loadDaggerHitSound } from "../sounds/dagger-hit-sound";
 import { loadThiefFamaleDamagedAudio } from "../sounds/thief-famale-damaged";
 import { loadThiefFamaleDeadAudio } from "../sounds/thief-famale-dead";
@@ -346,6 +347,8 @@ export class Thief extends Monster {
     this.damagedAudio.volume = 0.05;
     this.deadAudio.volume = 0.05;
 
+    this.skills$.next([new DoubleAttack()]);
+
     this.onSoundEffectAttackPlay$
       .pipe(
         switchMap(() =>
@@ -398,6 +401,10 @@ export class Thief extends Monster {
         takeUntil(this.onCleanup$)
       )
       .subscribe();
+  }
+
+  playAttackAudio(): void {
+    this.onSoundEffectAttackPlay$.next();
   }
 
   getFrameEntry(frameY: number, frameX: number) {
@@ -456,7 +463,7 @@ export class Thief extends Monster {
         tap({
           next: (frameX) => {
             if (frameX === 4) {
-              this.onSoundEffectAttackPlay$.next();
+              this.playAttackAudio();
             }
             if (frameX === 5) {
               this.onEffectAttack.next({

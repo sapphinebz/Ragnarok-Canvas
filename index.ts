@@ -33,7 +33,7 @@ import {
   takeUntil,
 } from "rxjs/operators";
 import { Poring } from "./monsters/Poring";
-import { Area, Monster } from "./monsters/Monster";
+import { Area, DamageArea, Monster } from "./monsters/Monster";
 import { Fabre } from "./monsters/Fabre";
 import { Thief } from "./monsters/Thief";
 import { KeyboardController } from "./gamepad/keyboard-controller";
@@ -228,7 +228,7 @@ onMonsterDied$
   .subscribe();
 
 const onMonstersBeAttacked = (option: {
-  onEachMonster: (monster: Monster) => void;
+  onEachMonster: (monster: Monster, area?: DamageArea) => void;
   onPreviousDamagedMonsters: (latestDamagedMonster: Monster[]) => void;
 }): MonoTypeOperatorFunction<Area> => {
   let latestDamagedMonster: Monster[];
@@ -247,7 +247,7 @@ const onMonstersBeAttacked = (option: {
         });
 
         if (monsterIsBeAttacked) {
-          option.onEachMonster(monster);
+          option.onEachMonster(monster, area);
           latestDamagedMonster.push(monster);
         }
       }
@@ -274,9 +274,9 @@ onLoadPlayer$
               monster.showHpGauge = false;
             }
           },
-          onEachMonster: (monster) => {
+          onEachMonster: (monster, area) => {
             player.aggressiveWith(monster);
-            player.damageTo(monster);
+            player.damageTo(monster, area?.skill);
             monster.faceTo(player);
             monster.showHpGauge = true;
             const isDied = monster.animateDieOrHurt();
