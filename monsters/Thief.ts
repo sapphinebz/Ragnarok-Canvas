@@ -30,6 +30,7 @@ export class Thief extends Monster {
 
   daggerHitSound = loadDaggerHitSound();
   damagedAudio = loadThiefFamaleDamagedAudio();
+  onPlayDamageAudio$ = new Subject<void>();
   deadAudio = loadThiefFamaleDeadAudio();
 
   frames: CropImage[][] = [
@@ -356,6 +357,10 @@ export class Thief extends Monster {
       )
       .subscribe();
 
+    this.onPlayDamageAudio$
+      .pipe(switchMap(() => playAudio(this.damagedAudio)))
+      .subscribe();
+
     /**
      * stay effect even player finish attack and move
      */
@@ -417,7 +422,7 @@ export class Thief extends Monster {
   hurting(): Observable<any> {
     return defer(() => {
       this.frameY = 6;
-      this.damagedAudio.play();
+      this.onPlayDamageAudio$.next();
       return this.forwardFrameX(150, 0, 3, { once: true });
     });
   }
