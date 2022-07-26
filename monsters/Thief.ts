@@ -343,7 +343,7 @@ export class Thief extends Monster {
   constructor(canvas: HTMLCanvasElement) {
     super(canvas, thiefLeftSpriteImage, thiefRightSpriteImage);
 
-    this.daggerHitSound.volume = 0.05;
+    this.daggerHitSound.volume = 0.025;
     this.damagedAudio.volume = 0.05;
     this.deadAudio.volume = 0.05;
 
@@ -467,7 +467,7 @@ export class Thief extends Monster {
       }).pipe(
         tap({
           next: (frameX) => {
-            if (frameX === 2) {
+            if (frameX === 3) {
               this.playAttackAudio();
             }
             if (frameX === 5) {
