@@ -203,10 +203,10 @@ function drawCriticalBackgroundImage(
 }
 
 export function animateComboDamage(damage: number, monster: Monster) {
-  const maxScale = 3;
+  const maxScale = 3.5;
   const minScale = 2;
 
-  const startY = monster.y - 50;
+  const startY = monster.y - 65;
   const startX = monster.x;
   const drawNumber: DrawNumber = {
     number: damage,
@@ -233,6 +233,7 @@ export function animateComboDamage(damage: number, monster: Monster) {
     tap({
       next: (t) => {
         drawNumber.scale = minScale + (maxScale - minScale) * t;
+        drawNumber.location.y = startY;
       },
       unsubscribe: () => {
         remove();
@@ -244,7 +245,7 @@ export function animateComboDamage(damage: number, monster: Monster) {
     1500,
     tap({
       next: (t) => {
-        drawNumber.location.y = startY - t * t * 80;
+        drawNumber.location.y = startY - t * 80;
       },
       unsubscribe: () => {
         remove();
