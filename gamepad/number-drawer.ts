@@ -1,3 +1,4 @@
+import { concat } from "rxjs";
 import { tap } from "rxjs/operators";
 import {
   CropImage,
@@ -202,7 +203,8 @@ function drawCriticalBackgroundImage(
 }
 
 export function animateComboDamage(damage: number, monster: Monster) {
-  const maxScale = 4;
+  const maxScale = 3;
+  const minScale = 2;
 
   const startY = monster.y - 50;
   const startX = monster.x;
@@ -213,28 +215,46 @@ export function animateComboDamage(damage: number, monster: Monster) {
       x: startX,
       y: startY,
     },
-    scale: maxScale,
+    scale: minScale,
+  };
+
+  const remove = () => {
+    const index = monster.comboDamages.findIndex((d) => d === drawNumber);
+    if (index > -1) {
+      monster.comboDamages.splice(index, 1);
+    }
   };
 
   // push data for rendering
   // look at rendering function "drawRestoreHp"
   monster.comboDamages.push(drawNumber);
-
-  return monster.tween(
-    1000,
+  const scale = monster.tween(
+    200,
     tap({
       next: (t) => {
-        drawNumber.scale = maxScale;
-        drawNumber.location.y = startY - t * 130;
+        drawNumber.scale = minScale + (maxScale - minScale) * t;
       },
-      complete: () => {
-        const index = monster.comboDamages.findIndex((d) => d === drawNumber);
-        if (index > -1) {
-          monster.comboDamages.splice(index, 1);
-        }
+      unsubscribe: () => {
+        remove();
       },
     })
   );
+
+  const location = monster.tween(
+    1500,
+    tap({
+      next: (t) => {
+        drawNumber.location.y = startY - t * t * 80;
+      },
+      unsubscribe: () => {
+        remove();
+      },
+      complete: () => {
+        remove();
+      },
+    })
+  );
+  return concat(scale, location);
 }
 
 export function animateRestoreHp(restore: number, monster: Monster) {

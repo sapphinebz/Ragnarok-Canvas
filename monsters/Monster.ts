@@ -25,6 +25,7 @@ import {
 } from "rxjs";
 import {
   concatAll,
+  concatMap,
   connect,
   debounceTime,
   distinctUntilChanged,
@@ -160,7 +161,7 @@ export abstract class Monster {
   onCleanup$ = new AsyncSubject<void>();
   onDamageArea$ = new Subject<DamageArea>();
   onReceiveDamage$ = new Subject<DamageNumber>();
-  onComboDamage$ = new Subject<number>();
+  onComboDamage$ = new Subject<number[]>();
   onRestoreHp$ = new Subject<number>();
   onMoving$ = new Subject<MoveLocation>();
   /**
@@ -287,8 +288,19 @@ export abstract class Monster {
 
     this.onComboDamage$
       .pipe(
-        mergeMap((damage) => {
-          return animateComboDamage(damage, this);
+        switchMap((damages) => {
+          let sum = 0;
+          return from(damages).pipe(
+            concatMap((damage, index) => {
+              sum += damage;
+              if (index !== damages.length - 1) {
+                return animateComboDamage(sum, this).pipe(
+                  takeUntil(timer(this.delayAnimationAttack))
+                );
+              }
+              return animateComboDamage(sum, this);
+            })
+          );
         }),
         takeUntil(this.onCleanup$)
       )
@@ -944,7 +956,7 @@ export abstract class Monster {
         if (monster.receivedDamages.length > 0) {
           const previousDamaged =
             monster.receivedDamages[monster.receivedDamages.length - 1];
-          monster.onComboDamage$.next(damage + previousDamaged.number);
+          monster.onComboDamage$.next([previousDamaged.number, damage]);
         }
       }
 
