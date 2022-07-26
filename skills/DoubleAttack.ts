@@ -17,7 +17,7 @@ export class DoubleAttack extends Skill {
         }),
         switchMap((area) => {
           const randomNumber = randomMinMax(0, 100);
-          const doubleAttackRate = 25;
+          const doubleAttackRate = 50;
           if (randomNumber <= doubleAttackRate) {
             return timer(monster.delayAnimationAttack).pipe(
               tap(() => {
