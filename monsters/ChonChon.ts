@@ -37,7 +37,7 @@ export class ChonChon extends Monster {
   visionRange = 250;
   trackRange = 250;
 
-  isAggressiveOnVision = true;
+  isAggressiveOnVision = false;
   dps = 300;
 
   frames: CropImage[][] = [

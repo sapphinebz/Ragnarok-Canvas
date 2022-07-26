@@ -9,7 +9,7 @@ import { CropImage, DIRECTION } from "./Monster";
 import { Poring } from "./Poring";
 
 export class SantaPoring extends Poring {
-  isAggressiveOnVision = true;
+  isAggressiveOnVision = false;
 
   get ctx() {
     return this.canvas.getContext("2d")!;
