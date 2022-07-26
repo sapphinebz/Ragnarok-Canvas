@@ -467,7 +467,7 @@ export class Thief extends Monster {
       }).pipe(
         tap({
           next: (frameX) => {
-            if (frameX === 4) {
+            if (frameX === 2) {
               this.playAttackAudio();
             }
             if (frameX === 5) {
