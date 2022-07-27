@@ -938,7 +938,7 @@ export abstract class Monster {
       });
     } else {
       const randomCriticalNumber = randomMinMax(0, 100);
-      const criticalRate = 15;
+      const criticalRate = 5;
 
       const inconstantDamageRate = (100 + randomMinMax(0, -25)) / 100;
       let damage = this.atk;
