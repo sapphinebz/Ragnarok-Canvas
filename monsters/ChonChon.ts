@@ -354,7 +354,13 @@ export class ChonChon extends Monster {
     return defer(() => {
       this.hideWing = false;
       this.flyingAudio.play();
-      return this.flyingVibrateAnimation(50);
+      return this.flyingVibrateAnimation(50).pipe(
+        tap({
+          unsubscribe: () => {
+            this.flyingAudio.stop();
+          },
+        })
+      );
     });
   }
 
