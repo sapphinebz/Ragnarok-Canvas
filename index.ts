@@ -47,7 +47,7 @@ import { Thief } from "./monsters/Thief";
 import { loadProteraFieldVol2 } from "./sounds/prontera-field-vol2";
 import { audioIsCloseImage } from "./sprites/audio-is-close-image";
 import { audioIsOpenImage } from "./sprites/audio-is-open-image";
-import { canvasHover, onClickCanvasArea } from "./utils/canvas";
+import { canvasHover, onClickCanvasArea, zIndexMonsters } from "./utils/canvas";
 import { rectanglesIntersect } from "./utils/collision";
 import { randomMinMax } from "./utils/random-minmax";
 
@@ -384,15 +384,9 @@ onCanvasRender$.subscribe(() => {
     );
   }
 
-  monsters.sort(
-    (monsterA, monsterB) =>
-      monsterA.y + monsterA.height - (monsterB.y + monsterB.height)
-  );
-  for (const monster of monsters) {
+  for (const monster of zIndexMonsters([...monsters, thief])) {
     monster.drawImage();
   }
-
-  keyboardController.drawPlayer();
 
   drawScore();
 

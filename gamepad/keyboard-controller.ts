@@ -6,25 +6,25 @@ import {
   ReplaySubject,
   startWith,
   Subject,
-} from 'rxjs';
+} from "rxjs";
 import {
   distinctUntilChanged,
   filter,
   map,
   takeUntil,
   tap,
-} from 'rxjs/operators';
-import { ACTION, Monster, WalkingStoppable } from '../monsters/Monster';
-import { onDocumentKeydown } from '../utils/on-document-keydown';
+} from "rxjs/operators";
+import { ACTION, Monster, WalkingStoppable } from "../monsters/Monster";
+import { onDocumentKeydown } from "../utils/on-document-keydown";
 
 export class KeyboardController {
   onCleanup$ = new ReplaySubject<void>(1);
-  keydown$ = onDocumentKeydown('keydown');
-  keyup$ = onDocumentKeydown('keyup');
+  keydown$ = onDocumentKeydown("keydown");
+  keyup$ = onDocumentKeydown("keyup");
   onAttack$ = new Subject<void>();
 
   get ctx() {
-    return this.canvas.getContext('2d');
+    return this.canvas.getContext("2d");
   }
 
   constructor(private canvas: HTMLCanvasElement, private monster: Monster) {}
@@ -33,10 +33,6 @@ export class KeyboardController {
     merge(this.movementAction(), this.attackAction())
       .pipe(takeUntil(this.onCleanup$))
       .subscribe();
-  }
-
-  drawPlayer() {
-    this.monster.drawImage();
   }
 
   cleanup() {
@@ -103,7 +99,7 @@ export class KeyboardController {
 
     return keyboardCode$.pipe(
       distinctUntilChanged(),
-      startWith('KeyUp'),
+      startWith("KeyUp"),
       tap((key) => {
         const action = movementKeyMap[key];
         if (action) {
@@ -134,27 +130,27 @@ export class KeyboardController {
   private mapKeysToActualKey(): OperatorFunction<string[], string> {
     return map((keys) => {
       if (keys.length === 0) {
-        return 'KeyUp';
+        return "KeyUp";
       } else if (keys.length === 1) {
         return keys[0];
       }
-      if (keys.indexOf('ArrowRight') !== -1 && keys.indexOf('ArrowUp') !== -1) {
-        return 'ArrowTopRight';
+      if (keys.indexOf("ArrowRight") !== -1 && keys.indexOf("ArrowUp") !== -1) {
+        return "ArrowTopRight";
       } else if (
-        keys.indexOf('ArrowRight') !== -1 &&
-        keys.indexOf('ArrowDown') !== -1
+        keys.indexOf("ArrowRight") !== -1 &&
+        keys.indexOf("ArrowDown") !== -1
       ) {
-        return 'ArrowBottomRight';
+        return "ArrowBottomRight";
       } else if (
-        keys.indexOf('ArrowLeft') !== -1 &&
-        keys.indexOf('ArrowUp') !== -1
+        keys.indexOf("ArrowLeft") !== -1 &&
+        keys.indexOf("ArrowUp") !== -1
       ) {
-        return 'ArrowTopLeft';
+        return "ArrowTopLeft";
       } else if (
-        keys.indexOf('ArrowLeft') !== -1 &&
-        keys.indexOf('ArrowDown') !== -1
+        keys.indexOf("ArrowLeft") !== -1 &&
+        keys.indexOf("ArrowDown") !== -1
       ) {
-        return 'ArrowBottomLeft';
+        return "ArrowBottomLeft";
       }
       return keys[keys.length - 1];
     });
@@ -190,7 +186,7 @@ export class KeyboardController {
 
         const cleanupSubscription = reset$.subscribe(() => {
           collections = [];
-          subscriber.next(['KeyReset']);
+          subscriber.next(["KeyReset"]);
         });
 
         const bufferSubscription = source.subscribe({

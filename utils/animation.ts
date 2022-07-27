@@ -10,7 +10,7 @@ export function tween(duration: number) {
 }
 
 /**
- * delta Time in millisecond
+ * delta Time in second
  * @returns delta time
  */
 export function deltaTime() {
