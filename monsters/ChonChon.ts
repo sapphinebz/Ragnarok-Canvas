@@ -231,11 +231,6 @@ export class ChonChon extends Monster {
   constructor(canvas: HTMLCanvasElement) {
     super(canvas, chonchonLeftImage, chonchonRightImage);
 
-    this.attackAudio.volume = 0.05;
-    this.damagedAudio.volume = 0.05;
-    this.flyingAudio.volume = 0.05;
-    this.dieAudio.volume = 0.05;
-
     this.dropItems = [
       [Jellopy, 30],
       [Jellopy, 30],
