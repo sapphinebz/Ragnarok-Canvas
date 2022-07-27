@@ -1,5 +1,5 @@
-import { defer, Observable, Subject } from "rxjs";
-import { switchMap, takeUntil, tap } from "rxjs/operators";
+import { defer, Observable } from "rxjs";
+import { tap } from "rxjs/operators";
 import { Feather } from "../items/Feather";
 import { Fluff } from "../items/Fluff";
 import { GreenHerb } from "../items/GreenHerb";
@@ -9,7 +9,6 @@ import { loadFabreDamagedAudio } from "../sounds/fabre-damaged";
 import { loadFabreDieAudio } from "../sounds/fabre-die";
 import { fabreSpriteLeftImage } from "../sprites/load-fabre-left";
 import { fabreSpriteRightImage } from "../sprites/load-fabre-right";
-import { playAudio } from "../utils/play-audio";
 import { CropImage, DIRECTION, Monster } from "./Monster";
 
 export class Fabre extends Monster {

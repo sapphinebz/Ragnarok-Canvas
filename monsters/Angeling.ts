@@ -1,4 +1,4 @@
-import { interval, map, takeUntil, tap } from "rxjs";
+import { takeUntil, tap } from "rxjs";
 import { Apple } from "../items/Apple";
 import { ConcentrationPotion } from "../items/ConcentrationPotion";
 import { WhiteHerb } from "../items/WhiteHerb";

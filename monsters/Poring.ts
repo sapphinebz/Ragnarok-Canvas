@@ -1,23 +1,6 @@
-import {
-  defer,
-  EMPTY,
-  ignoreElements,
-  merge,
-  NEVER,
-  Observable,
-  Subject,
-} from "rxjs";
-import {
-  concatMap,
-  connect,
-  filter,
-  switchMap,
-  takeUntil,
-  takeWhile,
-  tap,
-} from "rxjs/operators";
+import { defer, Observable } from "rxjs";
+import { takeWhile, tap } from "rxjs/operators";
 import { Apple } from "../items/Apple";
-import { ConcentrationPotion } from "../items/ConcentrationPotion";
 import { EmptyBottle } from "../items/EmptyBottle";
 import { Jellopy } from "../items/Jellopy";
 import { RedPotion } from "../items/RedPotion";
@@ -30,8 +13,7 @@ import { loadPoringDeadSound } from "../sounds/poring-dead";
 import { loadPoringWalkSound } from "../sounds/poring-walk";
 import { poringSpriteLeftImage } from "../sprites/load-poring-left";
 import { poringSpriteRightImage } from "../sprites/load-poring-right";
-import { playAudio } from "../utils/play-audio";
-import { CropImage, DIRECTION, Monster } from "./Monster";
+import { CropImage, Monster } from "./Monster";
 
 export class Poring extends Monster {
   x = 100;

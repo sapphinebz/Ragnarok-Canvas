@@ -1,16 +1,4 @@
-import {
-  auditTime,
-  defer,
-  EMPTY,
-  ignoreElements,
-  merge,
-  Observable,
-  Subject,
-  switchMap,
-  takeUntil,
-  tap,
-} from "rxjs";
-import { connect, filter, mergeMap } from "rxjs/operators";
+import { defer, Observable, tap } from "rxjs";
 import { EvilHorn } from "../items/EvilHorn";
 import { WhiteHerb } from "../items/WhiteHerb";
 import { YggdrasilBerry } from "../items/YggdrasilBerry";
@@ -21,7 +9,6 @@ import { loadBaphometDamagedAudio } from "../sounds/baphomet-damaged";
 import { loadBaphometDeadAudio } from "../sounds/baphomet-dead";
 import { baphometSpriteLeft } from "../sprites/baphomet-sprite-left";
 import { baphometSpriteRight } from "../sprites/baphomet-sprite-right";
-import { playAudio, stopAudio } from "../utils/play-audio";
 import { CropImage, DIRECTION, Monster } from "./Monster";
 
 export class Baphomet extends Monster {
