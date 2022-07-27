@@ -1,6 +1,7 @@
 import { defer, Observable, Subject, switchMap, timer } from "rxjs";
 import { map, mergeMap, takeUntil, takeWhile, tap } from "rxjs/operators";
 import { DoubleAttack } from "../skills/DoubleAttack";
+import { AudioSubject } from "../sounds/audio-subject";
 import { loadDaggerHitSound } from "../sounds/dagger-hit-sound";
 import { loadThiefFamaleDamagedAudio } from "../sounds/thief-famale-damaged";
 import { loadThiefFamaleDeadAudio } from "../sounds/thief-famale-dead";
@@ -29,10 +30,9 @@ export class Thief extends Monster {
   dps = 0;
   showHpGauge = true;
 
-  daggerHitSound = loadDaggerHitSound();
-  damagedAudio = loadThiefFamaleDamagedAudio();
-  onPlayDamageAudio$ = new Subject<void>();
-  deadAudio = loadThiefFamaleDeadAudio();
+  attackAudio = new AudioSubject(this, loadDaggerHitSound());
+  damagedAudio = new AudioSubject(this, loadThiefFamaleDamagedAudio());
+  deadAudio = new AudioSubject(this, loadThiefFamaleDeadAudio());
 
   frames: CropImage[][] = [
     [
@@ -332,8 +332,6 @@ export class Thief extends Monster {
 
   hasEffect = false;
   effectFrame: number[] = [];
-  onSoundEffectAttackPlay$ = new Subject<void>();
-  onStopSoundEffectAttack$ = new Subject<void>();
   onEffectAttack = new Subject<{
     x: number;
     y: number;
@@ -343,31 +341,15 @@ export class Thief extends Monster {
   constructor(canvas: HTMLCanvasElement) {
     super(canvas, thiefLeftSpriteImage, thiefRightSpriteImage);
 
-    this.daggerHitSound.volume = 0.025;
-    this.damagedAudio.volume = 0.05;
-    this.deadAudio.volume = 0.05;
+    this.attackAudio.volume = 0.025;
 
     const doubleAttackSkill = new DoubleAttack();
+
     this.skills$.next([doubleAttackSkill]);
 
     doubleAttackSkill.onUse.pipe(takeUntil(this.onCleanup$)).subscribe(() => {
-      this.playAttackAudio();
+      this.attackAudio.play();
     });
-
-    this.onSoundEffectAttackPlay$
-      .pipe(
-        switchMap(() =>
-          playAudio(this.daggerHitSound).pipe(
-            takeUntil(this.onStopSoundEffectAttack$)
-          )
-        ),
-        takeUntil(this.onCleanup$)
-      )
-      .subscribe();
-
-    this.onPlayDamageAudio$
-      .pipe(switchMap(() => playAudio(this.damagedAudio)))
-      .subscribe();
 
     /**
      * stay effect even player finish attack and move
@@ -408,10 +390,6 @@ export class Thief extends Monster {
       .subscribe();
   }
 
-  playAttackAudio(): void {
-    this.onSoundEffectAttackPlay$.next();
-  }
-
   getFrameEntry(frameY: number, frameX: number) {
     return this.frames[frameY][frameX];
   }
@@ -434,7 +412,7 @@ export class Thief extends Monster {
   hurting(): Observable<any> {
     return defer(() => {
       this.frameY = 6;
-      this.onPlayDamageAudio$.next();
+      this.damagedAudio.play();
       return this.forwardFrameX(150, 0, 3, { once: true });
     });
   }
@@ -468,7 +446,7 @@ export class Thief extends Monster {
         tap({
           next: (frameX) => {
             if (frameX === 3) {
-              this.playAttackAudio();
+              this.attackAudio.play();
             }
             if (frameX === 5) {
               this.onEffectAttack.next({
@@ -503,6 +481,7 @@ export class Thief extends Monster {
   walking(): Observable<any> {
     return defer(() => {
       this.frameY = 2;
+      this.attackAudio.stop();
       return this.forwardFrameX(35, 0, 7);
     });
   }

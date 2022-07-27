@@ -23,6 +23,7 @@ import { Jellopy } from "../items/Jellopy";
 import { RedPotion } from "../items/RedPotion";
 import { StickyMucus } from "../items/StickyMucus";
 import { WhitePotion } from "../items/WhitePotion";
+import { AudioSubject } from "../sounds/audio-subject";
 import { loadPoringAttackAudio } from "../sounds/poring-attack";
 import { loadPoringDamage } from "../sounds/poring-damage";
 import { loadPoringDeadSound } from "../sounds/poring-dead";
@@ -50,22 +51,14 @@ export class Poring extends Monster {
   trackRange = 450;
   isAggressiveOnVision = false;
   dps = 600;
-
   walkSpeed = 50;
-
   respawnTimeMin = 5000;
   respawnTimeMax = 10000;
 
-  onPlayAttackAudio$ = new Subject<void>();
-  attackAudio = loadPoringAttackAudio();
-
-  dyingAudio = loadPoringDeadSound();
-
-  onPlayDamageAudio$ = new Subject<void>();
-  damageAudio = loadPoringDamage();
-
-  onPlayWalkAudio$ = new Subject<void>();
-  walkingAudio = loadPoringWalkSound();
+  attackAudio = new AudioSubject(this, loadPoringAttackAudio());
+  dyingAudio = new AudioSubject(this, loadPoringDeadSound());
+  damagedAudio = new AudioSubject(this, loadPoringDamage());
+  walkingAudio = new AudioSubject(this, loadPoringWalkSound());
 
   frames: CropImage[][] = [
     [
@@ -282,34 +275,7 @@ export class Poring extends Monster {
       [EmptyBottle, 10],
     ];
 
-    this.dyingAudio.volume = 0.05;
     this.walkingAudio.volume = 0.02;
-    this.damageAudio.volume = 0.05;
-    this.attackAudio.volume = 0.05;
-
-    this.onPlayAttackAudio$
-      .pipe(
-        switchMap(() => {
-          this.attackAudio.currentTime = 0;
-          return playAudio(this.attackAudio);
-        }),
-        takeUntil(this.onCleanup$)
-      )
-      .subscribe();
-
-    this.onPlayDamageAudio$
-      .pipe(
-        switchMap(() => playAudio(this.damageAudio)),
-        takeUntil(this.onCleanup$)
-      )
-      .subscribe();
-
-    this.onPlayWalkAudio$
-      .pipe(
-        switchMap(() => playAudio(this.walkingAudio)),
-        takeUntil(this.onCleanup$)
-      )
-      .subscribe();
   }
 
   getFrameEntry(frameY: number, frameX: number) {
@@ -354,7 +320,7 @@ export class Poring extends Monster {
         }),
         tap((frameX) => {
           if (frameX === 2) {
-            this.onPlayAttackAudio$.next();
+            this.attackAudio.play();
           }
         })
       );
@@ -369,7 +335,7 @@ export class Poring extends Monster {
       return this.forwardFrameX(120, 0, 1, { once: true }).pipe(
         tap((frameX) => {
           if (frameX === 0) {
-            this.onPlayDamageAudio$.next();
+            this.damagedAudio.play();
           }
         })
       );
@@ -383,7 +349,7 @@ export class Poring extends Monster {
         tap({
           next: (frameX) => {
             if (frameX === 3) {
-              this.onPlayWalkAudio$.next();
+              this.walkingAudio.play();
             }
           },
         })

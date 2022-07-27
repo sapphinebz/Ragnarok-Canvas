@@ -1,23 +1,16 @@
-import { defer, interval, merge, Observable, Subject, timer } from "rxjs";
-import {
-  connect,
-  ignoreElements,
-  map,
-  tap,
-  switchMap,
-  takeUntil,
-} from "rxjs/operators";
+import { defer, interval, merge, Observable } from "rxjs";
+import { connect, ignoreElements, tap } from "rxjs/operators";
 import { ConcentrationPotion } from "../items/ConcentrationPotion";
 import { Jellopy } from "../items/Jellopy";
 import { RedHerb } from "../items/RedHerb";
 import { Shell } from "../items/Shell";
+import { AudioSubject } from "../sounds/audio-subject";
 import { loadChonchonAttackAudio } from "../sounds/chonchon-attack";
 import { loadChonchonDamaged } from "../sounds/chonchon-damaged";
 import { loadChonchonDieAudio } from "../sounds/chonchon-die";
 import { loadChonchonFlyingAudio } from "../sounds/chonchon-flying";
 import { chonchonLeftImage } from "../sprites/chonchon-left-image";
 import { chonchonRightImage } from "../sprites/chonchon-right-image";
-import { playAudio } from "../utils/play-audio";
 import { CropImage, DIRECTION, Monster } from "./Monster";
 
 export class ChonChon extends Monster {
@@ -230,13 +223,10 @@ export class ChonChon extends Monster {
     ],
   ];
 
-  attackAudio = loadChonchonAttackAudio();
-  damagedAudio = loadChonchonDamaged();
-  flyingAudio = loadChonchonFlyingAudio();
-  dieAudio = loadChonchonDieAudio();
-  onPlayAttackAudio$ = new Subject<void>();
-  onPlayDamagedAudio$ = new Subject<void>();
-  onPlayFlyingAudio$ = new Subject<void>();
+  attackAudio = new AudioSubject(this, loadChonchonAttackAudio());
+  damagedAudio = new AudioSubject(this, loadChonchonDamaged());
+  flyingAudio = new AudioSubject(this, loadChonchonFlyingAudio());
+  dieAudio = new AudioSubject(this, loadChonchonDieAudio());
 
   constructor(canvas: HTMLCanvasElement) {
     super(canvas, chonchonLeftImage, chonchonRightImage);
@@ -253,30 +243,6 @@ export class ChonChon extends Monster {
       [RedHerb, 15],
       [ConcentrationPotion, 5],
     ];
-
-    this.onPlayAttackAudio$
-      .pipe(
-        switchMap(() => playAudio(this.attackAudio)),
-        takeUntil(this.onCleanup$)
-      )
-      .subscribe();
-    this.onPlayDamagedAudio$
-      .pipe(
-        switchMap(() => playAudio(this.damagedAudio)),
-        takeUntil(this.onCleanup$)
-      )
-      .subscribe();
-
-    this.onPlayFlyingAudio$
-      .pipe(
-        switchMap(() =>
-          playAudio(this.flyingAudio).pipe(
-            takeUntil(merge(this.onPlayAttackAudio$, this.onPlayDamagedAudio$))
-          )
-        ),
-        takeUntil(this.onCleanup$)
-      )
-      .subscribe();
   }
 
   getFrameEntry(frameY: number, frameX: number) {
@@ -285,7 +251,7 @@ export class ChonChon extends Monster {
   standing(): Observable<any> {
     return defer(() => {
       this.hideWing = false;
-      this.onPlayFlyingAudio$.next();
+      this.flyingAudio.play();
       return this.flyingVibrateAnimation(50);
     });
   }
@@ -312,7 +278,7 @@ export class ChonChon extends Monster {
       }).pipe(
         tap((frameX) => {
           if (frameX === 0) {
-            this.onPlayAttackAudio$.next();
+            this.attackAudio.play();
           } else if (frameX === 3) {
             if (this.direction === DIRECTION.RIGHT) {
               this.onDamageArea$.next({
@@ -383,7 +349,7 @@ export class ChonChon extends Monster {
     return defer(() => {
       this.hideWing = true;
       this.frameY = 3;
-      this.onPlayDamagedAudio$.next();
+      this.damagedAudio.play();
 
       return this.forwardFrameX(100, 0, 1, { once: true });
     });
@@ -392,7 +358,7 @@ export class ChonChon extends Monster {
   walking(): Observable<any> {
     return defer(() => {
       this.hideWing = false;
-      this.onPlayFlyingAudio$.next();
+      this.flyingAudio.play();
       return this.flyingVibrateAnimation(50);
     });
   }

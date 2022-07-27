@@ -1,19 +1,17 @@
-import { defer, EMPTY, Observable, Subject, merge } from "rxjs";
-import { switchMap, takeUntil, tap } from "rxjs/operators";
+import { defer, Observable } from "rxjs";
+import { tap } from "rxjs/operators";
 import { BillsOfBird } from "../items/BillsOfBird";
 import { RedHerb } from "../items/RedHerb";
 import { YellowHerb } from "../items/YellowHerb";
+import { AudioSubject } from "../sounds/audio-subject";
 import { loadPecoPecoAttack } from "../sounds/pecopeco-attack";
 import { loadPecopecoDamaged } from "../sounds/pecopeco-damaged";
 import { loadPecopecoDieAudio } from "../sounds/pecopeco-die";
 import { loadPecoPecoMoveAudio } from "../sounds/pecopeco-move";
 import { loadPecopecoStandAudio } from "../sounds/pecopeco-stand";
 import { loadPecopecoStandAudio2 } from "../sounds/pecopeco-stand2";
-import { poringSpriteRightImage } from "../sprites/load-poring-right";
 import { pecopecoLeftImage } from "../sprites/pecopeco-left-image";
 import { pecopecoRightImage } from "../sprites/pecopeco-right-image";
-import { playAudio } from "../utils/play-audio";
-import { randomMinMax } from "../utils/random-minmax";
 import { CropImage, DIRECTION, Monster } from "./Monster";
 
 export class Pecopeco extends Monster {
@@ -38,18 +36,15 @@ export class Pecopeco extends Monster {
   respawnTimeMin = 10000;
   respawnTimeMax = 15000;
 
-  standAudio!: HTMLAudioElement;
-  onPlayStandAudio$ = new Subject<void>();
+  standAudio = new AudioSubject(this, [
+    loadPecopecoStandAudio(),
+    loadPecopecoStandAudio2(),
+  ]);
 
-  attackAudio = loadPecoPecoAttack();
-  onPlayAttackAudio$ = new Subject<void>();
+  attackAudio = new AudioSubject(this, loadPecoPecoAttack());
 
-  moveAudio = loadPecoPecoMoveAudio();
-  onPlayMoveAudio$ = new Subject<void>();
-  onStopMoveAudio$ = new Subject<void>();
-
-  damagedAudio = loadPecopecoDamaged();
-  onPlayDamagedAudio$ = new Subject<void>();
+  moveAudio = new AudioSubject(this, loadPecoPecoMoveAudio());
+  damagedAudio = new AudioSubject(this, loadPecopecoDamaged());
 
   diedAudio = loadPecopecoDieAudio();
 
@@ -210,45 +205,11 @@ export class Pecopeco extends Monster {
       [YellowHerb, 10],
     ];
 
-    if (randomMinMax(0, 1) === 0) {
-      this.standAudio = loadPecopecoStandAudio();
-    } else {
-      this.standAudio = loadPecopecoStandAudio2();
-    }
-
     this.standAudio.volume = 0.05;
     this.attackAudio.volume = 0.05;
-    this.moveAudio.volume = 0.02;
+    this.moveAudio.volume = 0.03;
     this.damagedAudio.volume = 0.05;
     this.diedAudio.volume = 0.05;
-
-    this.onPlayDamagedAudio$
-      .pipe(
-        switchMap(() => playAudio(this.damagedAudio)),
-        takeUntil(this.onDied$)
-      )
-      .subscribe();
-
-    this.onPlayStandAudio$
-      .pipe(
-        switchMap(() => playAudio(this.standAudio)),
-        takeUntil(this.onDied$)
-      )
-      .subscribe();
-
-    this.onPlayAttackAudio$
-      .pipe(
-        switchMap(() => playAudio(this.attackAudio)),
-        takeUntil(this.onDied$)
-      )
-      .subscribe();
-
-    this.onPlayMoveAudio$
-      .pipe(
-        switchMap(() => playAudio(this.moveAudio)),
-        takeUntil(merge(this.onDied$, this.onStopMoveAudio$))
-      )
-      .subscribe();
   }
 
   getFrameEntry(frameY: number, frameX: number) {
@@ -260,7 +221,7 @@ export class Pecopeco extends Monster {
       return this.forwardFrameX(150, 0, 3).pipe(
         tap((frameX) => {
           if (frameX === 0) {
-            this.onPlayStandAudio$.next();
+            this.standAudio.play();
           }
         })
       );
@@ -286,7 +247,7 @@ export class Pecopeco extends Monster {
       return this.forwardFrameX(150, 4, 7, { once: true }).pipe(
         tap((frameX) => {
           if (frameX === 4) {
-            this.onPlayAttackAudio$.next();
+            this.attackAudio.play();
           } else if (frameX === 7) {
             if (this.direction === DIRECTION.LEFT) {
               this.onDamageArea$.next({
@@ -317,7 +278,7 @@ export class Pecopeco extends Monster {
       return this.forwardFrameX(150, 4, 5, { once: true }).pipe(
         tap((frameX) => {
           if (frameX === 4) {
-            this.onPlayDamagedAudio$.next();
+            this.damagedAudio.play();
           }
         })
       );
@@ -331,11 +292,11 @@ export class Pecopeco extends Monster {
         tap({
           next: (frameX) => {
             if (frameX === 0) {
-              this.onPlayMoveAudio$.next();
+              this.moveAudio.play();
             }
           },
           complete: () => {
-            this.onStopMoveAudio$.next();
+            this.moveAudio.stop();
           },
         })
       );

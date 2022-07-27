@@ -68,13 +68,13 @@ const onWindowResize$ = fromEvent(window, "resize").pipe(
 // number monster in field & class
 const monstersClass: [any, number][] = [
   [Acidus, 0],
-  [Poring, 10],
+  [Poring, 0],
   [SantaPoring, 0],
-  [Angeling, 1],
-  [Fabre, 7],
-  [Baphomet, 0],
-  [ChonChon, 7],
-  [Pecopeco, 6],
+  [Angeling, 0],
+  [Fabre, 0],
+  [Baphomet, 1],
+  [ChonChon, 0],
+  [Pecopeco, 0],
 ];
 
 const fieldItems: FieldItem[] = [];

@@ -14,6 +14,7 @@ import { connect, filter, mergeMap } from "rxjs/operators";
 import { EvilHorn } from "../items/EvilHorn";
 import { WhiteHerb } from "../items/WhiteHerb";
 import { YggdrasilBerry } from "../items/YggdrasilBerry";
+import { AudioSubject } from "../sounds/audio-subject";
 import { loadBaphometAttackAudio } from "../sounds/baphomet-attack";
 import { loadBaphometBreath } from "../sounds/baphomet-breath";
 import { loadBaphometDamagedAudio } from "../sounds/baphomet-damaged";
@@ -45,11 +46,10 @@ export class Baphomet extends Monster {
   isAggressiveOnVision = true;
   dps = 300;
 
-  attackAudio = loadBaphometAttackAudio();
-  breathAudio = loadBaphometBreath();
-  damagedAudio = loadBaphometDamagedAudio();
-  deadAudio = loadBaphometDeadAudio();
-  onPlayBreathAudio$ = new Subject<void>();
+  attackAudio = new AudioSubject(this, loadBaphometAttackAudio());
+  breathAudio = new AudioSubject(this, loadBaphometBreath());
+  damagedAudio = new AudioSubject(this, loadBaphometDamagedAudio());
+  deadAudio = new AudioSubject(this, loadBaphometDeadAudio());
 
   frames: CropImage[][] = [
     // standing
@@ -377,18 +377,7 @@ export class Baphomet extends Monster {
       [WhiteHerb, 15],
     ];
 
-    this.onPlayBreathAudio$
-      .pipe(
-        // auditTime(2000),
-        switchMap(() => playAudio(this.breathAudio)),
-        takeUntil(this.onCleanup$)
-      )
-      .subscribe();
-
-    this.attackAudio.volume = 0.05;
     this.breathAudio.volume = 0.08;
-    this.damagedAudio.volume = 0.05;
-    this.deadAudio.volume = 0.05;
   }
 
   getFrameEntry(frameY: number, frameX: number) {
@@ -438,7 +427,7 @@ export class Baphomet extends Monster {
       return this.forwardFrameX(120, 0, 7).pipe(
         tap((frameX) => {
           if (frameX === 3) {
-            this.onPlayBreathAudio$.next();
+            this.breathAudio.play();
           }
         })
       );
@@ -458,7 +447,7 @@ export class Baphomet extends Monster {
             }
           },
           unsubscribe: () => {
-            stopAudio(this.damagedAudio);
+            this.damagedAudio.stop();
           },
         })
       );
@@ -468,13 +457,8 @@ export class Baphomet extends Monster {
   dying() {
     return defer(() => {
       this.frameY = 5;
-      return this.forwardFrameX(130, 0, 2, { once: true }).pipe(
-        tap((frameX) => {
-          if (frameX === 0) {
-            this.deadAudio.play();
-          }
-        })
-      );
+      this.deadAudio.play();
+      return this.forwardFrameX(130, 0, 2, { once: true });
     });
   }
 }

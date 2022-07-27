@@ -1,5 +1,5 @@
-import { defer, Observable, Subject, switchMap } from "rxjs";
-import { takeUntil, tap } from "rxjs/operators";
+import { defer, Observable } from "rxjs";
+import { tap } from "rxjs/operators";
 import { ConcentrationPotion } from "../items/ConcentrationPotion";
 import { DragonCanine } from "../items/DragonCanine";
 import { DragonScale } from "../items/DragonScale";
@@ -8,9 +8,9 @@ import { WhiteHerb } from "../items/WhiteHerb";
 import { WhitePotion } from "../items/WhitePotion";
 import { loadAcidusAttackSound } from "../sounds/acidus-attack";
 import { loadAcidusDeadSound } from "../sounds/acidus-dead";
+import { AudioSubject } from "../sounds/audio-subject";
 import { acidusLeftSpriteImage } from "../sprites/load-acidus-left";
 import { acidusSpriteRightImage } from "../sprites/load-acidus-right";
-import { playAudio } from "../utils/play-audio";
 import { CropImage, DIRECTION, Monster } from "./Monster";
 
 export class Acidus extends Monster {
@@ -33,10 +33,8 @@ export class Acidus extends Monster {
   respawnTimeMin = 10000;
   respawnTimeMax = 25000;
 
-  attackAudio = loadAcidusAttackSound();
-  deadAudio = loadAcidusDeadSound();
-
-  onPlayDeadAudio$ = new Subject<void>();
+  attackAudio = new AudioSubject(this, loadAcidusAttackSound());
+  deadAudio = new AudioSubject(this, loadAcidusDeadSound());
 
   frames: CropImage[][] = [
     [
@@ -209,8 +207,6 @@ export class Acidus extends Monster {
   ];
   constructor(public canvas: HTMLCanvasElement) {
     super(canvas, acidusLeftSpriteImage, acidusSpriteRightImage);
-    this.deadAudio.volume = 0.05;
-    this.attackAudio.volume = 0.05;
 
     this.dropItems = [
       [ConcentrationPotion, 5],
@@ -220,13 +216,6 @@ export class Acidus extends Monster {
       [WhitePotion, 10],
       [WhiteHerb, 15],
     ];
-
-    this.onPlayDeadAudio$
-      .pipe(
-        switchMap(() => playAudio(this.deadAudio)),
-        takeUntil(this.onCleanup$)
-      )
-      .subscribe();
   }
 
   getFrameEntry(frameY: number, frameX: number) {
@@ -283,7 +272,7 @@ export class Acidus extends Monster {
       return this.forwardFrameX(120, 0, 1, { once: true }).pipe(
         tap((frameX) => {
           if (frameX === 0) {
-            this.onPlayDeadAudio$.next();
+            this.deadAudio.play();
           }
         })
       );
@@ -296,7 +285,7 @@ export class Acidus extends Monster {
       return this.forwardFrameX(120, 0, 2, { once: true }).pipe(
         tap((frameX) => {
           if (frameX === 0) {
-            this.onPlayDeadAudio$.next();
+            this.deadAudio.play();
           }
         })
       );
