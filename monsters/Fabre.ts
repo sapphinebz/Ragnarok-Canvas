@@ -111,9 +111,9 @@ export class Fabre extends Monster {
     super(canvas, fabreSpriteLeftImage, fabreSpriteRightImage);
 
     this.dropItems = [
-      [GreenHerb, 30],
-      [GreenHerb, 30],
-      [Fluff, 70],
+      [GreenHerb, 10],
+      [GreenHerb, 20],
+      [Fluff, 40],
       [Feather, 20],
     ];
 

@@ -372,8 +372,8 @@ export class Baphomet extends Monster {
     super(canvas, baphometSpriteLeft, baphometSpriteRight);
 
     this.dropItems = [
-      [YggdrasilBerry, 70],
-      [EvilHorn, 80],
+      [YggdrasilBerry, 10],
+      [EvilHorn, 30],
       [WhiteHerb, 15],
     ];
 

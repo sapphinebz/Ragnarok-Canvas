@@ -1,26 +1,25 @@
 import "./style.css";
 
 import {
-  fromEvent,
-  startWith,
-  tap,
-  switchMap,
   animationFrameScheduler,
-  share,
-  Subject,
-  timer,
-  from,
   AsyncSubject,
-  merge,
-  OperatorFunction,
-  ignoreElements,
   BehaviorSubject,
-  Observable,
-  ReplaySubject,
-  EMPTY,
-  MonoTypeOperatorFunction,
   combineLatest,
+  from,
+  fromEvent,
+  ignoreElements,
+  merge,
+  MonoTypeOperatorFunction,
+  Observable,
+  OperatorFunction,
+  ReplaySubject,
+  share,
+  startWith,
+  Subject,
+  switchMap,
   takeWhile,
+  tap,
+  timer,
 } from "rxjs";
 import {
   connect,
@@ -32,24 +31,25 @@ import {
   shareReplay,
   takeUntil,
 } from "rxjs/operators";
-import { Poring } from "./monsters/Poring";
-import { Area, DamageArea, Monster } from "./monsters/Monster";
-import { Fabre } from "./monsters/Fabre";
-import { Thief } from "./monsters/Thief";
 import { KeyboardController } from "./gamepad/keyboard-controller";
-import { rectanglesIntersect } from "./utils/collision";
-import { Acidus } from "./monsters/Acidus";
-import { randomMinMax } from "./utils/random-minmax";
-import { audioIsOpenImage } from "./sprites/audio-is-open-image";
-import { audioIsCloseImage } from "./sprites/audio-is-close-image";
-import { loadProteraFieldVol2 } from "./sounds/prontera-field-vol2";
-import { Baphomet } from "./monsters/Baphomet";
-import { Angeling } from "./monsters/Angeling";
-import { SantaPoring } from "./monsters/SantaPoring";
-import { FieldItem } from "./items/Item";
 import { drawDamage, drawRestoreHp } from "./gamepad/number-drawer";
-import { canvasHover, onClickCanvasArea } from "./utils/canvas";
+import { FieldItem } from "./items/Item";
+import { Acidus } from "./monsters/Acidus";
+import { Angeling } from "./monsters/Angeling";
+import { Baphomet } from "./monsters/Baphomet";
 import { ChonChon } from "./monsters/ChonChon";
+import { Fabre } from "./monsters/Fabre";
+import { Area, DamageArea, Monster } from "./monsters/Monster";
+import { Pecopeco } from "./monsters/PecoPeco";
+import { Poring } from "./monsters/Poring";
+import { SantaPoring } from "./monsters/SantaPoring";
+import { Thief } from "./monsters/Thief";
+import { loadProteraFieldVol2 } from "./sounds/prontera-field-vol2";
+import { audioIsCloseImage } from "./sprites/audio-is-close-image";
+import { audioIsOpenImage } from "./sprites/audio-is-open-image";
+import { canvasHover, onClickCanvasArea } from "./utils/canvas";
+import { rectanglesIntersect } from "./utils/collision";
+import { randomMinMax } from "./utils/random-minmax";
 
 const canvas = document.querySelector<HTMLCanvasElement>("canvas")!;
 const ctx = canvas.getContext("2d")!;
@@ -67,13 +67,14 @@ const onWindowResize$ = fromEvent(window, "resize").pipe(
  */
 // number monster in field & class
 const monstersClass: [any, number][] = [
-  [Acidus, 1],
-  [Poring, 5],
-  [SantaPoring, 5],
+  [Acidus, 0],
+  [Poring, 10],
+  [SantaPoring, 0],
   [Angeling, 1],
   [Fabre, 7],
-  [Baphomet, 1],
-  [ChonChon, 5],
+  [Baphomet, 0],
+  [ChonChon, 7],
+  [Pecopeco, 6],
 ];
 
 const fieldItems: FieldItem[] = [];
@@ -154,7 +155,7 @@ const corpseDisappearAfterAnimationEnd = <T>(
           subscriber.error(err);
         },
         complete: () => {
-          timer(1500)
+          timer(5000)
             .pipe(takeUntil(unsubscribe$))
             .subscribe(() => {
               const index = monsters.findIndex((p) => p === monster);

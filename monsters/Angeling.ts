@@ -15,8 +15,8 @@ export class Angeling extends Poring {
   speedX = 4;
   speedY = 4;
 
-  respawnTimeMin = 15000;
-  respawnTimeMax = 25000;
+  respawnTimeMin = 50000;
+  respawnTimeMax = 60000;
 
   isAggressiveOnVision = true;
   visionRange = 300;
@@ -102,11 +102,11 @@ export class Angeling extends Poring {
     super(canvas);
 
     this.dropItems = [
-      [ConcentrationPotion, 50],
-      [WhiteHerb, 70],
+      [ConcentrationPotion, 10],
+      [WhiteHerb, 40],
       [Apple, 70],
-      [Apple, 70],
-      [WhitePotion, 20],
+      [Apple, 30],
+      [WhitePotion, 15],
     ];
 
     this.flipWingFrame$

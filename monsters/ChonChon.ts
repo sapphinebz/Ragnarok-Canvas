@@ -247,9 +247,9 @@ export class ChonChon extends Monster {
     this.dieAudio.volume = 0.05;
 
     this.dropItems = [
-      [Jellopy, 70],
-      [Jellopy, 70],
-      [Shell, 40],
+      [Jellopy, 30],
+      [Jellopy, 30],
+      [Shell, 20],
       [RedHerb, 15],
       [ConcentrationPotion, 5],
     ];
