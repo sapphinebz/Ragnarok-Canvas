@@ -206,7 +206,7 @@ export function animateComboDamage(damage: number, monster: Monster) {
   const maxScale = 3.5;
   const minScale = 2;
 
-  const startY = monster.y - 65;
+  const startY = monster.y - 55;
   const startX = monster.x;
   const drawNumber: DrawNumber = {
     number: damage,
@@ -342,8 +342,7 @@ export function animateReceivedDamage(damage: DamageNumber, monster: Monster) {
   if (monster.direction === DIRECTION.RIGHT) {
     dropXDistance = -dropXDistance;
   }
-  const maxLocationY = monster.y;
-  const startY = maxLocationY - 20;
+  const startY = monster.y - 10;
   const startX = monster.x;
   const drawNumber: DrawNumber = {
     isCritical: damage.isCritical,
