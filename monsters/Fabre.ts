@@ -14,8 +14,8 @@ import { CropImage, DIRECTION, Monster } from "./Monster";
 export class Fabre extends Monster {
   x = 100;
   y = 100;
-  speedX = 3;
-  speedY = 3;
+  speedX = 50;
+  speedY = 50;
   frameX = 0;
   frameY = 0;
   width = 50;

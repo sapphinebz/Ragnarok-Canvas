@@ -16,8 +16,8 @@ export class Baphomet extends Monster {
   hp = this.maxHp;
   x = 300;
   y = 300;
-  speedX = 6;
-  speedY = 6;
+  speedX = 90;
+  speedY = 90;
   frameX = 0;
   frameY = 0;
 

@@ -18,8 +18,8 @@ export class Acidus extends Monster {
   hp = this.maxHp;
   x = 200;
   y = 200;
-  speedX = 5;
-  speedY = 5;
+  speedX = 90;
+  speedY = 90;
   frameX = 0;
   frameY = 0;
   width = 119;

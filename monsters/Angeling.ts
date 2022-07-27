@@ -12,8 +12,8 @@ export class Angeling extends Poring {
   maxHp = 220;
   hp = this.maxHp;
   atk = 120;
-  speedX = 4;
-  speedY = 4;
+  speedX = 70;
+  speedY = 70;
 
   respawnTimeMin = 50000;
   respawnTimeMax = 60000;

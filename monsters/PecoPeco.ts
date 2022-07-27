@@ -20,8 +20,8 @@ export class Pecopeco extends Monster {
   maxHp = 250;
   hp = this.maxHp;
   atk = 70;
-  speedX = 7;
-  speedY = 7;
+  speedX = 120;
+  speedY = 120;
   frameX = 0;
   frameY = 0;
   width = 64;

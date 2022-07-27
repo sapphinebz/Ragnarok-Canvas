@@ -19,8 +19,8 @@ export class ChonChon extends Monster {
   maxHp = 150;
   hp = this.maxHp;
   atk = 25;
-  speedX = 3.5;
-  speedY = 3.5;
+  speedX = 110;
+  speedY = 110;
   frameX = 0;
   frameY = 0;
   width = 30;

@@ -46,6 +46,7 @@ import {
 import { DropItems } from "../items/Item";
 import { Skill, Skills } from "../skills/Skill";
 import { loadCriticalAttack } from "../sounds/critical-attack";
+import { deltaTime } from "../utils/animation";
 import { distanceBetween } from "../utils/collision";
 import { playAudio } from "../utils/play-audio";
 import { randomMinMax } from "../utils/random-minmax";
@@ -59,7 +60,7 @@ export interface MoveLocation {
 
 export interface WalkingConfig {
   faceDirection?: DIRECTION;
-  moveOption: () => MoveLocation;
+  moveOption: (delta: number) => MoveLocation;
   stopIfOutOfCanvas?: boolean;
 }
 
@@ -743,8 +744,8 @@ export abstract class Monster {
 
   walkingToTarget(target: Monster) {
     return defer(() => {
-      return this.walking().pipe(
-        map(() => {
+      return merge(this.walking().pipe(ignoreElements()), deltaTime()).pipe(
+        map((delta) => {
           const currentMoveLocation = { x: this.x, y: this.y };
           let moveNextLocation = { ...currentMoveLocation };
 
@@ -754,15 +755,15 @@ export abstract class Monster {
             target.y + target.height / 2 < this.y + this.height / 2;
 
           if (targetIsLeftSide) {
-            moveNextLocation.x -= this.speedX;
+            moveNextLocation.x -= this.speedX * delta;
           } else {
-            moveNextLocation.x += this.speedX;
+            moveNextLocation.x += this.speedX * delta;
           }
 
           if (targetIsTopSide) {
-            moveNextLocation.y -= this.speedY;
+            moveNextLocation.y -= this.speedY * delta;
           } else {
-            moveNextLocation.y += this.speedY;
+            moveNextLocation.y += this.speedY * delta;
           }
 
           if (targetIsLeftSide) {
@@ -790,7 +791,7 @@ export abstract class Monster {
 
           const distanceY = targetY - sourceY;
 
-          if (Math.abs(distanceY) <= this.speedY) {
+          if (Math.abs(distanceY) <= this.speedY * delta) {
             this.y = this.y + distanceY;
           } else {
             this.y = moveNextLocation.y;
@@ -798,7 +799,7 @@ export abstract class Monster {
 
           const distanceX = targetX - sourceX;
 
-          if (Math.abs(distanceX) <= this.speedX) {
+          if (Math.abs(distanceX) <= this.speedX * delta) {
             this.x = this.x + distanceX;
           } else {
             this.x = moveNextLocation.x;
@@ -815,7 +816,7 @@ export abstract class Monster {
   walkingDown(config: WalkingStoppable = { stopIfOutOfCanvas: true }) {
     return this.walkingDirection({
       faceDirection: DIRECTION.LEFT,
-      moveOption: () => this.moveDown(),
+      moveOption: (delta: number) => this.moveDown(delta),
       stopIfOutOfCanvas: config.stopIfOutOfCanvas,
     });
   }
@@ -823,7 +824,7 @@ export abstract class Monster {
   walkingUp(config: WalkingStoppable = { stopIfOutOfCanvas: true }) {
     return this.walkingDirection({
       faceDirection: DIRECTION.RIGHT,
-      moveOption: () => this.moveUp(),
+      moveOption: (delta: number) => this.moveUp(delta),
       stopIfOutOfCanvas: config.stopIfOutOfCanvas,
     });
   }
@@ -831,7 +832,7 @@ export abstract class Monster {
   walkingLeft(config: WalkingStoppable = { stopIfOutOfCanvas: true }) {
     return this.walkingDirection({
       faceDirection: DIRECTION.LEFT,
-      moveOption: () => this.moveLeft(),
+      moveOption: (delta: number) => this.moveLeft(delta),
       stopIfOutOfCanvas: config.stopIfOutOfCanvas,
     });
   }
@@ -839,7 +840,7 @@ export abstract class Monster {
   walkingRight(config: WalkingStoppable = { stopIfOutOfCanvas: true }) {
     return this.walkingDirection({
       faceDirection: DIRECTION.RIGHT,
-      moveOption: () => this.moveRight(),
+      moveOption: (delta: number) => this.moveRight(delta),
       stopIfOutOfCanvas: config.stopIfOutOfCanvas,
     });
   }
@@ -847,7 +848,7 @@ export abstract class Monster {
   walkingTopLeft(config: WalkingStoppable = { stopIfOutOfCanvas: true }) {
     return this.walkingDirection({
       faceDirection: DIRECTION.LEFT,
-      moveOption: () => this.moveTopLeft(),
+      moveOption: (delta: number) => this.moveTopLeft(delta),
       stopIfOutOfCanvas: config.stopIfOutOfCanvas,
     });
   }
@@ -855,7 +856,7 @@ export abstract class Monster {
   walkingTopRight(config: WalkingStoppable = { stopIfOutOfCanvas: true }) {
     return this.walkingDirection({
       faceDirection: DIRECTION.RIGHT,
-      moveOption: () => this.moveTopRight(),
+      moveOption: (delta: number) => this.moveTopRight(delta),
       stopIfOutOfCanvas: config.stopIfOutOfCanvas,
     });
   }
@@ -863,7 +864,7 @@ export abstract class Monster {
   walkingBottomLeft(config: WalkingStoppable = { stopIfOutOfCanvas: true }) {
     return this.walkingDirection({
       faceDirection: DIRECTION.LEFT,
-      moveOption: () => this.moveBottomLeft(),
+      moveOption: (delta: number) => this.moveBottomLeft(delta),
       stopIfOutOfCanvas: config.stopIfOutOfCanvas,
     });
   }
@@ -871,7 +872,7 @@ export abstract class Monster {
   walkingBottomRight(config: WalkingStoppable = { stopIfOutOfCanvas: true }) {
     return this.walkingDirection({
       faceDirection: DIRECTION.RIGHT,
-      moveOption: () => this.moveBottomRight(),
+      moveOption: (delta: number) => this.moveBottomRight(delta),
       stopIfOutOfCanvas: config.stopIfOutOfCanvas,
     });
   }
@@ -880,36 +881,36 @@ export abstract class Monster {
     this.actionChange$.next(ACTION.RANDOM);
   }
 
-  moveRight() {
-    return { x: this.x + this.speedX, y: this.y };
+  moveRight(delta: number) {
+    return { x: this.x + this.speedX * delta, y: this.y };
   }
 
-  moveLeft() {
-    return { x: this.x - this.speedX, y: this.y };
+  moveLeft(delta: number) {
+    return { x: this.x - this.speedX * delta, y: this.y };
   }
 
-  moveUp() {
-    return { x: this.x, y: this.y - this.speedY };
+  moveUp(delta: number) {
+    return { x: this.x, y: this.y - this.speedY * delta };
   }
 
-  moveDown() {
-    return { x: this.x, y: this.y + this.speedY };
+  moveDown(delta: number) {
+    return { x: this.x, y: this.y + this.speedY * delta };
   }
 
-  moveTopLeft() {
-    return { x: this.x - this.speedX, y: this.y - this.speedY };
+  moveTopLeft(delta: number) {
+    return { x: this.x - this.speedX * delta, y: this.y - this.speedY * delta };
   }
 
-  moveBottomLeft() {
-    return { x: this.x - this.speedX, y: this.y + this.speedY };
+  moveBottomLeft(delta: number) {
+    return { x: this.x - this.speedX * delta, y: this.y + this.speedY * delta };
   }
 
-  moveTopRight() {
-    return { x: this.x + this.speedX, y: this.y - this.speedY };
+  moveTopRight(delta: number) {
+    return { x: this.x + this.speedX * delta, y: this.y - this.speedY * delta };
   }
 
-  moveBottomRight() {
-    return { x: this.x + this.speedX, y: this.y + this.speedY };
+  moveBottomRight(delta: number) {
+    return { x: this.x + this.speedX * delta, y: this.y + this.speedY * delta };
   }
 
   cleanup() {
@@ -1184,8 +1185,8 @@ export abstract class Monster {
       if (faceDirection !== undefined) {
         this.direction = faceDirection;
       }
-      return this.walking().pipe(
-        map(() => moveOption()),
+      return merge(this.walking().pipe(ignoreElements()), deltaTime()).pipe(
+        map((delta) => moveOption(delta)),
         (source) => {
           if (stopIfOutOfCanvas) {
             return source.pipe(

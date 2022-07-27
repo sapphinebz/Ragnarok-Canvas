@@ -17,8 +17,8 @@ export class Thief extends Monster {
   atk = 18;
   x = 100;
   y = 100;
-  speedX = 8;
-  speedY = 8;
+  speedX = 280;
+  speedY = 280;
   frameX = 0;
   frameY = 0;
   width = 80;
