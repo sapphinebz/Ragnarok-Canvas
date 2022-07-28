@@ -91,17 +91,21 @@ export function drawDamage(
   monster: Monster,
   config: DrawNumberConfig = { style: "white" }
 ) {
-  const receivedDamages = monster.receivedDamagesDrawFrames;
-  drawNumber(monster, receivedDamages, config);
+  if (monster.receivedDamagesDrawFrames.length > 0) {
+    const receivedDamages = monster.receivedDamagesDrawFrames;
+    drawNumber(monster, receivedDamages, config);
 
-  if (monster.comboDamagesDrawFrames.length > 0) {
-    drawNumber(monster, monster.comboDamagesDrawFrames, { style: "yellow" });
+    if (monster.comboDamagesDrawFrames.length > 0) {
+      drawNumber(monster, monster.comboDamagesDrawFrames, { style: "yellow" });
+    }
   }
 }
 
 export function drawRestoreHp(monster: Monster) {
-  const restoredHp = monster.restoredHpDrawFrames;
-  drawNumber(monster, restoredHp, { style: "green" });
+  if (monster.restoredHpDrawFrames.length > 0) {
+    const restoredHp = monster.restoredHpDrawFrames;
+    drawNumber(monster, restoredHp, { style: "green" });
+  }
 }
 
 export function drawNumber(

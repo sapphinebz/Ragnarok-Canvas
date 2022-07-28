@@ -299,6 +299,11 @@ const keyboardController = new KeyboardController(canvas, thief);
 
 const killCount$ = new BehaviorSubject(0);
 
+// cache x score location
+const scoreCanvasXMap = new Map();
+// cache y score location
+const scoreCanvasYMap = new Map();
+
 let backgroundSoundTogglerImage = audioIsCloseImage;
 const backgroundSoundTogglerImagePosition = { x: 16, y: 16 };
 
@@ -306,10 +311,18 @@ const drawScore = () => {
   ctx.textAlign = "center";
   ctx.font = "bold 24px Arial";
   ctx.fillStyle = "white";
+  scoreCanvasXMap.set(
+    canvas.width,
+    scoreCanvasXMap.get(canvas.width) ?? canvas.width - canvas.width * 0.1
+  );
+  scoreCanvasYMap.set(
+    canvas.height,
+    scoreCanvasYMap.get(canvas.height) ?? canvas.height * 0.05
+  );
   ctx.fillText(
     `kill: ${killCount$.value}`,
-    canvas.width - canvas.width * 0.1,
-    canvas.height * 0.05
+    scoreCanvasXMap.get(canvas.width),
+    scoreCanvasYMap.get(canvas.height)
   );
 };
 
