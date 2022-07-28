@@ -16,8 +16,8 @@ import { CropImage, DIRECTION, Monster } from "./Monster";
 export class Baphomet extends Monster {
   x = 300;
   y = 300;
-  speedX = 90;
-  speedY = 90;
+  speedX = 120;
+  speedY = 120;
   frameX = 0;
   frameY = 0;
 
@@ -364,7 +364,7 @@ export class Baphomet extends Monster {
 
   weaponSprite = { offsetX: 772, offsetY: 822, width: 74, height: 99 };
 
-  healLevel10 = new Heal(10);
+  healLevel15 = new Heal(15);
   healLevel20 = new Heal(20);
 
   constructor(public canvas: HTMLCanvasElement) {
@@ -384,7 +384,7 @@ export class Baphomet extends Monster {
     this.whenHpBelow(
       this.maxHp * 0.5,
       tap(() => {
-        this.healLevel10.useWith(this, this);
+        this.healLevel15.useWith(this, this);
       })
     ).subscribe();
 

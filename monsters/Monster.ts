@@ -50,6 +50,12 @@ import { Skill, Skills } from "../skills/Skill";
 import { loadCriticalAttack } from "../sounds/critical-attack";
 import { deltaTime } from "../utils/animation";
 import { distanceBetween } from "../utils/collision";
+import {
+  BACKGROUND_CASTING_SPELL_COLOR,
+  DANGER_HEALTH_GAUGE_COLOR,
+  GOOD_HEALTH_GAUGE_COLOR,
+  STROKE_GAUGE_COLOR,
+} from "../utils/constants";
 import { playAudio } from "../utils/play-audio";
 import { randomEnd, randomMinMax } from "../utils/random-minmax";
 import { repeatUntil } from "../utils/repeat-util";
@@ -535,14 +541,21 @@ export abstract class Monster {
             width,
             height
           );
+
           // hp Gauge
           if (this.showHpGauge) {
             const gaugeHpRate = this.hp / this.maxHp;
-            this.drawGauge(this.width, "hsl(0deg 0% 10% / 70%)");
+            this.drawGauge(this.width, STROKE_GAUGE_COLOR);
             if (gaugeHpRate <= 0.2) {
-              this.drawGauge(this.width * (this.hp / this.maxHp), "#d50000");
+              this.drawGauge(
+                this.width * (this.hp / this.maxHp),
+                DANGER_HEALTH_GAUGE_COLOR
+              );
             } else {
-              this.drawGauge(this.width * (this.hp / this.maxHp), "lime");
+              this.drawGauge(
+                this.width * (this.hp / this.maxHp),
+                GOOD_HEALTH_GAUGE_COLOR
+              );
             }
           }
         }
@@ -1204,16 +1217,48 @@ export abstract class Monster {
     });
   }
 
-  private drawGauge(value: number, color: string) {
+  public drawGauge(value: number, color: string) {
     this.ctx.beginPath();
     this.ctx.fillStyle = color;
     this.ctx.rect(this.x, this.y + this.height + 5, value, 5);
     this.ctx.fill();
 
     this.ctx.beginPath();
-    this.ctx.strokeStyle = "hsl(0deg 0% 10% / 70%)";
-    // this.ctx.strokeStyle = 'blue';
+    this.ctx.strokeStyle = STROKE_GAUGE_COLOR;
     this.ctx.strokeRect(this.x, this.y + this.height + 5, value, 5);
+    this.ctx.fill();
+  }
+
+  public drawCastingSpell(spellName: string, rate: number) {
+    this.drawSpellName(spellName);
+
+    this.drawCastASpellGauge(this.width, STROKE_GAUGE_COLOR);
+    this.drawCastASpellGauge(this.width * rate, GOOD_HEALTH_GAUGE_COLOR);
+  }
+
+  private drawSpellName(spellName: string) {
+    this.ctx.beginPath();
+    this.ctx.fillStyle = BACKGROUND_CASTING_SPELL_COLOR;
+    this.ctx.rect(this.x, this.y - 27, this.width, 19);
+    this.ctx.fill();
+
+    this.ctx.textAlign = "center";
+    this.ctx.font = "normal 12px Tahoma";
+    this.ctx.fillStyle = "white";
+    this.ctx.fillText(`${spellName} !!`, this.x + this.width / 2, this.y - 13);
+  }
+
+  private drawCastASpellGauge(value: number, color: string) {
+    const yPosition = this.y - 7;
+    const gaugeHeight = 6;
+    this.ctx.beginPath();
+    this.ctx.fillStyle = color;
+    this.ctx.rect(this.x, yPosition, value, gaugeHeight);
+    this.ctx.fill();
+
+    this.ctx.beginPath();
+    this.ctx.strokeStyle = STROKE_GAUGE_COLOR;
+    this.ctx.strokeRect(this.x, yPosition, value, gaugeHeight);
     this.ctx.fill();
   }
 
