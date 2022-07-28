@@ -71,10 +71,10 @@ const monstersClass: [any, number][] = [
   [Poring, 14],
   [SantaPoring, 0],
   [Angeling, 1],
-  [Fabre, 0],
-  [Baphomet, 0],
-  [ChonChon, 0],
-  [Pecopeco, 0],
+  [Fabre, 7],
+  [Baphomet, 1],
+  [ChonChon, 7],
+  [Pecopeco, 7],
 ];
 
 const fieldItems: FieldItem[] = [];
