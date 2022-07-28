@@ -16,8 +16,7 @@ import { CropImage, DIRECTION, Monster } from "./Monster";
 export class ChonChon extends Monster {
   x = 100;
   y = 100;
-  maxHp = 150;
-  hp = this.maxHp;
+
   atk = 25;
   speedX = 110;
   speedY = 110;
@@ -235,6 +234,9 @@ export class ChonChon extends Monster {
 
   constructor(canvas: HTMLCanvasElement) {
     super(canvas, chonchonLeftImage, chonchonRightImage);
+
+    this.maxHp = 150;
+    this.hp = this.maxHp;
 
     this.dropItems = [
       [Jellopy, 30],

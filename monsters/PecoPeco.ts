@@ -17,8 +17,6 @@ import { CropImage, DIRECTION, Monster } from "./Monster";
 export class Pecopeco extends Monster {
   x = 150;
   y = 150;
-  maxHp = 250;
-  hp = this.maxHp;
   atk = 70;
   speedX = 120;
   speedY = 120;
@@ -204,6 +202,9 @@ export class Pecopeco extends Monster {
 
   constructor(canvas: HTMLCanvasElement) {
     super(canvas, pecopecoLeftImage, pecopecoRightImage);
+
+    this.maxHp = 250;
+    this.hp = this.maxHp;
 
     this.dropItems = [
       [RedHerb, 20],

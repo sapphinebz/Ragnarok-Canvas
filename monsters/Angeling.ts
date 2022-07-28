@@ -3,14 +3,13 @@ import { Apple } from "../items/Apple";
 import { ConcentrationPotion } from "../items/ConcentrationPotion";
 import { WhiteHerb } from "../items/WhiteHerb";
 import { WhitePotion } from "../items/WhitePotion";
+import { Heal } from "../skills/Heal";
 import { poringSpriteLeftImage } from "../sprites/load-poring-left";
 import { poringSpriteRightImage } from "../sprites/load-poring-right";
 import { CropImage, DIRECTION } from "./Monster";
 import { Poring } from "./Poring";
 
 export class Angeling extends Poring {
-  maxHp = 220;
-  hp = this.maxHp;
   atk = 120;
   speedX = 70;
   speedY = 70;
@@ -98,8 +97,13 @@ export class Angeling extends Poring {
     return this.canvas.getContext("2d")!;
   }
 
+  heal1 = new Heal(10);
+
   constructor(canvas: HTMLCanvasElement) {
     super(canvas);
+
+    this.maxHp = 450;
+    this.hp = this.maxHp;
 
     this.dropItems = [
       [ConcentrationPotion, 10],
@@ -108,6 +112,13 @@ export class Angeling extends Poring {
       [Apple, 30],
       [WhitePotion, 15],
     ];
+
+    this.whenHpBelow(
+      this.maxHp * 0.5,
+      tap(() => {
+        this.heal1.useWith(this, this);
+      })
+    ).subscribe();
 
     this.flipWingFrame$
       .pipe(takeUntil(this.onDied$), takeUntil(this.onCleanup$))

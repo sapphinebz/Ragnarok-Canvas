@@ -14,6 +14,7 @@ import {
   MonoTypeOperatorFunction,
   Observable,
   of,
+  OperatorFunction,
   pairwise,
   ReplaySubject,
   startWith,
@@ -35,6 +36,7 @@ import {
   mergeMap,
   repeat,
   takeUntil,
+  share,
   takeWhile,
 } from "rxjs/operators";
 import {
@@ -122,8 +124,14 @@ export type CropImage = {
 
 export abstract class Monster {
   atk = 1;
-  hp = 20;
-  maxHp = this.hp;
+  maxHp = 20;
+  hp$ = new BehaviorSubject<number>(this.maxHp);
+  set hp(value: number) {
+    this.hp$.next(value);
+  }
+  get hp() {
+    return this.hp$.value;
+  }
   x: number = 0;
   y: number = 0;
   speedX: number = 0;
@@ -233,12 +241,13 @@ export abstract class Monster {
 
   behaviorActions: Observable<any>[] = [];
 
-  receivedDamages: DrawNumber[] = [];
-  comboDamages: DrawNumber[] = [];
+  receivedDamagesDrawFrames: DrawNumber[] = [];
+  comboDamagesDrawFrames: DrawNumber[] = [];
+  restoredHpDrawFrames: DrawNumber[] = [];
+
   get latestDamageReceived() {
-    return this.receivedDamages[this.receiveDamage.length - 1];
+    return this.receivedDamagesDrawFrames[this.receiveDamage.length - 1];
   }
-  restoredHp: DrawNumber[] = [];
 
   get ctx() {
     return this.canvas.getContext("2d")!;
@@ -969,9 +978,11 @@ export abstract class Monster {
       }
 
       if (skill === "DoubleAttack") {
-        if (monster.receivedDamages.length > 0) {
+        if (monster.receivedDamagesDrawFrames.length > 0) {
           const previousDamaged =
-            monster.receivedDamages[monster.receivedDamages.length - 1];
+            monster.receivedDamagesDrawFrames[
+              monster.receivedDamagesDrawFrames.length - 1
+            ];
           monster.onComboDamage$.next([previousDamaged.number, damage]);
         }
       }
@@ -1138,6 +1149,19 @@ export abstract class Monster {
     );
   }
 
+  initSkill(skills: Skill[]) {
+    this.skills$.next(skills);
+  }
+
+  whenHpBelow(value: number, doEffect: OperatorFunction<any, any>) {
+    return this.hp$.pipe(
+      filter((hp) => hp < value),
+      take(1),
+      doEffect,
+      takeUntil(this.onDied$)
+    );
+  }
+
   render() {
     this.onActionTick$.next();
   }
@@ -1152,7 +1176,7 @@ export abstract class Monster {
       this.hp = hp;
     }
 
-    this.onRestoreHp$.next(this.hp - hpBefore);
+    this.onRestoreHp$.next(Math.round(this.hp - hpBefore));
   }
 
   private playCriticalAudio() {

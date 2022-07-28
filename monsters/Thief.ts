@@ -12,8 +12,6 @@ import { loadRightThiefDagger } from "../sprites/load-thief-right-dagger";
 import { CropImage, DIRECTION, Monster } from "./Monster";
 
 export class Thief extends Monster {
-  maxHp = 1200;
-  hp = this.maxHp;
   atk = 18;
   x = 100;
   y = 100;
@@ -340,11 +338,14 @@ export class Thief extends Monster {
   constructor(canvas: HTMLCanvasElement) {
     super(canvas, thiefLeftSpriteImage, thiefRightSpriteImage);
 
+    this.maxHp = 1200;
+    this.hp = this.maxHp;
+
     this.attackAudio.volume = 0.025;
 
-    const doubleAttackSkill = new DoubleAttack();
+    const doubleAttackSkill = new DoubleAttack(10);
 
-    this.skills$.next([doubleAttackSkill]);
+    this.initSkill([doubleAttackSkill]);
 
     doubleAttackSkill.onUse.pipe(takeUntil(this.onCleanup$)).subscribe(() => {
       this.attackAudio.play();

@@ -6,6 +6,9 @@ import { Skill } from "./Skill";
 
 export class DoubleAttack extends Skill {
   passive: boolean = true;
+  constructor(public level: number) {
+    super();
+  }
   useWith(monster: Monster) {
     monster.onDamageArea$
       .pipe(
@@ -17,7 +20,7 @@ export class DoubleAttack extends Skill {
         }),
         switchMap((area) => {
           const randomNumber = randomMinMax(0, 100);
-          const doubleAttackRate = 50;
+          const doubleAttackRate = 5 * this.level;
           if (randomNumber <= doubleAttackRate) {
             return timer(monster.delayAnimationAttack).pipe(
               tap(() => {

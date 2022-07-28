@@ -71,10 +71,10 @@ const monstersClass: [any, number][] = [
   [Poring, 14],
   [SantaPoring, 0],
   [Angeling, 1],
-  [Fabre, 7],
+  [Fabre, 0],
   [Baphomet, 0],
-  [ChonChon, 7],
-  [Pecopeco, 7],
+  [ChonChon, 0],
+  [Pecopeco, 0],
 ];
 
 const fieldItems: FieldItem[] = [];
@@ -386,6 +386,12 @@ onCanvasRender$.subscribe(() => {
 
   for (const monster of zIndexMonsters([...monsters, thief])) {
     monster.drawImage();
+    if (monster === thief) {
+      drawDamage(monster, { style: "red" });
+    } else {
+      drawDamage(monster);
+    }
+    drawRestoreHp(monster);
   }
 
   drawScore();
@@ -395,13 +401,6 @@ onCanvasRender$.subscribe(() => {
     backgroundSoundTogglerImagePosition.x,
     backgroundSoundTogglerImagePosition.y
   );
-
-  for (const monster of monsters) {
-    drawDamage(monster);
-  }
-
-  drawDamage(thief, { style: "red" });
-  drawRestoreHp(thief);
 });
 
 killCount$.subscribe(() => tick());

@@ -5,5 +5,7 @@ export type Skills = "DoubleAttack";
 export abstract class Skill {
   onUse = new Subject<void>();
   abstract passive: boolean;
-  abstract useWith(monster: Monster): void;
+  level = 1;
+
+  abstract useWith(monster: Monster, toMonster?: Monster): void;
 }

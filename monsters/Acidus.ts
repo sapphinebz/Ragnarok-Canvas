@@ -14,8 +14,6 @@ import { acidusSpriteRightImage } from "../sprites/load-acidus-right";
 import { CropImage, DIRECTION, Monster } from "./Monster";
 
 export class Acidus extends Monster {
-  maxHp = 350;
-  hp = this.maxHp;
   x = 200;
   y = 200;
   speedX = 90;
@@ -213,6 +211,8 @@ export class Acidus extends Monster {
   constructor(public canvas: HTMLCanvasElement) {
     super(canvas, acidusLeftSpriteImage, acidusSpriteRightImage);
 
+    this.maxHp = 350;
+    this.hp = this.maxHp;
     this.dropItems = [
       [ConcentrationPotion, 5],
       [DragonScale, 30],

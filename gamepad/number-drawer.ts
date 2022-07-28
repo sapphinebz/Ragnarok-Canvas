@@ -91,16 +91,16 @@ export function drawDamage(
   monster: Monster,
   config: DrawNumberConfig = { style: "white" }
 ) {
-  const receivedDamages = monster.receivedDamages;
+  const receivedDamages = monster.receivedDamagesDrawFrames;
   drawNumber(monster, receivedDamages, config);
 
-  if (monster.comboDamages.length > 0) {
-    drawNumber(monster, monster.comboDamages, { style: "yellow" });
+  if (monster.comboDamagesDrawFrames.length > 0) {
+    drawNumber(monster, monster.comboDamagesDrawFrames, { style: "yellow" });
   }
 }
 
 export function drawRestoreHp(monster: Monster) {
-  const restoredHp = monster.restoredHp;
+  const restoredHp = monster.restoredHpDrawFrames;
   drawNumber(monster, restoredHp, { style: "green" });
 }
 
@@ -219,15 +219,17 @@ export function animateComboDamage(damage: number, monster: Monster) {
   };
 
   const remove = () => {
-    const index = monster.comboDamages.findIndex((d) => d === drawNumber);
+    const index = monster.comboDamagesDrawFrames.findIndex(
+      (d) => d === drawNumber
+    );
     if (index > -1) {
-      monster.comboDamages.splice(index, 1);
+      monster.comboDamagesDrawFrames.splice(index, 1);
     }
   };
 
   // push data for rendering
   // look at rendering function "drawRestoreHp"
-  monster.comboDamages.push(drawNumber);
+  monster.comboDamagesDrawFrames.push(drawNumber);
   const scale = monster.tween(
     200,
     tap({
@@ -275,7 +277,7 @@ export function animateRestoreHp(restore: number, monster: Monster) {
 
   // push data for rendering
   // look at rendering function "drawRestoreHp"
-  monster.restoredHp.push(drawNumber);
+  monster.restoredHpDrawFrames.push(drawNumber);
 
   return monster.tween(
     1000,
@@ -285,9 +287,11 @@ export function animateRestoreHp(restore: number, monster: Monster) {
         drawNumber.location.y = startY - t * 130;
       },
       complete: () => {
-        const index = monster.restoredHp.findIndex((d) => d === drawNumber);
+        const index = monster.restoredHpDrawFrames.findIndex(
+          (d) => d === drawNumber
+        );
         if (index > -1) {
-          monster.restoredHp.splice(index, 1);
+          monster.restoredHpDrawFrames.splice(index, 1);
         }
       },
     })
@@ -313,7 +317,7 @@ export function animateMissDamage(monster: Monster) {
 
   // push data for rendering
   // look at rendering function "drawDamage"
-  monster.receivedDamages.push(drawNumber);
+  monster.receivedDamagesDrawFrames.push(drawNumber);
 
   return monster.tween(
     1000,
@@ -323,11 +327,11 @@ export function animateMissDamage(monster: Monster) {
         drawNumber.location.y = startY - t * targetY;
       },
       complete: () => {
-        const index = monster.receivedDamages.findIndex(
+        const index = monster.receivedDamagesDrawFrames.findIndex(
           (d) => d === drawNumber
         );
         if (index > -1) {
-          monster.receivedDamages.splice(index, 1);
+          monster.receivedDamagesDrawFrames.splice(index, 1);
         }
       },
     })
@@ -356,7 +360,7 @@ export function animateReceivedDamage(damage: DamageNumber, monster: Monster) {
 
   // push data for rendering
   // look at rendering function "drawDamage"
-  monster.receivedDamages.push(drawNumber);
+  monster.receivedDamagesDrawFrames.push(drawNumber);
 
   return monster.tween(
     800,
@@ -368,11 +372,11 @@ export function animateReceivedDamage(damage: DamageNumber, monster: Monster) {
         drawNumber.location.x = startX + t * dropXDistance;
       },
       complete: () => {
-        const index = monster.receivedDamages.findIndex(
+        const index = monster.receivedDamagesDrawFrames.findIndex(
           (d) => d === drawNumber
         );
         if (index > -1) {
-          monster.receivedDamages.splice(index, 1);
+          monster.receivedDamagesDrawFrames.splice(index, 1);
         }
       },
     })

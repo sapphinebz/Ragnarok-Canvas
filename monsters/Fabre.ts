@@ -20,8 +20,7 @@ export class Fabre extends Monster {
   frameY = 0;
   width = 50;
   height = 40;
-  maxHp = 100;
-  hp = this.maxHp;
+
   atk = 25;
   dps = 800;
 
@@ -113,6 +112,9 @@ export class Fabre extends Monster {
 
   constructor(canvas: HTMLCanvasElement) {
     super(canvas, fabreSpriteLeftImage, fabreSpriteRightImage);
+
+    this.maxHp = 100;
+    this.hp = this.maxHp;
 
     this.dropItems = [
       [GreenHerb, 10],

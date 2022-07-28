@@ -18,8 +18,6 @@ import { CropImage, Monster } from "./Monster";
 export class Poring extends Monster {
   x = 100;
   y = 100;
-  maxHp = 80;
-  hp = this.maxHp;
   atk = 35;
   speedX = 60;
   speedY = 60;
@@ -250,6 +248,9 @@ export class Poring extends Monster {
 
   constructor(canvas: HTMLCanvasElement) {
     super(canvas, poringSpriteLeftImage, poringSpriteRightImage);
+
+    this.maxHp = 80;
+    this.hp = this.maxHp;
 
     this.dropItems = [
       [WhitePotion, 1],
