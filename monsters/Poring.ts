@@ -280,14 +280,11 @@ export class Poring extends Monster {
     return defer(() => {
       this.frameY = 3;
 
-      return this.forwardFrameX(100, 0, 5).pipe(
+      return this.forwardFrameX(100, 0, 5, { once: true }).pipe(
         tap((frameX) => {
           if (frameX === 2) {
             this.dyingAudio.play();
           }
-        }),
-        takeWhile((frameX) => {
-          return frameX + 1 <= 5;
         })
       );
     });

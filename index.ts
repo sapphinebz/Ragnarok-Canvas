@@ -50,6 +50,7 @@ import { audioIsOpenImage } from "./sprites/audio-is-open-image";
 import { canvasHover, onClickCanvasArea, zIndexMonsters } from "./utils/canvas";
 import { rectanglesIntersect } from "./utils/collision";
 import { randomMinMax } from "./utils/random-minmax";
+import { Poporing } from "./monsters/Poporing";
 
 const canvas = document.querySelector<HTMLCanvasElement>("canvas")!;
 const ctx = canvas.getContext("2d")!;
@@ -68,13 +69,14 @@ const onWindowResize$ = fromEvent(window, "resize").pipe(
 // number monster in field & class
 const monstersClass: [any, number][] = [
   [Acidus, 0],
-  [Poring, 14],
+  [Poring, 10],
   [SantaPoring, 0],
   [Angeling, 1],
+  [Poporing, 4],
   [Fabre, 7],
   [Baphomet, 1],
   [ChonChon, 7],
-  [Pecopeco, 7],
+  [Pecopeco, 4],
 ];
 
 const fieldItems: FieldItem[] = [];
