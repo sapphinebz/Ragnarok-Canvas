@@ -27,7 +27,6 @@ export abstract class CastingSkill extends Skill {
       .subscribe({
         next: (elapse) => {
           monster.drawCastingSpell(spellName, elapse);
-          monster.onActionTick$.next();
         },
         complete: () => {
           onCompleteCast();
