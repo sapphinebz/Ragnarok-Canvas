@@ -160,6 +160,7 @@ export abstract class Monster {
   attackSpeed = 80;
 
   statusEffect: string[] = [];
+  summonBy?: Monster;
 
   get delayAnimationAttack() {
     const delay = 200 - this.attackSpeed;
@@ -177,6 +178,7 @@ export abstract class Monster {
   onDamageArea$ = new Subject<DamageArea>();
   onReceiveDamage$ = new Subject<DamageNumber>();
   onComboDamage$ = new Subject<number[]>();
+  onTargetWithInAttackRange$ = new Subject<Monster>();
   onRestoreHp$ = new Subject<number>();
   onMoving$ = new Subject<MoveLocation>();
   /**
@@ -379,6 +381,7 @@ export abstract class Monster {
                     distinctUntilChanged(),
                     switchMap((targetWithInAttackRange) => {
                       if (targetWithInAttackRange) {
+                        this.onTargetWithInAttackRange$.next(target);
                         return timer(this.dps).pipe(
                           tap(() => {
                             if (this.aggressiveTarget !== null) {
@@ -1004,15 +1007,6 @@ export abstract class Monster {
     }
   }
 
-  aggressiveMonsters(): MonoTypeOperatorFunction<Monster[]> {
-    return tap((monsters) => {
-      for (const monster of monsters) {
-        monster.aggressiveTarget = this;
-        monster.actionChange$.next(ACTION.MOVE_TO_TARGET);
-      }
-    });
-  }
-
   aggressiveWith(monster: Monster) {
     monster.aggressiveTarget = this;
     monster.actionChange$.next(ACTION.MOVE_TO_TARGET);
@@ -1166,6 +1160,9 @@ export abstract class Monster {
     this.skills$.next(skills);
   }
 
+  /**
+   * for Skill Behavior
+   */
   whenHpBelow(
     value: number,
     doEffect: OperatorFunction<any, any>,
@@ -1185,6 +1182,9 @@ export abstract class Monster {
     );
   }
 
+  /**
+   * for Skill Behavior
+   */
   canUseAgainAfter(duration: number): OperatorFunction<any, any> {
     return repeat({ delay: () => timer(duration) });
   }
@@ -1246,8 +1246,8 @@ export abstract class Monster {
   public drawCastingSpell(spellName: string, rate: number) {
     this.drawSpellName(spellName);
 
-    this.drawCastASpellGauge(this.width, STROKE_GAUGE_COLOR);
-    this.drawCastASpellGauge(this.width * rate, GOOD_HEALTH_GAUGE_COLOR);
+    this.drawCastingSpellGauge(this.width, STROKE_GAUGE_COLOR);
+    this.drawCastingSpellGauge(this.width * rate, GOOD_HEALTH_GAUGE_COLOR);
   }
 
   private drawSpellName(spellName: string) {
@@ -1262,7 +1262,7 @@ export abstract class Monster {
     this.ctx.fillText(`${spellName} !!`, this.x + this.width / 2, this.y - 13);
   }
 
-  private drawCastASpellGauge(value: number, color: string) {
+  private drawCastingSpellGauge(value: number, color: string) {
     const yPosition = this.y - 7;
     const gaugeHeight = 6;
     this.ctx.beginPath();

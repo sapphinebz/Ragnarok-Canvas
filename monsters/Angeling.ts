@@ -1,14 +1,18 @@
-import { takeUntil, tap } from "rxjs";
+import { combineLatest, filter, take, takeUntil, tap } from "rxjs";
 import { Apple } from "../items/Apple";
 import { ConcentrationPotion } from "../items/ConcentrationPotion";
 import { WhiteHerb } from "../items/WhiteHerb";
 import { WhitePotion } from "../items/WhitePotion";
+import { ComeOn } from "../skills/ComeOn";
 import { Heal } from "../skills/Heal";
 import { HealAll } from "../skills/HealAll";
 import { poringSpriteLeftImage } from "../sprites/load-poring-left";
 import { poringSpriteRightImage } from "../sprites/load-poring-right";
-import { CropImage, DIRECTION } from "./Monster";
+import { randomMinMax } from "../utils/random-minmax";
+import { CropImage, DIRECTION, Monster } from "./Monster";
+import { Poporing } from "./Poporing";
 import { Poring } from "./Poring";
+import { SantaPoring } from "./SantaPoring";
 
 export class Angeling extends Poring {
   atk = 120;
@@ -98,8 +102,24 @@ export class Angeling extends Poring {
     return this.canvas.getContext("2d")!;
   }
 
-  healAll = new HealAll(15);
-  heal = new Heal(15);
+  healAllSkill = new HealAll(15);
+  healSkill = new Heal(15);
+  comeonMyPoringSkill = new ComeOn({
+    level: 1,
+    summonMonsters: () => {
+      let i = 1;
+      const amountMonster = 6;
+      const summonMonsters: Monster[] = [];
+      const monsters = [Poring, Poporing, SantaPoring];
+      while (i <= amountMonster) {
+        const randomMonsterClassIndex = randomMinMax(0, monsters.length - 1);
+        const MonsterClass = monsters[randomMonsterClassIndex];
+        summonMonsters.push(new MonsterClass(this.canvas));
+        i++;
+      }
+      return summonMonsters;
+    },
+  });
 
   constructor(canvas: HTMLCanvasElement) {
     super(canvas);
@@ -118,7 +138,7 @@ export class Angeling extends Poring {
     this.whenHpBelow(
       this.maxHp * 0.5,
       tap(() => {
-        this.healAll.useWith(this, this);
+        this.healAllSkill.useWith(this, this);
       }),
       this.canUseAgainAfter(20000)
     ).subscribe();
@@ -126,10 +146,22 @@ export class Angeling extends Poring {
     this.whenHpBelow(
       this.maxHp * 0.3,
       tap(() => {
-        this.heal.useWith(this, this);
+        this.healSkill.useWith(this, this);
       }),
       this.canUseAgainAfter(60000)
     ).subscribe();
+
+    const whenAggressive$ = this.aggressiveTarget$.pipe(
+      filter((target) => target !== null)
+    );
+
+    const hpBelow90$ = this.hp$.pipe(filter((hp) => hp < this.maxHp * 0.9));
+
+    combineLatest([whenAggressive$, hpBelow90$])
+      .pipe(take(1), this.canUseAgainAfter(15000), takeUntil(this.onDied$))
+      .subscribe(() => {
+        this.comeonMyPoringSkill.useWith(this);
+      });
 
     this.flipWingFrame$
       .pipe(takeUntil(this.onDied$), takeUntil(this.onCleanup$))

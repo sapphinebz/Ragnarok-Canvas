@@ -17,3 +17,9 @@ export function randomEnd<T>(
 ): MonoTypeOperatorFunction<T> {
   return takeUntil(randomTimer(min, max));
 }
+
+export function randomLocationAroundTarget(target: Monster, monster: Monster) {
+  const distance = monster.attackRange;
+  monster.x = randomMinMax(target.x - distance, target.x + distance);
+  monster.y = Math.sqrt(distance ** 2 - (monster.x - target.x) ** 2) + target.y;
+}

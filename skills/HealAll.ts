@@ -1,4 +1,4 @@
-import { monstersOnField } from "..";
+import * as Field from "..";
 import { Monster } from "../monsters/Monster";
 import { loadHealAudio } from "../sounds/heal-effect";
 import { distanceBetween } from "../utils/collision";
@@ -24,7 +24,7 @@ export class HealAll extends CastingSkill {
     /** formula Heal */
     this.casting("Heal all", user, () => {
       this.useAudio.play();
-      for (const monster of monstersOnField) {
+      for (const monster of Field.monstersOnField) {
         const distance = distanceBetween(user, monster);
         if (distance <= 150) {
           monster.restoreHp(toMonster.maxHp * 0.05 * this.level);

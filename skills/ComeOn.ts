@@ -1,19 +1,49 @@
+import { from, mergeMap, takeUntil } from "rxjs";
+import { tap } from "rxjs/operators";
 import { Monster } from "../monsters/Monster";
 import { CastingSkill } from "./CastingSkill";
+import * as Field from "..";
+import { randomLocationAroundTarget } from "../utils/random-minmax";
 
-/**
- * เสกลูกน้องแหละ รอแปปกำลังทำ
- */
 export class ComeOn extends CastingSkill {
-  constructor(public level: number) {
+  constructor(
+    public config: {
+      level: number;
+      summonMonsters: () => Monster[];
+    }
+  ) {
     super();
-    this.castingTime = 1000;
+    this.castingTime = 500;
   }
-  useWith(monster: Monster, toMonster: Monster) {
-    /** formula Heal */
-    // this.casting(monster, () => {
-    //   this.useAudio.play();
-    //   toMonster.restoreHp(toMonster.maxHp * 0.05 * this.level);
-    // });
+  useWith(user: Monster) {
+    this.casting("รุมโว้ย", user, () => {
+      const summonMonsters = this.config.summonMonsters();
+
+      from(summonMonsters)
+        .pipe(
+          mergeMap((summonMonster) => {
+            if (user.aggressiveTarget) {
+              randomLocationAroundTarget(user.aggressiveTarget, summonMonster);
+            } else {
+              randomLocationAroundTarget(user, summonMonster);
+            }
+            Field.summonMonster(summonMonster);
+            summonMonster.summonBy = user;
+
+            if (user.aggressiveTarget) {
+              const player = user.aggressiveTarget;
+              player.aggressiveWith(summonMonster);
+              summonMonster.faceTo(player);
+            }
+            return user.onDied$.pipe(
+              tap(() => {
+                user.die();
+              })
+            );
+          }),
+          takeUntil(user.onCleanup$)
+        )
+        .subscribe();
+    });
   }
 }

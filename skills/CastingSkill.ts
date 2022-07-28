@@ -6,9 +6,9 @@ import { Skill } from "./Skill";
 
 export abstract class CastingSkill extends Skill {
   castingTime = 0;
-  castingAudio = loadCastingSpellAudio();
-  castingSubscription?: Subscription;
   passive = false;
+  private castingSubscription?: Subscription;
+  private castingAudio = loadCastingSpellAudio();
   constructor() {
     super();
 
@@ -26,6 +26,7 @@ export abstract class CastingSkill extends Skill {
       .pipe(takeUntil(monster.onDied$))
       .subscribe({
         next: (elapse) => {
+          monster.onActionTick$.next();
           monster.drawCastingSpell(spellName, elapse);
         },
         complete: () => {

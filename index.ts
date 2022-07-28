@@ -5,6 +5,7 @@ import {
   AsyncSubject,
   BehaviorSubject,
   combineLatest,
+  EMPTY,
   from,
   fromEvent,
   ignoreElements,
@@ -72,7 +73,7 @@ const monstersClass: [any, number][] = [
   [Poring, 10],
   [SantaPoring, 0],
   [Angeling, 1],
-  [Poporing, 4],
+  [Poporing, 0],
   [Fabre, 7],
   [Baphomet, 1],
   [ChonChon, 7],
@@ -128,6 +129,16 @@ const checkPlayerCollideItem = (
 };
 
 const onRespawnMonster$ = new Subject<Monster>();
+const respawnMonster = (monster: Monster) => {
+  monstersOnField.push(monster);
+  onRespawnMonster$.next(monster);
+};
+
+const onSummonMonster$ = new Subject<Monster>();
+export const summonMonster = (monster: Monster) => {
+  monstersOnField.push(monster);
+  onSummonMonster$.next(monster);
+};
 
 const getMonsterClass = (monster: Monster) => {
   const fentry = monstersClass.find(
@@ -147,34 +158,35 @@ const generateMonsters = () =>
   }, [] as Monster[]);
 
 const corpseDisappearAfterAnimationEnd = <T>(
-  monster: Monster
+  monster: Monster,
+  duration: number
 ): OperatorFunction<T, any> => {
   return (source: Observable<T>) =>
     new Observable<any>((subscriber) => {
-      const unsubscribe$ = new ReplaySubject<void>(1);
-      source.pipe(takeUntil(unsubscribe$)).subscribe({
+      let timeoutIndex: any;
+      const subscription = source.subscribe({
         error: (err) => {
           subscriber.error(err);
         },
         complete: () => {
-          timer(5000)
-            .pipe(takeUntil(unsubscribe$))
-            .subscribe(() => {
-              const index = monstersOnField.findIndex((p) => p === monster);
-              if (index > -1) {
-                monster.cleanup();
-                monstersOnField.splice(index, 1);
-                tick();
-              }
-              subscriber.next(monstersOnField);
-              subscriber.complete();
-            });
+          timeoutIndex = setTimeout(() => {
+            const index = monstersOnField.findIndex((p) => p === monster);
+            if (index > -1) {
+              monster.cleanup();
+              monstersOnField.splice(index, 1);
+              tick();
+            }
+            subscriber.next(monstersOnField);
+            subscriber.complete();
+          }, duration);
         },
       });
       return {
         unsubscribe: () => {
-          unsubscribe$.next();
-          unsubscribe$.complete();
+          if (timeoutIndex) {
+            clearTimeout(timeoutIndex);
+          }
+          subscription.unsubscribe();
         },
       };
     });
@@ -186,23 +198,26 @@ const respawnMonsterRandomTime = (
   max: number
 ) => {
   return switchMap(() => {
+    if (monster.summonBy !== undefined) {
+      return EMPTY;
+    }
     const respawnTime = randomMinMax(min, max);
     return timer(respawnTime).pipe(
       tap(() => {
         const Class = getMonsterClass(monster);
         if (Class) {
-          onRespawnMonster$.next(new Class(canvas));
+          respawnMonster(new Class(canvas));
         }
       })
     );
   });
 };
 
-const showAnimationDieAndRespawn = (monster: Monster) => {
+const corpseDisappearAndRespawn = (monster: Monster) => {
   return monster.onDied$.pipe(
     connect((dieAnimation$) => {
       const onRemoveMonsterFromField$ = dieAnimation$.pipe(
-        corpseDisappearAfterAnimationEnd(monster)
+        corpseDisappearAfterAnimationEnd(monster, 5000)
       );
       const respawnMonster$ = onRemoveMonsterFromField$.pipe(
         respawnMonsterRandomTime(
@@ -225,7 +240,7 @@ onMonsterDied$
   .pipe(
     mergeMap((monster) => {
       killCount$.next(killCount$.value + 1);
-      return showAnimationDieAndRespawn(monster);
+      return corpseDisappearAndRespawn(monster);
     })
   )
   .subscribe();
@@ -420,14 +435,9 @@ onCanvasRender$.subscribe(() => {
 
 killCount$.subscribe(() => tick());
 
-const onLoadMonster$ = merge(
-  onRespawnMonster$.pipe(
-    tap((monster) => {
-      monstersOnField.push(monster);
-    })
-  ),
-  from(monstersOnField)
-).pipe(shareReplay());
+const onLoadMonster$ = merge(onRespawnMonster$, from(monstersOnField)).pipe(
+  shareReplay()
+);
 
 onCanvasMount$.subscribe(() => {
   keyboardController.start();
@@ -438,7 +448,7 @@ onCanvasMount$.pipe(switchMap(() => onLoadMonster$)).subscribe((monster) => {
 });
 
 // DropItem to Field
-const onMonsterDropedItems$ = onLoadMonster$.pipe(
+const onMonsterDropedItems$ = merge(onLoadMonster$, onSummonMonster$).pipe(
   mergeMap((monster) =>
     monster.onDied$.pipe(
       switchMap(() => {
