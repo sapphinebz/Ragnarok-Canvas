@@ -17,7 +17,7 @@ export class Heal extends CastingSkill {
   }
   useWith(monster: Monster, toMonster: Monster) {
     /** formula Heal */
-    this.casting(monster, () => {
+    this.casting("Heal", monster, () => {
       this.useAudio.play();
       toMonster.restoreHp(toMonster.maxHp * 0.05 * this.level);
     });

@@ -15,7 +15,7 @@ export abstract class CastingSkill extends Skill {
     this.castingAudio.volume = 0.05;
   }
 
-  casting(monster: Monster, onCompleteCast: () => void) {
+  casting(spellName: string, monster: Monster, onCompleteCast: () => void) {
     if (this.castingSubscription) {
       this.castingSubscription.unsubscribe();
     }
@@ -26,7 +26,7 @@ export abstract class CastingSkill extends Skill {
       .pipe(takeUntil(monster.onDied$))
       .subscribe({
         next: (elapse) => {
-          monster.drawCastingSpell("Heal", elapse);
+          monster.drawCastingSpell(spellName, elapse);
           monster.onActionTick$.next();
         },
         complete: () => {

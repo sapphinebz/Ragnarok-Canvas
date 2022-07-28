@@ -4,6 +4,7 @@ import { ConcentrationPotion } from "../items/ConcentrationPotion";
 import { WhiteHerb } from "../items/WhiteHerb";
 import { WhitePotion } from "../items/WhitePotion";
 import { Heal } from "../skills/Heal";
+import { HealAll } from "../skills/HealAll";
 import { poringSpriteLeftImage } from "../sprites/load-poring-left";
 import { poringSpriteRightImage } from "../sprites/load-poring-right";
 import { CropImage, DIRECTION } from "./Monster";
@@ -97,7 +98,8 @@ export class Angeling extends Poring {
     return this.canvas.getContext("2d")!;
   }
 
-  heal1 = new Heal(10);
+  healAll = new HealAll(15);
+  heal = new Heal(15);
 
   constructor(canvas: HTMLCanvasElement) {
     super(canvas);
@@ -116,8 +118,17 @@ export class Angeling extends Poring {
     this.whenHpBelow(
       this.maxHp * 0.5,
       tap(() => {
-        this.heal1.useWith(this, this);
-      })
+        this.healAll.useWith(this, this);
+      }),
+      this.canUseAgainAfter(20000)
+    ).subscribe();
+
+    this.whenHpBelow(
+      this.maxHp * 0.3,
+      tap(() => {
+        this.heal.useWith(this, this);
+      }),
+      this.canUseAgainAfter(60000)
     ).subscribe();
 
     this.flipWingFrame$

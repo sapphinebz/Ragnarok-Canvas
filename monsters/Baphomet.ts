@@ -1,9 +1,9 @@
 import { defer, merge, Observable, tap } from "rxjs";
-import { share, take, takeUntil } from "rxjs/operators";
 import { EvilHorn } from "../items/EvilHorn";
 import { WhiteHerb } from "../items/WhiteHerb";
 import { YggdrasilBerry } from "../items/YggdrasilBerry";
 import { Heal } from "../skills/Heal";
+import { HealAll } from "../skills/HealAll";
 import { AudioSubject } from "../sounds/audio-subject";
 import { loadBaphometAttackAudio } from "../sounds/baphomet-attack";
 import { loadBaphometBreath } from "../sounds/baphomet-breath";
@@ -364,7 +364,7 @@ export class Baphomet extends Monster {
 
   weaponSprite = { offsetX: 772, offsetY: 822, width: 74, height: 99 };
 
-  healLevel15 = new Heal(15);
+  healLevel15 = new HealAll(15);
   healLevel20 = new Heal(20);
 
   constructor(public canvas: HTMLCanvasElement) {
@@ -382,17 +382,19 @@ export class Baphomet extends Monster {
     this.breathAudio.volume = 0.08;
 
     this.whenHpBelow(
-      this.maxHp * 0.5,
+      this.maxHp * 0.7,
       tap(() => {
         this.healLevel15.useWith(this, this);
-      })
+      }),
+      this.canUseAgainAfter(60000)
     ).subscribe();
 
     this.whenHpBelow(
       this.maxHp * 0.25,
       tap(() => {
         this.healLevel20.useWith(this, this);
-      })
+      }),
+      this.canUseAgainAfter(60000)
     ).subscribe();
   }
 

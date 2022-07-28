@@ -160,13 +160,13 @@ const corpseDisappearAfterAnimationEnd = <T>(
           timer(5000)
             .pipe(takeUntil(unsubscribe$))
             .subscribe(() => {
-              const index = monsters.findIndex((p) => p === monster);
+              const index = monstersOnField.findIndex((p) => p === monster);
               if (index > -1) {
                 monster.cleanup();
-                monsters.splice(index, 1);
+                monstersOnField.splice(index, 1);
                 tick();
               }
-              subscriber.next(monsters);
+              subscriber.next(monstersOnField);
               subscriber.complete();
             });
         },
@@ -240,7 +240,7 @@ const onMonstersBeAttacked = (option: {
       option.onPreviousDamagedMonsters(latestDamagedMonster);
     }
     latestDamagedMonster = [];
-    for (const monster of monsters) {
+    for (const monster of monstersOnField) {
       if (!monster.isDied) {
         const monsterIsBeAttacked = rectanglesIntersect(area, {
           x: monster.x,
@@ -258,7 +258,7 @@ const onMonstersBeAttacked = (option: {
   });
 };
 
-const monsters = generateMonsters();
+export const monstersOnField = generateMonsters();
 
 /**
  * PLAYER
@@ -399,12 +399,12 @@ onCanvasRender$.subscribe(() => {
     );
   }
 
-  for (const monster of zIndexMonsters([...monsters, thief])) {
+  for (const monster of zIndexMonsters([...monstersOnField, thief])) {
     monster.drawImage();
-    if (monster === thief) {
-      drawDamage(monster, { style: "red" });
-    } else {
+    if (monster !== thief) {
       drawDamage(monster);
+    } else {
+      drawDamage(monster, { style: "red" });
     }
     drawRestoreHp(monster);
   }
@@ -423,10 +423,10 @@ killCount$.subscribe(() => tick());
 const onLoadMonster$ = merge(
   onRespawnMonster$.pipe(
     tap((monster) => {
-      monsters.push(monster);
+      monstersOnField.push(monster);
     })
   ),
-  from(monsters)
+  from(monstersOnField)
 ).pipe(shareReplay());
 
 onCanvasMount$.subscribe(() => {

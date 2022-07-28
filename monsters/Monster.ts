@@ -1166,13 +1166,27 @@ export abstract class Monster {
     this.skills$.next(skills);
   }
 
-  whenHpBelow(value: number, doEffect: OperatorFunction<any, any>) {
+  whenHpBelow(
+    value: number,
+    doEffect: OperatorFunction<any, any>,
+    cooldownCondition?: OperatorFunction<any, any>
+  ) {
     return this.hp$.pipe(
       filter((hp) => hp < value),
       take(1),
       doEffect,
+      (observable) => {
+        if (cooldownCondition) {
+          return observable.pipe(cooldownCondition);
+        }
+        return observable;
+      },
       takeUntil(this.onDied$)
     );
+  }
+
+  canUseAgainAfter(duration: number): OperatorFunction<any, any> {
+    return repeat({ delay: () => timer(duration) });
   }
 
   render() {
