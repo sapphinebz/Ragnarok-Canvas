@@ -25,6 +25,11 @@ export class Fabre extends Monster {
   atk = 25;
   dps = 800;
 
+  behaviorActions = this.walkingsAnyDirection(3000, 4000).concat([
+    this.standingDuration(3000, 4000),
+    this.standingDuration(2000, 4000),
+  ]);
+
   dyingAudio = new AudioSubject(this, loadFabreDieAudio());
   attackAudio = new AudioSubject(this, loadFabreAttackAudio());
   damagedAudio = new AudioSubject(this, loadFabreDamagedAudio());

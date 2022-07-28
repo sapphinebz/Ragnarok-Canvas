@@ -49,7 +49,7 @@ import { loadCriticalAttack } from "../sounds/critical-attack";
 import { deltaTime } from "../utils/animation";
 import { distanceBetween } from "../utils/collision";
 import { playAudio } from "../utils/play-audio";
-import { randomMinMax } from "../utils/random-minmax";
+import { randomEnd, randomMinMax } from "../utils/random-minmax";
 import { repeatUntil } from "../utils/repeat-util";
 import { shuffle } from "../utils/shuffle";
 
@@ -230,6 +230,8 @@ export abstract class Monster {
   criticalAttackSound = loadCriticalAttack();
   onPlayCriticalAttack$ = new Subject<void>();
   skills$ = new BehaviorSubject<Skill[]>([]);
+
+  behaviorActions: Observable<any>[] = [];
 
   receivedDamages: DrawNumber[] = [];
   comboDamages: DrawNumber[] = [];
@@ -421,27 +423,7 @@ export abstract class Monster {
           );
         } else if (action === ACTION.RANDOM) {
           return defer(() => {
-            const randomTime = () => Math.random() * 3000 + 1000;
-            const randomEndAction = () => takeUntil(timer(randomTime()));
-            const actions = [
-              this.walkingLeft().pipe(randomEndAction()),
-              this.standing().pipe(
-                this.emitStandingAggressive(),
-                randomEndAction()
-              ),
-              this.walkingRight().pipe(randomEndAction()),
-              this.standing().pipe(
-                this.emitStandingAggressive(),
-                randomEndAction()
-              ),
-              this.walkingUp().pipe(randomEndAction()),
-              this.walkingDown().pipe(randomEndAction()),
-              this.walkingTopLeft().pipe(randomEndAction()),
-              this.walkingTopRight().pipe(randomEndAction()),
-              this.walkingBottomLeft().pipe(randomEndAction()),
-              this.walkingBottomRight().pipe(randomEndAction()),
-            ];
-            return from(shuffle(actions)).pipe(concatAll());
+            return from(shuffle(this.behaviorActions)).pipe(concatAll());
           }).pipe(repeat());
         } else if (action === ACTION.HURT) {
           return this.hurting().pipe(
@@ -811,6 +793,39 @@ export abstract class Monster {
         })
       );
     });
+  }
+
+  /**
+   * behaviors walking
+   * and random duration time
+   * @param min min behavior duration
+   * @param max max behavior duration
+   * @returns any direction animation walking
+   */
+  walkingsAnyDirection(min: number, max: number) {
+    return [
+      this.walkingRight().pipe(randomEnd(min, max)),
+      this.walkingLeft().pipe(randomEnd(min, max)),
+      this.walkingUp().pipe(randomEnd(min, max)),
+      this.walkingDown().pipe(randomEnd(min, max)),
+      this.walkingTopLeft().pipe(randomEnd(min, max)),
+      this.walkingTopRight().pipe(randomEnd(min, max)),
+      this.walkingBottomLeft().pipe(randomEnd(min, max)),
+      this.walkingBottomRight().pipe(randomEnd(min, max)),
+    ];
+  }
+  /**
+   * behaviors standing
+   * and random duration time
+   * @param min min behavior duration
+   * @param max max behavior duration
+   * @returns animation standing
+   */
+  standingDuration(min: number, max: number) {
+    return this.standing().pipe(
+      this.emitStandingAggressive(),
+      randomEnd(min, max)
+    );
   }
 
   walkingDown(config: WalkingStoppable = { stopIfOutOfCanvas: true }) {

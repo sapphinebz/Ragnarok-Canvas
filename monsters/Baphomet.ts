@@ -33,6 +33,14 @@ export class Baphomet extends Monster {
   isAggressiveOnVision = true;
   dps = 300;
 
+  behaviorActions = this.walkingsAnyDirection(1000, 2000).concat([
+    this.standingDuration(3000, 6000),
+    this.standingDuration(3000, 6000),
+    this.standingDuration(3000, 6000),
+    this.standingDuration(3000, 6000),
+    this.standingDuration(3000, 6000),
+  ]);
+
   attackAudio = new AudioSubject(this, loadBaphometAttackAudio());
   breathAudio = new AudioSubject(this, loadBaphometBreath());
   damagedAudio = new AudioSubject(this, loadBaphometDamagedAudio());

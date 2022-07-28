@@ -33,6 +33,11 @@ export class ChonChon extends Monster {
   isAggressiveOnVision = false;
   dps = 300;
 
+  behaviorActions = this.walkingsAnyDirection(5000, 6000).concat([
+    this.standingDuration(1000, 6000),
+    this.standingDuration(1000, 6000),
+  ]);
+
   frames: CropImage[][] = [
     // standing
     [{ order: 0, offsetX: 12, offsetY: 10, width: 19, height: 26 }],
