@@ -1,7 +1,9 @@
-import { defer, merge, Observable, tap } from "rxjs";
+import { combineLatest, defer, merge, Observable, tap } from "rxjs";
+import { filter, takeUntil, take } from "rxjs/operators";
 import { EvilHorn } from "../items/EvilHorn";
 import { WhiteHerb } from "../items/WhiteHerb";
 import { YggdrasilBerry } from "../items/YggdrasilBerry";
+import { ComeOn } from "../skills/ComeOn";
 import { Heal } from "../skills/Heal";
 import { HealAll } from "../skills/HealAll";
 import { AudioSubject } from "../sounds/audio-subject";
@@ -11,6 +13,7 @@ import { loadBaphometDamagedAudio } from "../sounds/baphomet-damaged";
 import { loadBaphometDeadAudio } from "../sounds/baphomet-dead";
 import { baphometSpriteLeft } from "../sprites/baphomet-sprite-left";
 import { baphometSpriteRight } from "../sprites/baphomet-sprite-right";
+import { BaphometJr } from "./BaphometJr";
 import { CropImage, DIRECTION, Monster } from "./Monster";
 
 export class Baphomet extends Monster {
@@ -366,6 +369,20 @@ export class Baphomet extends Monster {
 
   healLevel15 = new HealAll(15);
   healLevel20 = new Heal(20);
+  comeOnBaphometJrSkill = new ComeOn({
+    level: 1,
+    summonMonsters: () => {
+      let i = 1;
+      const amountMonster = 6;
+      const summonMonsters: Monster[] = [];
+
+      while (i <= amountMonster) {
+        summonMonsters.push(new BaphometJr(this.canvas));
+        i++;
+      }
+      return summonMonsters;
+    },
+  });
 
   constructor(public canvas: HTMLCanvasElement) {
     super(canvas, baphometSpriteLeft, baphometSpriteRight);
@@ -396,6 +413,18 @@ export class Baphomet extends Monster {
       }),
       this.canUseAgainAfter(60000)
     ).subscribe();
+
+    const whenAggressive$ = this.aggressiveTarget$.pipe(
+      filter((target) => target !== null)
+    );
+
+    const hpBelow90$ = this.hp$.pipe(filter((hp) => hp < this.maxHp * 0.9));
+
+    combineLatest([whenAggressive$, hpBelow90$])
+      .pipe(take(1), this.canUseAgainAfter(15000), takeUntil(this.onDied$))
+      .subscribe(() => {
+        this.comeOnBaphometJrSkill.useWith(this);
+      });
   }
 
   getFrameEntry(frameY: number, frameX: number) {
