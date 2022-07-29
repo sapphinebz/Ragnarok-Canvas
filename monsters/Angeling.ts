@@ -151,17 +151,13 @@ export class Angeling extends Poring {
       this.canUseAgainAfter(60000)
     ).subscribe();
 
-    const whenAggressive$ = this.aggressiveTarget$.pipe(
-      filter((target) => target !== null)
-    );
-
-    const hpBelow90$ = this.hp$.pipe(filter((hp) => hp < this.maxHp * 0.9));
-
-    combineLatest([whenAggressive$, hpBelow90$])
-      .pipe(take(1), this.canUseAgainAfter(15000), takeUntil(this.onDied$))
-      .subscribe(() => {
+    this.whenAggressiveAndHp(
+      (hp) => hp <= this.maxHp * 0.9,
+      tap(() => {
         this.comeonMyPoringSkill.useWith(this);
-      });
+      }),
+      this.comeonMyPoringSkill.allSummonDiedCanUseAfter(15000)
+    );
 
     this.flipWingFrame$
       .pipe(takeUntil(this.onDied$), takeUntil(this.onCleanup$))
