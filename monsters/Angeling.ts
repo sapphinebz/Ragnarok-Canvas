@@ -27,6 +27,7 @@ export class Angeling extends Poring {
   trackRange = 500;
   dps = 400;
 
+  isStealer = false;
   haloFrame = 0;
   haloY = -5;
   // Halo as direction

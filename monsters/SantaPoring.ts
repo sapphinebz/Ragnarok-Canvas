@@ -10,6 +10,7 @@ import { Poring } from "./Poring";
 
 export class SantaPoring extends Poring {
   isAggressiveOnVision = false;
+  isStealer = true;
 
   get ctx() {
     return this.canvas.getContext("2d")!;

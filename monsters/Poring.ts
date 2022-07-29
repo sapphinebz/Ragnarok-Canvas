@@ -1,5 +1,5 @@
 import { defer, Observable } from "rxjs";
-import { takeWhile, tap } from "rxjs/operators";
+import { tap } from "rxjs/operators";
 import { Apple } from "../items/Apple";
 import { EmptyBottle } from "../items/EmptyBottle";
 import { Jellopy } from "../items/Jellopy";
@@ -34,6 +34,7 @@ export class Poring extends Monster {
   walkSpeed = 50;
   respawnTimeMin = 5000;
   respawnTimeMax = 10000;
+  isStealer = true;
 
   attackAudio = new AudioSubject(this, loadPoringAttackAudio());
   dyingAudio = new AudioSubject(this, loadPoringDeadSound());
@@ -262,6 +263,10 @@ export class Poring extends Monster {
       [Apple, 10],
       [EmptyBottle, 10],
     ];
+
+    if (this.isStealer) {
+      this.autoStealItemOnField();
+    }
 
     this.walkingAudio.volume = 0.02;
   }

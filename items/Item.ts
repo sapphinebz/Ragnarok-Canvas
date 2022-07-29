@@ -1,6 +1,8 @@
+import { AsyncSubject } from "rxjs";
 import { Monster, MoveLocation } from "../monsters/Monster";
 
 export interface FieldItem {
+  class: any;
   item: Item;
   location: MoveLocation;
 }
@@ -9,6 +11,8 @@ export type DropItems = [any, number][];
 
 export abstract class Item {
   usable = false;
+
+  onCleanUp$ = new AsyncSubject<void>();
 
   get width() {
     return this.image.width;
@@ -21,6 +25,7 @@ export abstract class Item {
   get ctx() {
     return this.canvas.getContext("2d");
   }
+
   constructor(
     public canvas: HTMLCanvasElement,
     public image: HTMLImageElement
@@ -50,5 +55,10 @@ export abstract class Item {
         }
       }, timeout);
     }
+  }
+
+  cleanup() {
+    this.onCleanUp$.next();
+    this.onCleanUp$.complete();
   }
 }

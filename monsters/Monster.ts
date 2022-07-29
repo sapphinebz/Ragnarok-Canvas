@@ -38,6 +38,8 @@ import {
   takeUntil,
   share,
   takeWhile,
+  exhaustMap,
+  first,
 } from "rxjs/operators";
 import {
   animateComboDamage,
@@ -45,7 +47,7 @@ import {
   animateReceivedDamage,
   animateRestoreHp,
 } from "../gamepad/number-drawer";
-import { DropItems } from "../items/Item";
+import { DropItems, FieldItem } from "../items/Item";
 import { Skill, Skills } from "../skills/Skill";
 import { loadCriticalAttack } from "../sounds/critical-attack";
 import { deltaTime } from "../utils/animation";
@@ -60,10 +62,16 @@ import { playAudio } from "../utils/play-audio";
 import { randomEnd, randomMinMax } from "../utils/random-minmax";
 import { repeatUntil } from "../utils/repeat-util";
 import { shuffle } from "../utils/shuffle";
+import * as Field from "..";
 
 export interface MoveLocation {
   x: number;
   y: number;
+}
+
+export interface TargetLocation extends MoveLocation {
+  width: number;
+  height: number;
 }
 
 export interface WalkingConfig {
@@ -79,6 +87,7 @@ export const enum ACTION {
   RANDOM,
   HURT,
   MOVE_TO_TARGET,
+  MOVE_TO_STEAL_ITEM,
   ATTACK,
   STANDING,
   WALKING_LEFT,
@@ -190,6 +199,12 @@ export abstract class Monster {
    */
   aggressiveTarget$ = new BehaviorSubject<Monster | null>(null);
 
+  targetItem?: FieldItem;
+  /**
+   * Class Item stolen
+   */
+  stolenItems: any[] = [];
+
   /**
    * vision when monster see player and charge with aggressive
    */
@@ -214,7 +229,9 @@ export abstract class Monster {
     return this.aggressiveTarget$.value;
   }
   set aggressiveTarget(value: Monster | null) {
-    this.aggressiveTarget$.next(value);
+    if (value !== this.aggressiveTarget$.value) {
+      this.aggressiveTarget$.next(value);
+    }
   }
 
   direction$ = new BehaviorSubject<DIRECTION>(DIRECTION.LEFT);
@@ -377,7 +394,10 @@ export abstract class Monster {
                 this.actionChange$.next(ACTION.RANDOM);
                 return EMPTY;
               }
-              return this.walkingToTarget(target).pipe(
+              return this.walkingToTarget(
+                target,
+                (distance) => distance <= this.attackRange
+              ).pipe(
                 connect((walking$) => {
                   const nextAttack$ = walking$.pipe(
                     distinctUntilChanged(),
@@ -407,6 +427,37 @@ export abstract class Monster {
                   )
                 )
               );
+            })
+          );
+        } else if (action === ACTION.MOVE_TO_STEAL_ITEM && this.targetItem) {
+          const itemLocation = {
+            x: this.targetItem.location.x + this.targetItem.item.width / 2,
+            y: this.targetItem.location.y + this.targetItem.item.height / 2,
+            width: this.targetItem.item.width,
+            height: this.targetItem.item.height,
+          };
+          return this.walkingToTarget(
+            itemLocation,
+            (distance) => distance <= 10
+          ).pipe(
+            takeWhile((arrived) => {
+              if (arrived && this.targetItem) {
+                const ItemClass = this.targetItem.class;
+                this.stolenItems.push(ItemClass);
+                Field.removeItemFromField(this.targetItem);
+                return false;
+              }
+              return true;
+            }),
+            takeUntil(this.targetItem.item.onCleanUp$),
+            tap({
+              complete: () => {
+                if (preAction === ACTION.MOVE_TO_STEAL_ITEM) {
+                  this.actionChange$.next(ACTION.RANDOM);
+                } else {
+                  this.actionChange$.next(preAction);
+                }
+              },
             })
           );
         } else if (action === ACTION.ATTACK) {
@@ -555,7 +606,7 @@ export abstract class Monster {
           }
 
           // hp Gauge
-          if (this.showHpGauge) {
+          if (this.showHpGauge && !this.isDied) {
             const gaugeHpRate = this.hp / this.maxHp;
             this.drawGauge(this.width, STROKE_GAUGE_COLOR);
             if (gaugeHpRate <= 0.2) {
@@ -621,6 +672,52 @@ export abstract class Monster {
       this.x = randomMinMax(minWidth, maxWidth - this.width);
       this.y = randomMinMax(minHeight, maxHeight - this.height);
     }
+  }
+
+  autoStealItemOnField() {
+    this.aggressiveTarget$
+      .pipe(
+        map((monster) => monster !== null),
+        distinctUntilChanged(),
+        switchMap((isAggressive) => {
+          if (isAggressive) {
+            return EMPTY;
+          }
+          return Field.fieldItems.pipe(
+            exhaustMap((fieldItems) => {
+              if (fieldItems.length === 0) {
+                return EMPTY;
+              }
+              return timer(0, 500).pipe(
+                map(() => {
+                  let nearest: FieldItem | null = null;
+                  let distance: number = 0;
+                  for (const fieldItem of fieldItems) {
+                    const _distance = distanceBetween(fieldItem.location, this);
+                    if (_distance > 350) {
+                      continue;
+                    } else if (!nearest || _distance < distance) {
+                      nearest = fieldItem;
+                      distance = _distance;
+                      continue;
+                    }
+                  }
+                  return nearest;
+                }),
+                first(
+                  (fieldItem): fieldItem is FieldItem => fieldItem !== null
+                ),
+                tap((fieldItem) => {
+                  this.targetItem = fieldItem;
+                  this.actionChange$.next(ACTION.MOVE_TO_STEAL_ITEM);
+                })
+              );
+            })
+          );
+        }),
+        takeUntil(this.onCleanup$)
+      )
+      .subscribe();
   }
 
   autoAggressiveOnVisionTarget(target$: Observable<Monster>) {
@@ -758,7 +855,10 @@ export abstract class Monster {
     this.actionChange$.next(ACTION.HURT);
   }
 
-  walkingToTarget(target: Monster) {
+  walkingToTarget(
+    target: TargetLocation,
+    predicate: (distance: number) => boolean
+  ) {
     return defer(() => {
       return merge(this.walking().pipe(ignoreElements()), deltaTime()).pipe(
         map((delta) => {
@@ -798,7 +898,7 @@ export abstract class Monster {
             { x: targetX, y: targetY },
             { x: sourceX, y: sourceY }
           );
-          if (distance <= this.attackRange) {
+          if (predicate(distance)) {
             return true;
           }
 

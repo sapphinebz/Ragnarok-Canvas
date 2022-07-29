@@ -80,19 +80,39 @@ const monstersClass: [any, number][] = [
   [Baphomet, 1],
   [ChonChon, 7],
   [Pecopeco, 4],
-  // [BaphometJr, 3],
 ];
 
-const fieldItems: FieldItem[] = [];
+export const onAddFieldItem$ = new Subject<FieldItem>();
+export const onRemoveFieldItem$ = new Subject<FieldItem>();
+export const fieldItems = new BehaviorSubject<FieldItem[]>([]);
 
-const addAddItemToField = (fieldItem: FieldItem) => {
-  fieldItems.push(fieldItem);
+const createDropedItem = (monster: Monster, ClassItem: any) => {
+  const itemX = randomMinMax(monster.x, monster.x + monster.width);
+  const itemY = randomMinMax(monster.y, monster.y + monster.height);
+  const droppedItem: FieldItem = {
+    class: ClassItem,
+    item: new ClassItem(),
+    location: {
+      x: itemX,
+      y: itemY,
+    },
+  };
+
+  return droppedItem;
 };
 
-const removeItemFromField = (fieldItem: FieldItem) => {
-  const index = fieldItems.findIndex((i) => i === fieldItem);
+export const addItemToField = (fieldItem: FieldItem) => {
+  onAddFieldItem$.next(fieldItem);
+  fieldItems.next([...fieldItems.value, fieldItem]);
+};
+
+export const removeItemFromField = (fieldItem: FieldItem) => {
+  const index = fieldItems.value.findIndex((i) => i === fieldItem);
   if (index > -1) {
-    fieldItems.splice(index, 1);
+    onRemoveFieldItem$.next(fieldItem);
+    fieldItem.item.cleanup();
+    fieldItems.value.splice(index, 1);
+    fieldItems.next(fieldItems.value);
   }
 };
 
@@ -409,7 +429,7 @@ canvasHover(canvas, {
   });
 
 onCanvasRender$.subscribe(() => {
-  for (const fieldItem of fieldItems) {
+  for (const fieldItem of fieldItems.value) {
     ctx.drawImage(
       fieldItem.item.image,
       fieldItem.location.x,
@@ -455,24 +475,23 @@ const onMonsterDropedItems$ = merge(onLoadMonster$, onSummonMonster$).pipe(
   mergeMap((monster) =>
     monster.onDied$.pipe(
       switchMap(() => {
-        const dropItems = monster.dropItems;
         const droppedItems: FieldItem[] = [];
+
+        for (const ClassItem of monster.stolenItems) {
+          const droppedItem = createDropedItem(monster, ClassItem);
+          addItemToField(droppedItem);
+          droppedItems.push(droppedItem);
+        }
+
+        const dropItems = monster.dropItems;
 
         for (const dropItem of dropItems) {
           const dropRate = dropItem[1];
           const ClassItem = dropItem[0];
           const randomRate = randomMinMax(0, 100);
           if (randomRate <= dropRate) {
-            const itemX = randomMinMax(monster.x, monster.x + monster.width);
-            const itemY = randomMinMax(monster.y, monster.y + monster.height);
-            const droppedItem = {
-              item: new ClassItem(),
-              location: {
-                x: itemX,
-                y: itemY,
-              },
-            };
-            addAddItemToField(droppedItem);
+            const droppedItem = createDropedItem(monster, ClassItem);
+            addItemToField(droppedItem);
             droppedItems.push(droppedItem);
           }
         }
@@ -487,7 +506,7 @@ const onMonsterDropedItems$ = merge(onLoadMonster$, onSummonMonster$).pipe(
             return fieldItem.item.usable === false;
           }),
           mergeMap((fieldItem) => {
-            return timer(10000).pipe(
+            return timer(20000).pipe(
               tap(() => {
                 removeItemFromField(fieldItem);
               })
@@ -505,7 +524,8 @@ const onMonsterDropedItems$ = merge(onLoadMonster$, onSummonMonster$).pipe(
           mergeMap(([player, fieldItem]) => {
             return player.onMoving$.pipe(
               checkPlayerCollideItem(player, fieldItem),
-              playerUseItem(player, fieldItem)
+              playerUseItem(player, fieldItem),
+              takeUntil(fieldItem.item.onCleanUp$)
             );
           })
         );
