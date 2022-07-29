@@ -382,38 +382,31 @@ export class BaphometJr extends Monster {
     ];
 
     this.drawBefore$.pipe(takeUntil(this.onCleanup$)).subscribe((frame) => {
-      const frameY = frame.frameY;
-      const frameX = frame.frameX;
-      if (this.weapons[frameY] && this.weapons[frameY][frameX]) {
-        const image =
-          this.direction === DIRECTION.LEFT
-            ? baphometJrLeftImage
-            : baphometJrRightImage;
-
-        this.drawCropImageX(image, this.weapons[frameY][frameX]);
-      }
+      this.drawCropImageAtFrame({
+        frames: this.weapons,
+        frameX: frame.frameX,
+        frameY: frame.frameY,
+        imageLeft: baphometJrLeftImage,
+        imageRight: baphometJrRightImage,
+      });
     });
 
     this.drawAfter$.pipe(takeUntil(this.onCleanup$)).subscribe((frame) => {
-      const frameY = frame.frameY;
-      const frameX = frame.frameX;
-      if (this.slashs[frameY] && this.slashs[frameY][frameX]) {
-        const image =
-          this.direction === DIRECTION.LEFT
-            ? baphometJrLeftImage
-            : baphometJrRightImage;
+      this.drawCropImageAtFrame({
+        frames: this.slashs,
+        frameX: frame.frameX,
+        frameY: frame.frameY,
+        imageLeft: baphometJrLeftImage,
+        imageRight: baphometJrRightImage,
+      });
 
-        this.drawCropImageX(image, this.slashs[frameY][frameX]!);
-      }
-
-      if (this.breaths[frameY] && this.breaths[frameY][frameX]) {
-        const image =
-          this.direction === DIRECTION.LEFT
-            ? baphometJrLeftImage
-            : baphometJrRightImage;
-
-        this.drawCropImageX(image, this.breaths[frameY][frameX]!);
-      }
+      this.drawCropImageAtFrame({
+        frames: this.breaths,
+        frameX: frame.frameX,
+        frameY: frame.frameY,
+        imageLeft: baphometJrLeftImage,
+        imageRight: baphometJrRightImage,
+      });
     });
   }
 

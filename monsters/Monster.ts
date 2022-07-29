@@ -1161,6 +1161,22 @@ export abstract class Monster {
     );
   }
 
+  drawCropImageAtFrame(config: {
+    frameX: number;
+    frameY: number;
+    frames: (CropImage | null)[][];
+    imageLeft: HTMLImageElement;
+    imageRight: HTMLImageElement;
+  }) {
+    const { imageLeft, imageRight, frames, frameX, frameY } = config;
+
+    if (frames[frameY] && frames[frameY][frameX]) {
+      const image = this.direction === DIRECTION.LEFT ? imageLeft : imageRight;
+
+      this.drawCropImageX(image, frames[frameY][frameX]!);
+    }
+  }
+
   tween(duration: number, nextEffect: MonoTypeOperatorFunction<number>) {
     return animationFrames().pipe(
       map((event) => event.elapsed / duration),
