@@ -45,6 +45,9 @@ export class ComeOn extends CastingSkill {
             return user.onDied$.pipe(
               tap(() => {
                 summonMonster.die();
+                setTimeout(() => {
+                  Field.removeMonsterFromField(summonMonster);
+                }, 5000);
               })
             );
           }),

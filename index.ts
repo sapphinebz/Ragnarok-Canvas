@@ -193,12 +193,7 @@ const corpseDisappearAfterAnimationEnd = <T>(
         },
         complete: () => {
           timeoutIndex = setTimeout(() => {
-            const index = monstersOnField.findIndex((p) => p === monster);
-            if (index > -1) {
-              monster.cleanup();
-              monstersOnField.splice(index, 1);
-              tick();
-            }
+            removeMonsterFromField(monster);
             subscriber.next(monstersOnField);
             subscriber.complete();
           }, duration);
@@ -297,6 +292,15 @@ const onMonstersBeAttacked = (option: {
 };
 
 export const monstersOnField = generateMonsters();
+
+export const removeMonsterFromField = (monster: Monster) => {
+  const index = monstersOnField.findIndex((p) => p === monster);
+  if (index > -1) {
+    monster.cleanup();
+    monstersOnField.splice(index, 1);
+    tick();
+  }
+};
 
 /**
  * PLAYER
