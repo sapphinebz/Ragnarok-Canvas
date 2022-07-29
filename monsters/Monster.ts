@@ -505,7 +505,9 @@ export abstract class Monster {
     })
       .pipe(takeUntil(this.onCleanup$))
       .subscribe(({ direction, leftImage, rightImage }) => {
-        this.drawBefore$.next({ frameY: this.frameY, frameX: this.frameX });
+        if (this.drawBefore$.observed) {
+          this.drawBefore$.next({ frameY: this.frameY, frameX: this.frameX });
+        }
         const frameXEntry = this.getFrameEntry(this.frameY, this.frameX);
         if (frameXEntry) {
           let {
@@ -548,7 +550,9 @@ export abstract class Monster {
             height
           );
 
-          this.drawAfter$.next({ frameY: this.frameY, frameX: this.frameX });
+          if (this.drawAfter$.observed) {
+            this.drawAfter$.next({ frameY: this.frameY, frameX: this.frameX });
+          }
 
           // hp Gauge
           if (this.showHpGauge) {
