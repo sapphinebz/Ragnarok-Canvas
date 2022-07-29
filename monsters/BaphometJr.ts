@@ -1,4 +1,7 @@
 import { defer, Observable, tap } from "rxjs";
+import { EvilHorn } from "../items/EvilHorn";
+import { YellowHerb } from "../items/YellowHerb";
+import { YggdrasilBerry } from "../items/YggdrasilBerry";
 import { AudioSubject } from "../sounds/audio-subject";
 import { loadBaphometAttackAudio } from "../sounds/baphomet-attack";
 import { loadBaphometBreath } from "../sounds/baphomet-breath";
@@ -211,7 +214,11 @@ export class BaphometJr extends Monster {
     this.maxHp = 250;
     this.hp = this.maxHp;
 
-    this.dropItems = [];
+    this.dropItems = [
+      [YellowHerb, 20],
+      [EvilHorn, 20],
+      [YggdrasilBerry, 15],
+    ];
   }
 
   getFrameEntry(frameY: number, frameX: number) {
