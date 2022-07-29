@@ -303,24 +303,6 @@ export class BaphometJr extends Monster {
         marginLeftWidth: 4,
         marginLeftHeight: -3,
       },
-      {
-        order: 3,
-        offsetX: 309,
-        offsetY: 289,
-        width: 33,
-        height: 52,
-        marginLeftWidth: 0,
-        marginLeftHeight: -2,
-      },
-      {
-        order: 4,
-        offsetX: 309,
-        offsetY: 289,
-        width: 33,
-        height: 52,
-        marginLeftWidth: 0,
-        marginLeftHeight: -2,
-      },
     ],
   ];
 
@@ -454,7 +436,7 @@ export class BaphometJr extends Monster {
   standing() {
     return defer(() => {
       this.frameY = 0;
-      return this.forwardFrameX(120, 0, 3);
+      return this.forwardFrameX(80, 0, 3);
     });
   }
 
