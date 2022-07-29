@@ -1,4 +1,4 @@
-import { defer, Observable, tap } from "rxjs";
+import { defer, Observable, takeUntil, tap } from "rxjs";
 import { EvilHorn } from "../items/EvilHorn";
 import { YellowHerb } from "../items/YellowHerb";
 import { YggdrasilBerry } from "../items/YggdrasilBerry";
@@ -38,8 +38,8 @@ export class BaphometJr extends Monster {
 
   attackAudio = new AudioSubject(this, loadBaphometAttackAudio());
   // breathAudio = new AudioSubject(this, loadBaphometBreath());
-  // damagedAudio = new AudioSubject(this, loadBaphometDamagedAudio());
-  // deadAudio = new AudioSubject(this, loadBaphometDeadAudio());
+  damagedAudio = new AudioSubject(this, loadBaphometDamagedAudio());
+  deadAudio = new AudioSubject(this, loadBaphometDeadAudio());
 
   frames: CropImage[][] = [
     // Standing
@@ -208,17 +208,213 @@ export class BaphometJr extends Monster {
     ],
   ];
 
+  breaths = [
+    [
+      {
+        order: 0,
+        offsetX: 398,
+        offsetY: 405,
+        width: 7,
+        height: 6,
+        marginLeftWidth: 6,
+        marginLeftHeight: 32,
+        marginRightWidth: 25,
+        marginRightHeight: 31,
+      },
+
+      {
+        order: 1,
+        offsetX: 369,
+        offsetY: 402,
+        width: 11,
+        height: 11,
+        marginLeftWidth: 1,
+        marginLeftHeight: 29,
+        marginRightWidth: 25,
+        marginRightHeight: 28,
+      },
+    ],
+  ];
+
+  weapons: CropImage[][] = [
+    [],
+    //Walking
+    [
+      {
+        order: 0,
+        offsetX: 309,
+        offsetY: 289,
+        width: 33,
+        height: 52,
+        marginLeftWidth: 5,
+        marginLeftHeight: -2,
+        marginRightWidth: 0,
+        marginRightHeight: -2,
+      },
+      {
+        order: 1,
+        offsetX: 309,
+        offsetY: 289,
+        width: 33,
+        height: 52,
+        marginLeftWidth: 4,
+        marginLeftHeight: -2,
+        marginRightWidth: -1,
+        marginRightHeight: -2,
+      },
+      {
+        order: 2,
+        offsetX: 309,
+        offsetY: 289,
+        width: 33,
+        height: 52,
+        marginLeftWidth: 5,
+        marginLeftHeight: -2,
+        marginRightWidth: 0,
+        marginRightHeight: -2,
+      },
+    ],
+    // Attacks
+    [
+      {
+        order: 0,
+        offsetX: 309,
+        offsetY: 289,
+        width: 33,
+        height: 52,
+        marginLeftWidth: 5,
+        marginLeftHeight: -2,
+      },
+      {
+        order: 1,
+        offsetX: 309,
+        offsetY: 289,
+        width: 33,
+        height: 52,
+        marginLeftWidth: 5,
+        marginLeftHeight: -2,
+      },
+      {
+        order: 2,
+        offsetX: 309,
+        offsetY: 289,
+        width: 33,
+        height: 52,
+        marginLeftWidth: 4,
+        marginLeftHeight: -3,
+      },
+      {
+        order: 3,
+        offsetX: 309,
+        offsetY: 289,
+        width: 33,
+        height: 52,
+        marginLeftWidth: 0,
+        marginLeftHeight: -2,
+      },
+      {
+        order: 4,
+        offsetX: 309,
+        offsetY: 289,
+        width: 33,
+        height: 52,
+        marginLeftWidth: 0,
+        marginLeftHeight: -2,
+      },
+    ],
+  ];
+
+  slashs = [
+    [],
+    [],
+    [
+      null,
+      null,
+      {
+        order: 0,
+        offsetX: 105,
+        offsetY: 277,
+        width: 42,
+        height: 75,
+        marginLeftWidth: -17,
+        marginLeftHeight: -2,
+        marginRightWidth: 9,
+        marginRightHeight: 0,
+      },
+      {
+        order: 1,
+        offsetX: 105,
+        offsetY: 277,
+        width: 42,
+        height: 75,
+        marginLeftWidth: -17,
+        marginLeftHeight: -2,
+        marginRightWidth: 9,
+        marginRightHeight: 0,
+      },
+      {
+        order: 2,
+        offsetX: 167,
+        offsetY: 295,
+        width: 40,
+        height: 40,
+        marginLeftWidth: -15,
+        marginLeftHeight: 33,
+        marginRightWidth: 9,
+        marginRightHeight: 35,
+      },
+    ],
+  ];
+
   constructor(public canvas: HTMLCanvasElement) {
     super(canvas, baphometJrLeftImage, baphometJrRightImage);
 
     this.maxHp = 250;
     this.hp = this.maxHp;
 
+    this.damagedAudio.volume = 0.02;
+    this.attackAudio.volume = 0.02;
+
     this.dropItems = [
       [YellowHerb, 20],
       [EvilHorn, 20],
-      [YggdrasilBerry, 15],
+      [YggdrasilBerry, 3],
     ];
+
+    this.drawBefore$.pipe(takeUntil(this.onCleanup$)).subscribe((frame) => {
+      const frameY = frame.frameY;
+      const frameX = frame.frameX;
+      if (this.weapons[frameY] && this.weapons[frameY][frameX]) {
+        const image =
+          this.direction === DIRECTION.LEFT
+            ? baphometJrLeftImage
+            : baphometJrRightImage;
+
+        this.drawCropImageX(image, this.weapons[frameY][frameX]);
+      }
+    });
+
+    this.drawAfter$.pipe(takeUntil(this.onCleanup$)).subscribe((frame) => {
+      const frameY = frame.frameY;
+      const frameX = frame.frameX;
+      if (this.slashs[frameY] && this.slashs[frameY][frameX]) {
+        const image =
+          this.direction === DIRECTION.LEFT
+            ? baphometJrLeftImage
+            : baphometJrRightImage;
+
+        this.drawCropImageX(image, this.slashs[frameY][frameX]!);
+      }
+
+      if (this.breaths[frameY] && this.breaths[frameY][frameX]) {
+        const image =
+          this.direction === DIRECTION.LEFT
+            ? baphometJrLeftImage
+            : baphometJrRightImage;
+
+        this.drawCropImageX(image, this.breaths[frameY][frameX]!);
+      }
+    });
   }
 
   getFrameEntry(frameY: number, frameX: number) {
@@ -274,13 +470,25 @@ export class BaphometJr extends Monster {
   hurting(): Observable<any> {
     return defer(() => {
       this.frameY = 3;
-      return this.forwardFrameX(130, 0, 0, { once: true });
+      return this.forwardFrameX(130, 0, 0, { once: true }).pipe(
+        tap({
+          next: (frameX) => {
+            if (frameX === 0) {
+              this.damagedAudio.play();
+            }
+          },
+          unsubscribe: () => {
+            this.damagedAudio.stop();
+          },
+        })
+      );
     });
   }
 
   dying() {
     return defer(() => {
       this.frameY = 3;
+      this.deadAudio.play();
       return this.forwardFrameX(130, 0, 1, { once: true });
     });
   }

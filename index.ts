@@ -29,6 +29,7 @@ import {
   filter,
   map,
   mergeMap,
+  repeat,
   shareReplay,
   takeUntil,
 } from "rxjs/operators";
@@ -40,7 +41,7 @@ import { Angeling } from "./monsters/Angeling";
 import { Baphomet } from "./monsters/Baphomet";
 import { ChonChon } from "./monsters/ChonChon";
 import { Fabre } from "./monsters/Fabre";
-import { Area, DamageArea, Monster } from "./monsters/Monster";
+import { Area, DamageArea, DIRECTION, Monster } from "./monsters/Monster";
 import { Pecopeco } from "./monsters/PecoPeco";
 import { Poring } from "./monsters/Poring";
 import { SantaPoring } from "./monsters/SantaPoring";
@@ -70,15 +71,15 @@ const onWindowResize$ = fromEvent(window, "resize").pipe(
  */
 // number monster in field & class
 const monstersClass: [any, number][] = [
-  [Acidus, 0],
-  [Poring, 10],
-  [SantaPoring, 0],
-  [Angeling, 1],
-  [Poporing, 0],
-  [Fabre, 7],
+  // [Acidus, 0],
+  // [Poring, 10],
+  // [SantaPoring, 0],
+  // [Angeling, 1],
+  // [Poporing, 0],
+  // [Fabre, 7],
   [Baphomet, 1],
-  [ChonChon, 7],
-  [Pecopeco, 4],
+  // [ChonChon, 7],
+  // [Pecopeco, 4],
 ];
 
 const fieldItems: FieldItem[] = [];
@@ -524,7 +525,7 @@ const onMonsterTickRender$ = onLoadMonster$.pipe(
     monster.autoAggressiveOnVisionTarget(onLoadPlayer$);
     return monster.onActionTick$.pipe(takeUntil(monster.onCleanup$));
     // monster.direction = DIRECTION.RIGHT;
-    // return monster.standing().pipe(repeat());
+    // return monster.walking().pipe(repeat());
   })
 );
 

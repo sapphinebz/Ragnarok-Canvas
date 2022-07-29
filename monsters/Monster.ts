@@ -241,7 +241,9 @@ export abstract class Monster {
    * on this monster need render
    */
   onActionTick$ = new Subject<void>();
+  drawBefore$ = new Subject<{ frameX: number; frameY: number }>();
   drawImage$ = new Subject<void>();
+  drawAfter$ = new Subject<{ frameX: number; frameY: number }>();
 
   criticalAttackSound = loadCriticalAttack();
   onPlayCriticalAttack$ = new Subject<void>();
@@ -503,6 +505,7 @@ export abstract class Monster {
     })
       .pipe(takeUntil(this.onCleanup$))
       .subscribe(({ direction, leftImage, rightImage }) => {
+        this.drawBefore$.next({ frameY: this.frameY, frameX: this.frameX });
         const frameXEntry = this.getFrameEntry(this.frameY, this.frameX);
         if (frameXEntry) {
           let {
@@ -544,6 +547,8 @@ export abstract class Monster {
             width,
             height
           );
+
+          this.drawAfter$.next({ frameY: this.frameY, frameX: this.frameX });
 
           // hp Gauge
           if (this.showHpGauge) {
@@ -1118,6 +1123,39 @@ export abstract class Monster {
       cropImage.height ?? 0,
       this.x + (dx ?? 0) + (marginWidth ?? 0),
       this.y + (dy ?? 0) + (marginHeight ?? 0),
+      cropImage.width,
+      cropImage.height ?? 0
+    );
+  }
+
+  drawCropImageX(
+    image: HTMLImageElement,
+    cropImage: CropImage,
+    option: { x?: number; y?: number } = {}
+  ) {
+    let marginWidth = 0;
+    let marginHeight = 0;
+    let offsetX = cropImage.offsetX;
+    if (this.direction === DIRECTION.LEFT) {
+      marginWidth = cropImage.marginLeftWidth ?? 0;
+      marginHeight = cropImage.marginLeftHeight ?? 0;
+      offsetX = cropImage.offsetX;
+    } else if (this.direction === DIRECTION.RIGHT) {
+      marginWidth = cropImage.marginRightWidth ?? 0;
+      marginHeight = cropImage.marginRightHeight ?? 0;
+      offsetX = image.width - (offsetX + cropImage.width);
+    }
+
+    const { x: dx, y: dy } = option;
+
+    this.ctx.drawImage(
+      image,
+      offsetX,
+      cropImage.offsetY ?? 0,
+      cropImage.width,
+      cropImage.height ?? 0,
+      this.x + (dx ?? 0) + marginWidth,
+      this.y + (dy ?? 0) + marginHeight,
       cropImage.width,
       cropImage.height ?? 0
     );
