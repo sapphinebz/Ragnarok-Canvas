@@ -157,7 +157,7 @@ export class Angeling extends Poring {
         this.comeonMyPoringSkill.useWith(this);
       }),
       this.comeonMyPoringSkill.allSummonDiedCanUseAfter(15000)
-    );
+    ).subscribe();
 
     this.flipWingFrame$
       .pipe(takeUntil(this.onDied$), takeUntil(this.onCleanup$))
