@@ -684,7 +684,7 @@ export abstract class Monster {
             return EMPTY;
           }
           return Field.fieldItems.pipe(
-            exhaustMap((fieldItems) => {
+            switchMap((fieldItems) => {
               if (fieldItems.length === 0) {
                 return EMPTY;
               }
