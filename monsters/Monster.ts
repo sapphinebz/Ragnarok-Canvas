@@ -243,6 +243,8 @@ export abstract class Monster {
     return this.direction$.value;
   }
 
+  abstract frames: CropImage[][];
+
   leftImage$ = new ReplaySubject<HTMLImageElement>(1);
   rightImage$ = new ReplaySubject<HTMLImageElement>(1);
 
@@ -624,8 +626,6 @@ export abstract class Monster {
         }
       });
   }
-
-  abstract getFrameEntry(frameY: number, frameX: number): CropImage;
 
   abstract drawEffect(): void;
 
@@ -1483,6 +1483,10 @@ export abstract class Monster {
         this.updateMove()
       );
     });
+  }
+
+  private getFrameEntry(frameY: number, frameX: number) {
+    return this.frames[frameY][frameX];
   }
 
   private isOutOfCanvas(moveLocation: MoveLocation) {

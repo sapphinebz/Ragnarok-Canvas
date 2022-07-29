@@ -219,9 +219,6 @@ export class Pecopeco extends Monster {
     this.diedAudio.volume = 0.05;
   }
 
-  getFrameEntry(frameY: number, frameX: number) {
-    return this.frames[frameY][frameX];
-  }
   standing(): Observable<any> {
     return defer(() => {
       this.frameY = 0;

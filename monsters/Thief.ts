@@ -410,10 +410,6 @@ export class Thief extends Monster {
       .subscribe();
   }
 
-  getFrameEntry(frameY: number, frameX: number) {
-    return this.frames[frameY][frameX];
-  }
-
   standing(): Observable<any> {
     return defer(() => {
       this.frameY = 0;

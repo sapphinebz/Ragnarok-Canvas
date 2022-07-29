@@ -247,9 +247,6 @@ export class ChonChon extends Monster {
     ];
   }
 
-  getFrameEntry(frameY: number, frameX: number) {
-    return this.frames[frameY][frameX];
-  }
   standing(): Observable<any> {
     return defer(() => {
       this.hideWing = false;

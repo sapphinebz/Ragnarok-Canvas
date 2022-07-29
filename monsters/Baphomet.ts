@@ -424,10 +424,6 @@ export class Baphomet extends Monster {
     ).subscribe();
   }
 
-  getFrameEntry(frameY: number, frameX: number) {
-    return this.frames[frameY][frameX];
-  }
-
   attack(): Observable<any> {
     return defer(() => {
       this.frameY = 3;

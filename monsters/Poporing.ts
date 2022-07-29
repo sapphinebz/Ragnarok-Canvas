@@ -332,10 +332,6 @@ export class Poporing extends Monster {
     ];
   }
 
-  getFrameEntry(frameY: number, frameX: number): CropImage {
-    return this.frames[frameY][frameX];
-  }
-
   standing(): Observable<any> {
     return defer(() => {
       this.frameY = 0;

@@ -271,9 +271,6 @@ export class Poring extends Monster {
     this.walkingAudio.volume = 0.02;
   }
 
-  getFrameEntry(frameY: number, frameX: number) {
-    return this.frames[frameY][frameX];
-  }
   standing(): Observable<any> {
     return defer(() => {
       this.frameY = 0;
