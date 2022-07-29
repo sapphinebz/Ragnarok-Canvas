@@ -1,5 +1,5 @@
-import { defer, Observable, Subject, timer } from "rxjs";
-import { map, mergeMap, takeUntil, takeWhile, tap } from "rxjs/operators";
+import { defer, Observable } from "rxjs";
+import { takeUntil, tap } from "rxjs/operators";
 import { DoubleAttack } from "../skills/DoubleAttack";
 import { AudioSubject } from "../sounds/audio-subject";
 import { loadDaggerHitSound } from "../sounds/dagger-hit-sound";
@@ -19,8 +19,8 @@ export class Thief extends Monster {
   speedY = 200;
   frameX = 0;
   frameY = 0;
-  width = 80;
-  height = 107;
+  width = 62;
+  height = 94;
 
   attackSpeed = 130;
 
@@ -33,238 +33,218 @@ export class Thief extends Monster {
 
   frames: CropImage[][] = [
     [
-      // stand left
-      { order: 0, offsetX: 0, width: 80 },
-      { order: 1, offsetX: 100, width: 80, marginHeight: -1 },
-      { order: 2, offsetX: 201, width: 80, marginHeight: -1 },
-      { order: 3, offsetX: 301, width: 80, marginHeight: -1 },
-      { order: 4, offsetX: 401, width: 80, marginHeight: -1 },
-      { order: 5, offsetX: 500, width: 80 },
+      // Standing
+      { order: 0, offsetX: 19, offsetY: 13, width: 62, height: 93 },
+      {
+        order: 1,
+        offsetX: 119,
+        offsetY: 13,
+        width: 62,
+        height: 94,
+        marginLeftWidth: 0,
+        marginLeftHeight: -1,
+        marginRightWidth: 0,
+        marginRightHeight: -1,
+      },
+      {
+        order: 2,
+        offsetX: 218,
+        offsetY: 12,
+        width: 64,
+        height: 95,
+        marginLeftWidth: -2,
+        marginLeftHeight: -2,
+        marginRightWidth: 0,
+        marginRightHeight: -2,
+      },
+      {
+        order: 3,
+        offsetX: 317,
+        offsetY: 12,
+        width: 65,
+        height: 95,
+        marginLeftWidth: -3,
+        marginLeftHeight: -2,
+        marginRightWidth: 0,
+        marginRightHeight: -2,
+      },
+      {
+        order: 4,
+        offsetX: 417,
+        offsetY: 13,
+        width: 65,
+        height: 94,
+        marginLeftWidth: -3,
+        marginLeftHeight: -1,
+        marginRightWidth: 0,
+        marginRightHeight: -1,
+      },
+      { order: 5, offsetX: 519, offsetY: 13, width: 62, height: 93 },
     ],
     // stand top
+    [],
+    // walk left
     [
       {
         order: 0,
-        offsetX: 29,
-        offsetY: 133,
-        width: 41,
-        height: 93,
-        marginLeftWidth: 20,
-        marginRightWidth: 20,
-        marginHeight: 14,
+        offsetX: 28,
+        offsetY: 270,
+        width: 33,
+        height: 97,
+        marginLeftWidth: 6,
+        marginLeftHeight: 0,
+        marginRightWidth: 23,
+        marginRightHeight: 0,
       },
       {
         order: 1,
-        offsetX: 129,
-        offsetY: 133,
-        width: 41,
-        height: 94,
-        marginLeftWidth: 20,
+        offsetX: 102,
+        offsetY: 271,
+        width: 36,
+        height: 93,
+        marginLeftWidth: 6,
+        marginLeftHeight: 0,
         marginRightWidth: 20,
-        marginHeight: 13,
+        marginRightHeight: 0,
       },
       {
         order: 2,
-        offsetX: 229,
-        offsetY: 133,
-        width: 41,
-        height: 95,
-        marginLeftWidth: 20,
-        marginRightWidth: 20,
-        marginHeight: 13,
+        offsetX: 175,
+        offsetY: 272,
+        width: 42,
+        height: 90,
+        marginLeftWidth: 2,
+        marginLeftHeight: 0,
+        marginRightWidth: 18,
+        marginRightHeight: 0,
       },
       {
         order: 3,
-        offsetX: 329,
-        offsetY: 133,
-        width: 41,
-        height: 95,
-        marginLeftWidth: 20,
-        marginRightWidth: 20,
-        marginHeight: 13,
+        offsetX: 260,
+        offsetY: 269,
+        width: 37,
+        height: 93,
+        marginLeftWidth: 6,
+        marginLeftHeight: 0,
+        marginRightWidth: 19,
+        marginRightHeight: 0,
       },
       {
         order: 4,
+        offsetX: 348,
+        offsetY: 269,
+        width: 33,
+        height: 93,
+        marginLeftWidth: 6,
+        marginLeftHeight: 0,
+        marginRightWidth: 23,
+        marginRightHeight: 0,
+      },
+      {
+        order: 5,
         offsetX: 429,
-        offsetY: 133,
-        width: 41,
-        height: 94,
-        marginLeftWidth: 20,
-        marginRightWidth: 20,
-        marginHeight: 13,
-      },
-      {
-        order: 5,
-        offsetX: 529,
-        offsetY: 133,
-        width: 41,
-        height: 93,
-        marginLeftWidth: 20,
-        marginRightWidth: 20,
-        marginHeight: 14,
-      },
-    ],
-    // walk left
-    [
-      { order: 0, offsetY: 257, offsetX: 3, width: 80, height: 109 },
-      {
-        order: 1,
-        offsetY: 257,
-        offsetX: 77,
-        width: 80,
-        height: 111,
-        marginHeight: -1,
-      },
-      {
-        order: 2,
-        offsetY: 257,
-        offsetX: 154,
-        width: 80,
-        height: 111,
-        marginHeight: -2,
-      },
-      {
-        order: 3,
-        offsetY: 257,
-        offsetX: 235,
-        width: 80,
-        height: 111,
-        marginHeight: 1,
-      },
-      {
-        order: 4,
-        offsetY: 257,
-        offsetX: 323,
-        width: 80,
-        height: 111,
-        marginHeight: 1,
-      },
-      {
-        order: 5,
-        offsetY: 257,
-        offsetX: 404,
-        width: 80,
-        height: 111,
-        marginHeight: 3,
+        offsetY: 267,
+        width: 34,
+        height: 95,
+        marginLeftWidth: 6,
+        marginLeftHeight: 0,
+        marginRightWidth: 22,
+        marginRightHeight: 0,
       },
       {
         order: 6,
-        offsetY: 257,
-        offsetX: 484,
-        width: 80,
-        height: 111,
-        marginHeight: 3,
+        offsetX: 509,
+        offsetY: 267,
+        width: 37,
+        height: 95,
+        marginLeftWidth: 6,
+        marginLeftHeight: 0,
+        marginRightWidth: 19,
+        marginRightHeight: 0,
       },
       {
         order: 7,
-        offsetY: 257,
-        offsetX: 556,
-        width: 80,
-        height: 111,
-        marginHeight: 1,
+        offsetX: 581,
+        offsetY: 269,
+        width: 35,
+        height: 99,
+        marginLeftWidth: 6,
+        marginLeftHeight: 0,
+        marginRightWidth: 21,
+        marginRightHeight: 0,
       },
     ],
 
     // walk top
-    [
-      {
-        order: 0,
-        offsetX: 0,
-        width: 50,
-        offsetY: 200,
-        height: 50,
-        marginRightWidth: 5,
-      },
-      {
-        order: 1,
-        offsetX: 50,
-        width: 50,
-        offsetY: 200,
-        height: 50,
-        marginRightWidth: 5,
-      },
-      {
-        order: 2,
-        offsetX: 130,
-        width: 50,
-        offsetY: 200,
-        height: 50,
-        marginRightWidth: 5,
-      },
-      {
-        order: 3,
-        offsetX: 240,
-        offsetY: 190,
-        width: 90,
-        height: 80,
-        marginHeight: -20,
-        marginLeftWidth: 0,
-        marginRightWidth: -35,
-      },
-      {
-        order: 4,
-        offsetX: 310,
-        offsetY: 180,
-        width: 130,
-        height: 80,
-        marginLeftWidth: -45,
-        marginRightWidth: -30,
-        marginHeight: -25,
-      },
-      {
-        order: 5,
-        offsetX: 430,
-        offsetY: 200,
-        width: 120,
-        height: 60,
-        marginLeftWidth: -45,
-        marginRightWidth: -20,
-        marginHeight: -3,
-      },
-    ],
+    [],
     // attack left
     [
-      { order: 0, offsetY: 534, offsetX: 1, width: 80, height: 109 },
-      { order: 1, offsetY: 534, offsetX: 110, width: 80, height: 109 },
+      { order: 0, offsetX: 21, offsetY: 547, width: 62, height: 93 },
+      {
+        order: 1,
+        offsetX: 129,
+        offsetY: 548,
+        width: 45,
+        height: 92,
+        marginLeftWidth: 0,
+        marginLeftHeight: 1,
+        marginRightWidth: 17,
+        marginRightHeight: 1,
+      },
       {
         order: 2,
-        offsetY: 534,
-        offsetX: 203,
-        width: 80,
-        height: 109,
-        marginHeight: 1,
+        offsetX: 222,
+        offsetY: 547,
+        width: 45,
+        height: 92,
+        marginLeftWidth: 0,
+        marginLeftHeight: 1,
+        marginRightWidth: 17,
+        marginRightHeight: 1,
       },
       {
         order: 3,
-        offsetY: 534,
-        offsetX: 303,
-        width: 80,
-        height: 109,
-        marginHeight: 1,
+        offsetX: 322,
+        offsetY: 547,
+        width: 45,
+        height: 92,
+        marginLeftWidth: 0,
+        marginLeftHeight: 1,
+        marginRightWidth: 17,
+        marginRightHeight: 1,
       },
       {
         order: 4,
-        offsetY: 534,
-        offsetX: 403,
-        width: 80,
-        height: 109,
-        marginHeight: 1,
+        offsetX: 420,
+        offsetY: 547,
+        width: 49,
+        height: 92,
+        marginLeftWidth: -6,
+        marginLeftHeight: 1,
+        marginRightWidth: 19,
+        marginRightHeight: 1,
       },
       {
         order: 5,
-        offsetY: 534,
-        offsetX: 511,
-        width: 80,
-        height: 109,
-        marginHeight: 5,
+        offsetX: 509,
+        offsetY: 551,
+        width: 72,
+        height: 84,
+        marginLeftWidth: -25,
+        marginLeftHeight: 9,
+        marginRightWidth: 15,
+        marginRightHeight: 9,
       },
       {
         order: 6,
-        offsetY: 534,
-        offsetX: 611,
-        width: 80,
-        height: 109,
-        marginHeight: 6,
+        offsetX: 608,
+        offsetY: 551,
+        width: 73,
+        height: 83,
+        marginLeftWidth: -26,
+        marginLeftHeight: 10,
+        marginRightWidth: 15,
+        marginRightHeight: 10,
       },
     ],
     [],
@@ -272,35 +252,45 @@ export class Thief extends Monster {
       // hurting
       {
         order: 0,
-        offsetX: 3,
-        width: 80,
-        offsetY: 797,
-        height: 109,
-        marginHeight: 1,
+        offsetX: 22,
+        offsetY: 809,
+        width: 62,
+        height: 93,
+        marginLeftWidth: 0,
+        marginLeftHeight: 0,
       },
       {
         order: 1,
-        offsetX: 110,
-        width: 80,
-        offsetY: 797,
-        height: 109,
-        marginHeight: -4,
+        offsetX: 133,
+        offsetY: 813,
+        width: 40,
+        height: 86,
+        marginLeftWidth: 8,
+        marginLeftHeight: -1,
+        marginRightWidth: 14,
+        marginRightHeight: -1,
       },
       {
         order: 2,
-        offsetX: 205,
-        width: 80,
-        offsetY: 797,
-        height: 109,
-        marginHeight: -5,
+        offsetX: 233,
+        offsetY: 812,
+        width: 39,
+        height: 87,
+        marginLeftWidth: 10,
+        marginLeftHeight: -2,
+        marginRightWidth: 13,
+        marginRightHeight: -2,
       },
       {
         order: 3,
-        offsetX: 299,
-        width: 80,
-        offsetY: 797,
-        height: 109,
-        marginHeight: -3,
+        offsetX: 328,
+        offsetY: 814,
+        width: 49,
+        height: 84,
+        marginLeftWidth: 11,
+        marginLeftHeight: 1,
+        marginRightWidth: 2,
+        marginRightHeight: 1,
       },
       {
         order: 4,
@@ -308,32 +298,85 @@ export class Thief extends Monster {
         offsetY: 832,
         width: 80,
         height: 48,
-        marginHeight: 52,
-        marginLeftWidth: 30,
-        marginRightWidth: -30,
+        marginLeftWidth: 21,
+        marginLeftHeight: 41,
+        marginRightWidth: -39,
+        marginRightHeight: 41,
+      },
+    ],
+  ];
+
+  weapons = [
+    [],
+    [],
+    [],
+    [],
+    [
+      null,
+      null,
+      null,
+      null,
+      null,
+      {
+        order: 5,
+        offsetX: 3,
+        offsetY: 664,
+        width: 32,
+        height: 17,
+        marginLeftWidth: -38,
+        marginLeftHeight: 51,
+        marginRightWidth: 70,
+        marginRightHeight: 51,
+      },
+      {
+        order: 6,
+        offsetX: 45,
+        offsetY: 664,
+        width: 31,
+        height: 17,
+        marginLeftWidth: -37,
+        marginLeftHeight: 51,
+        marginRightWidth: 70,
+        marginRightHeight: 51,
+      },
+      {
+        order: 7,
+        offsetX: 86,
+        offsetY: 665,
+        width: 27,
+        height: 16,
+        marginLeftWidth: -34,
+        marginLeftHeight: 52,
+        marginRightWidth: 71,
+        marginRightHeight: 52,
+      },
+      {
+        order: 8,
+        offsetX: 126,
+        offsetY: 664,
+        width: 19,
+        height: 13,
+        marginLeftWidth: -28,
+        marginLeftHeight: 54,
+        marginRightWidth: 73,
+        marginRightHeight: 54,
+      },
+      {
+        order: 9,
+        offsetX: 154,
+        offsetY: 664,
+        width: 14,
+        height: 12,
+        marginLeftWidth: -27,
+        marginLeftHeight: 56,
+        marginRightWidth: 77,
+        marginRightHeight: 56,
       },
     ],
   ];
 
   leftEffectDaggerImage = loadLeftThiefDagger();
   rightEffectDaggerImage = loadRightThiefDagger();
-
-  // 0 = left, 1 = right
-  attackEffectFrames = [
-    [0, 650, 30, 30, -18, 51, 30, 30, DIRECTION.LEFT],
-    [45, 650, 30, 30, -18, 51, 30, 30, DIRECTION.LEFT],
-    [85, 650, 30, 30, -18, 51, 30, 30, DIRECTION.LEFT],
-    [125, 650, 30, 30, -18, 51, 30, 30, DIRECTION.LEFT],
-    [145, 650, 30, 30, -18, 51, 30, 30, DIRECTION.LEFT],
-  ];
-
-  hasEffect = false;
-  effectFrame: number[] = [];
-  onEffectAttack = new Subject<{
-    x: number;
-    y: number;
-    direction: DIRECTION;
-  }>();
 
   constructor(canvas: HTMLCanvasElement) {
     super(canvas, thiefLeftSpriteImage, thiefRightSpriteImage);
@@ -351,39 +394,16 @@ export class Thief extends Monster {
       this.attackAudio.play();
     });
 
-    /**
-     * stay effect even player finish attack and move
-     */
-    this.onEffectAttack
+    this.drawAfter$
       .pipe(
-        mergeMap(({ x, y, direction }) => {
-          return timer(0, this.delayAnimationAttack).pipe(
-            map((_, index) => index),
-            takeWhile((frameX) => {
-              if (this.attackEffectFrames[frameX] !== undefined) {
-                this.hasEffect = true;
-                this.effectFrame = [...this.attackEffectFrames[frameX]];
-
-                let offsetX = this.effectFrame[0];
-                const sWidth = this.effectFrame[3];
-
-                if (direction === DIRECTION.RIGHT) {
-                  this.effectFrame[0] =
-                    this.rightEffectDaggerImage.width - (offsetX + sWidth);
-                  this.effectFrame[4] = x + 50 - this.effectFrame[4];
-                  this.effectFrame[5] = y + 103 - this.effectFrame[5];
-                } else if (direction === DIRECTION.LEFT) {
-                  this.effectFrame[4] = x + this.effectFrame[4];
-                  this.effectFrame[5] = y + this.effectFrame[5];
-                }
-                this.effectFrame[8] = direction;
-
-                return true;
-              }
-              this.hasEffect = false;
-              return false;
-            })
-          );
+        tap((frame) => {
+          this.drawCropImageAtFrame({
+            frames: this.weapons,
+            frameX: frame.frameX,
+            frameY: frame.frameY,
+            imageLeft: this.leftEffectDaggerImage,
+            imageRight: this.rightEffectDaggerImage,
+          });
         }),
         takeUntil(this.onCleanup$)
       )
@@ -417,25 +437,7 @@ export class Thief extends Monster {
     });
   }
 
-  drawEffect() {
-    if (this.hasEffect) {
-      const [sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight, directionEnum] =
-        this.effectFrame;
-      this.ctx.drawImage(
-        directionEnum === 0
-          ? this.leftEffectDaggerImage
-          : this.rightEffectDaggerImage,
-        sx,
-        sy,
-        sWidth,
-        sHeight,
-        dx,
-        dy,
-        dWidth,
-        dHeight
-      );
-    }
-  }
+  drawEffect() {}
 
   attack(): Observable<any> {
     return defer(() => {
@@ -447,15 +449,7 @@ export class Thief extends Monster {
           next: (frameX) => {
             if (frameX === 3) {
               this.attackAudio.play();
-            }
-            if (frameX === 5) {
-              this.onEffectAttack.next({
-                x: this.x,
-                y: this.y,
-                direction: this.direction,
-              });
-            }
-            if (frameX === 5) {
+            } else if (frameX === 5) {
               if (this.direction === DIRECTION.LEFT) {
                 this.onDamageArea$.next({
                   x: this.x - 25,
