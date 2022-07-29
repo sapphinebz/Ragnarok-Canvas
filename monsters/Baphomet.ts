@@ -1,5 +1,5 @@
-import { combineLatest, defer, merge, Observable, tap } from "rxjs";
-import { filter, takeUntil, take } from "rxjs/operators";
+import { defer, Observable } from "rxjs";
+import { tap } from "rxjs/operators";
 import { EvilHorn } from "../items/EvilHorn";
 import { WhiteHerb } from "../items/WhiteHerb";
 import { YggdrasilBerry } from "../items/YggdrasilBerry";
@@ -369,6 +369,7 @@ export class Baphomet extends Monster {
 
   healLevel15 = new HealAll(15);
   healLevel20 = new Heal(20);
+
   comeOnBaphometJrSkill = new ComeOn({
     level: 1,
     summonMonsters: () => {
@@ -398,33 +399,29 @@ export class Baphomet extends Monster {
 
     this.breathAudio.volume = 0.08;
 
-    this.whenHpBelow(
-      this.maxHp * 0.7,
+    this.whenHp(
+      (hp) => hp <= this.maxHp * 0.7,
       tap(() => {
         this.healLevel15.useWith(this, this);
       }),
       this.canUseAgainAfter(60000)
     ).subscribe();
 
-    this.whenHpBelow(
-      this.maxHp * 0.25,
+    this.whenHp(
+      (hp) => hp <= this.maxHp * 0.25,
       tap(() => {
         this.healLevel20.useWith(this, this);
       }),
       this.canUseAgainAfter(60000)
     ).subscribe();
 
-    const whenAggressive$ = this.aggressiveTarget$.pipe(
-      filter((target) => target !== null)
-    );
-
-    const hpBelow90$ = this.hp$.pipe(filter((hp) => hp < this.maxHp * 0.9));
-
-    combineLatest([whenAggressive$, hpBelow90$])
-      .pipe(take(1), this.canUseAgainAfter(15000), takeUntil(this.onDied$))
-      .subscribe(() => {
+    this.whenAggressiveAndHp(
+      (hp) => hp <= this.maxHp * 0.9,
+      tap(() => {
         this.comeOnBaphometJrSkill.useWith(this);
-      });
+      }),
+      this.comeOnBaphometJrSkill.allSummonDiedCanUseAfter(10000)
+    ).subscribe();
   }
 
   getFrameEntry(frameY: number, frameX: number) {

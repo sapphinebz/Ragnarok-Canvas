@@ -1221,18 +1221,45 @@ export abstract class Monster {
   /**
    * for Skill Behavior
    */
-  whenHpBelow(
-    value: number,
+  whenHp(
+    hpPredicate: (hp: number) => boolean,
     doEffect: OperatorFunction<any, any>,
     cooldownCondition?: OperatorFunction<any, any>
   ) {
     return this.hp$.pipe(
-      filter((hp) => hp < value),
+      filter((hp) => hpPredicate(hp)),
       take(1),
       doEffect,
       (observable) => {
         if (cooldownCondition) {
           return observable.pipe(cooldownCondition);
+        }
+        return observable;
+      },
+      takeUntil(this.onDied$)
+    );
+  }
+
+  /**
+   * for Skill Behavior
+   */
+  whenAggressiveAndHp(
+    hpPredicate: (hp: number) => boolean,
+    doEffect: OperatorFunction<any, any>,
+    canUseAgainCondition?: OperatorFunction<any, any>
+  ) {
+    const whenAggressive$ = this.aggressiveTarget$.pipe(
+      filter((target) => target !== null)
+    );
+
+    const hpBelow$ = this.hp$.pipe(filter((hp) => hpPredicate(hp)));
+
+    return combineLatest([whenAggressive$, hpBelow$]).pipe(
+      take(1),
+      doEffect,
+      (observable) => {
+        if (canUseAgainCondition) {
+          return observable.pipe(canUseAgainCondition);
         }
         return observable;
       },

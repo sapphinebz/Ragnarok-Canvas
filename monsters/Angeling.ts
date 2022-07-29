@@ -135,16 +135,16 @@ export class Angeling extends Poring {
       [WhitePotion, 15],
     ];
 
-    this.whenHpBelow(
-      this.maxHp * 0.5,
+    this.whenHp(
+      (hp) => hp <= this.maxHp * 0.5,
       tap(() => {
         this.healAllSkill.useWith(this, this);
       }),
       this.canUseAgainAfter(20000)
     ).subscribe();
 
-    this.whenHpBelow(
-      this.maxHp * 0.3,
+    this.whenHp(
+      (hp) => hp <= this.maxHp * 0.3,
       tap(() => {
         this.healSkill.useWith(this, this);
       }),
