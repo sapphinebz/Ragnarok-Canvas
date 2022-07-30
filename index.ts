@@ -13,7 +13,6 @@ import {
   MonoTypeOperatorFunction,
   Observable,
   OperatorFunction,
-  ReplaySubject,
   share,
   startWith,
   Subject,
@@ -29,8 +28,8 @@ import {
   filter,
   map,
   mergeMap,
-  repeat,
   shareReplay,
+  take,
   takeUntil,
   throttleTime,
 } from "rxjs/operators";
@@ -350,6 +349,10 @@ const scoreCanvasXMap = new Map();
 const scoreCanvasYMap = new Map();
 
 let backgroundSoundTogglerImage = audioIsCloseImage;
+const onLoadedImageSoundToggler$ = fromEvent(
+  backgroundSoundTogglerImage,
+  "load"
+).pipe(take(1));
 const backgroundSoundTogglerImagePosition = { x: 16, y: 16 };
 
 const drawScore = () => {
@@ -396,22 +399,28 @@ const onCanvasRender$ = onWindowResize$.pipe(
 );
 
 let backgroundMusic: HTMLAudioElement;
-canvasHover(canvas, {
-  x: backgroundSoundTogglerImagePosition.x,
-  y: backgroundSoundTogglerImagePosition.y,
-  w: backgroundSoundTogglerImage.width,
-  h: backgroundSoundTogglerImage.height,
-})
+
+onLoadedImageSoundToggler$
   .pipe(
-    tap((isHover) => {
-      if (isHover) {
-        canvas.style.cursor = "pointer";
-      } else {
-        canvas.style.cursor = "default";
-      }
-    }),
-    onClickCanvasArea(canvas),
-    map(() => backgroundSoundTogglerImage === audioIsOpenImage)
+    switchMap(() => onWindowResize$),
+    switchMap(() => {
+      return canvasHover(canvas, {
+        x: backgroundSoundTogglerImagePosition.x,
+        y: backgroundSoundTogglerImagePosition.y,
+        w: backgroundSoundTogglerImage.width,
+        h: backgroundSoundTogglerImage.height,
+      }).pipe(
+        tap((isHover) => {
+          if (isHover) {
+            canvas.style.cursor = "pointer";
+          } else {
+            canvas.style.cursor = "default";
+          }
+        }),
+        onClickCanvasArea(canvas),
+        map(() => backgroundSoundTogglerImage === audioIsOpenImage)
+      );
+    })
   )
   .subscribe((isOpen) => {
     if (isOpen) {
@@ -423,14 +432,13 @@ canvasHover(canvas, {
       backgroundSoundTogglerImage = audioIsOpenImage;
       if (!backgroundMusic) {
         backgroundMusic = loadProteraFieldVol2();
-        backgroundMusic.volume = 0.05;
+        backgroundMusic.volume = 0.1;
         backgroundMusic.loop = true;
       }
       if (backgroundMusic) {
         backgroundMusic.play();
       }
     }
-    tick();
   });
 
 onCanvasRender$.subscribe(() => {

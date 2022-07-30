@@ -212,7 +212,7 @@ export class Pecopeco extends Monster {
       [YellowHerb, 10],
     ];
 
-    this.standAudio.volume = 0.05;
+    this.standAudio.volume = 0.02;
     this.attackAudio.volume = 0.05;
     this.moveAudio.volume = 0.03;
     this.damagedAudio.volume = 0.05;

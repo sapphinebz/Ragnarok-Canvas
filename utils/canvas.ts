@@ -1,10 +1,16 @@
 import { fromEvent, NEVER, Observable } from "rxjs";
-import { map, distinctUntilChanged, switchMap } from "rxjs/operators";
+import {
+  map,
+  distinctUntilChanged,
+  switchMap,
+  throttleTime,
+} from "rxjs/operators";
 import { Area, Monster } from "../monsters/Monster";
 import { isMouseHoverArea } from "./collision";
 
 export function canvasHover(canvas: HTMLCanvasElement, area: Area) {
   return fromEvent<MouseEvent>(canvas, "mousemove").pipe(
+    throttleTime(50),
     map((event) => {
       return isMouseHoverArea(event, {
         x: area.x,
