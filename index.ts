@@ -54,6 +54,7 @@ import { rectanglesIntersect } from "./utils/collision";
 import { randomMinMax } from "./utils/random-minmax";
 import { Poporing } from "./monsters/Poporing";
 import { BaphometJr } from "./monsters/BaphometJr";
+import { Pouring } from "./monsters/Pouring";
 
 const canvas = document.querySelector<HTMLCanvasElement>("canvas")!;
 const ctx = canvas.getContext("2d")!;

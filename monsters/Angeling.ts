@@ -12,6 +12,7 @@ import { randomMinMax } from "../utils/random-minmax";
 import { CropImage, DIRECTION, Monster } from "./Monster";
 import { Poporing } from "./Poporing";
 import { Poring } from "./Poring";
+import { Pouring } from "./Pouring";
 import { SantaPoring } from "./SantaPoring";
 
 export class Angeling extends Poring {
@@ -111,7 +112,7 @@ export class Angeling extends Poring {
       let i = 1;
       const amountMonster = 6;
       const summonMonsters: Monster[] = [];
-      const monsters = [Poring, Poporing, SantaPoring];
+      const monsters = [Pouring, Poporing, SantaPoring];
       while (i <= amountMonster) {
         const randomMonsterClassIndex = randomMinMax(0, monsters.length - 1);
         const MonsterClass = monsters[randomMonsterClassIndex];
