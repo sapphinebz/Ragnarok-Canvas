@@ -32,6 +32,7 @@ import {
   repeat,
   shareReplay,
   takeUntil,
+  throttleTime,
 } from "rxjs/operators";
 import { KeyboardController } from "./gamepad/keyboard-controller";
 import { drawDamage, drawRestoreHp } from "./gamepad/number-drawer";
@@ -527,6 +528,7 @@ const onMonsterDropedItems$ = merge(onLoadMonster$, onSummonMonster$).pipe(
         ]).pipe(
           mergeMap(([player, fieldItem]) => {
             return player.onMoving$.pipe(
+              throttleTime(50),
               checkPlayerCollideItem(player, fieldItem),
               playerUseItem(player, fieldItem),
               takeUntil(fieldItem.item.onCleanUp$)
