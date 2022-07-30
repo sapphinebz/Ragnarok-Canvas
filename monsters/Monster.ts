@@ -820,26 +820,6 @@ export abstract class Monster {
   /**
    * for test only
    */
-  testSprites(frames: [number, number][], delay = 1000) {
-    let index = 0;
-    return interval(delay).pipe(
-      map(() => {
-        const [frameX, frameY] = frames[index];
-        this.frameX = frameX;
-        this.frameY = frameY;
-        if (index + 1 > frames.length - 1) {
-          index = 0;
-        } else {
-          index++;
-        }
-        return this.frameX;
-      })
-    );
-  }
-
-  /**
-   * for test only
-   */
   testArea(area: Area) {
     this.ctx.beginPath();
     this.ctx.fillStyle = "red";
