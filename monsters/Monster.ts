@@ -40,6 +40,7 @@ import {
   takeWhile,
   exhaustMap,
   first,
+  throttleTime,
 } from "rxjs/operators";
 import {
   animateComboDamage,
@@ -728,7 +729,8 @@ export abstract class Monster {
             startWith(0),
             map(() => {
               return target;
-            })
+            }),
+            takeUntil(target.onDied$)
           )
         ),
         mergeAll()
@@ -744,6 +746,7 @@ export abstract class Monster {
       );
       combineLatest({ target: onTargetsMoving$, self: onSelfMoving$ })
         .pipe(
+          throttleTime(500),
           map(({ target, self }) => {
             const distance = distanceBetween(target, self);
             if (this.aggressiveTarget !== null && distance <= this.trackRange) {
@@ -757,15 +760,14 @@ export abstract class Monster {
             return null;
           }),
           distinctUntilChanged(),
-          takeUntil(this.onDied$),
-          takeUntil(this.onCleanup$)
+          takeUntil(this.onDied$)
         )
         .subscribe((aggressiveTarget) => {
-          this.aggressiveTarget = aggressiveTarget;
-
-          if (aggressiveTarget !== null) {
+          if (aggressiveTarget !== null && !aggressiveTarget.isDied) {
+            this.aggressiveTarget = aggressiveTarget;
             this.actionChange$.next(ACTION.MOVE_TO_TARGET);
           } else {
+            this.aggressiveTarget = null;
             this.actionChange$.next(ACTION.RANDOM);
           }
         });
