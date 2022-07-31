@@ -28,20 +28,20 @@ import {
   concatAll,
   concatMap,
   connect,
+  debounce,
   debounceTime,
   distinctUntilChanged,
   endWith,
   filter,
+  first,
   mergeAll,
   mergeMap,
   repeat,
   takeUntil,
-  share,
   takeWhile,
-  exhaustMap,
-  first,
   throttleTime,
 } from "rxjs/operators";
+import * as Field from "..";
 import {
   animateComboDamage,
   animateMissDamage,
@@ -52,7 +52,7 @@ import { DropItems, FieldItem } from "../items/Item";
 import { Skill, Skills } from "../skills/Skill";
 import { loadCriticalAttack } from "../sounds/critical-attack";
 import { deltaTime } from "../utils/animation";
-import { distanceBetween } from "../utils/collision";
+import { distanceBetweenTarget } from "../utils/collision";
 import {
   BACKGROUND_CASTING_SPELL_COLOR,
   DANGER_HEALTH_GAUGE_COLOR,
@@ -63,7 +63,6 @@ import { playAudio } from "../utils/play-audio";
 import { randomEnd, randomMinMax } from "../utils/random-minmax";
 import { repeatUntil } from "../utils/repeat-util";
 import { shuffle } from "../utils/shuffle";
-import * as Field from "..";
 
 export interface MoveLocation {
   x: number;
@@ -245,6 +244,9 @@ export abstract class Monster {
   }
 
   abstract frames: CropImage[][];
+
+  // abstract halfWidth: number;
+  // abstract halfHeight: number;
 
   leftImage$ = new ReplaySubject<HTMLImageElement>(1);
   rightImage$ = new ReplaySubject<HTMLImageElement>(1);
@@ -441,7 +443,7 @@ export abstract class Monster {
           };
           return this.walkingToTarget(
             itemLocation,
-            (distance) => distance <= 10
+            (distance) => distance <= 1
           ).pipe(
             takeWhile((arrived) => {
               if (arrived && this.targetItem) {
@@ -694,8 +696,16 @@ export abstract class Monster {
                   let nearest: FieldItem | null = null;
                   let distance: number = 0;
                   for (const fieldItem of fieldItems) {
-                    const _distance = distanceBetween(fieldItem.location, this);
-                    if (_distance > 350) {
+                    const { distance: _distance } = distanceBetweenTarget(
+                      {
+                        x: fieldItem.location.x,
+                        y: fieldItem.location.y,
+                        width: fieldItem.item.width,
+                        height: fieldItem.item.height,
+                      },
+                      this
+                    );
+                    if (_distance > this.visionRange) {
                       continue;
                     } else if (!nearest || _distance < distance) {
                       nearest = fieldItem;
@@ -748,7 +758,7 @@ export abstract class Monster {
         .pipe(
           throttleTime(500),
           map(({ target, self }) => {
-            const distance = distanceBetween(target, self);
+            const { distance } = distanceBetweenTarget(target, self);
             if (this.aggressiveTarget !== null && distance <= this.trackRange) {
               return target;
             } else if (
@@ -870,16 +880,24 @@ export abstract class Monster {
             this.direction = DIRECTION.RIGHT;
           }
 
-          const targetX = target.x + target.width / 2;
-          const targetY = target.y + target.height / 2;
+          // const targetX = target.x + target.width / 2;
+          // const targetY = target.y + target.height / 2;
 
-          const sourceX = moveNextLocation.x + this.width / 2;
-          const sourceY = moveNextLocation.y + this.height / 2;
+          // const sourceX = moveNextLocation.x + this.width / 2;
+          // const sourceY = moveNextLocation.y + this.height / 2;
 
-          const distance = distanceBetween(
-            { x: targetX, y: targetY },
-            { x: sourceX, y: sourceY }
-          );
+          // const distance = distanceBetween(
+          //   { x: targetX, y: targetY },
+          //   { x: sourceX, y: sourceY }
+          // );
+
+          const { targetX, targetY, sourceX, sourceY, distance } =
+            distanceBetweenTarget(target, {
+              x: moveNextLocation.x,
+              y: moveNextLocation.y,
+              width: this.width,
+              height: this.height,
+            });
           if (predicate(distance)) {
             return true;
           }
@@ -1336,8 +1354,8 @@ export abstract class Monster {
 
     const hpBelow$ = this.hp$.pipe(filter((hp) => hpPredicate(hp)));
 
-    return combineLatest([whenAggressive$, hpBelow$]).pipe(
-      take(1),
+    return whenAggressive$.pipe(
+      debounce(() => hpBelow$),
       doEffect,
       (observable) => {
         if (canUseAgainCondition) {

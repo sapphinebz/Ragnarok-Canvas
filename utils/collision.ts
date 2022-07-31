@@ -1,4 +1,4 @@
-import { Area, Monster, MoveLocation } from "../monsters/Monster";
+import { Area, MoveLocation, TargetLocation } from "../monsters/Monster";
 
 export function rectanglesIntersect(area1: Area, area2: Area) {
   const aLeftOfB = area1.x + area1.w < area2.x;
@@ -30,4 +30,22 @@ export function distanceBetween(
   return Math.sqrt(
     (location1.x - location2.x) ** 2 + (location1.y - location2.y) ** 2
   );
+}
+
+export function distanceBetweenTarget(
+  source: TargetLocation,
+  target: TargetLocation
+) {
+  const targetX = target.x + target.width / 2;
+  const targetY = target.y + target.height / 2;
+
+  const sourceX = source.x + source.width / 2;
+  const sourceY = source.y + source.height / 2;
+
+  const distance = distanceBetween(
+    { x: targetX, y: targetY },
+    { x: sourceX, y: sourceY }
+  );
+
+  return { distance, targetX, targetY, sourceX, sourceY };
 }
