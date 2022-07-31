@@ -402,7 +402,11 @@ export class Baphomet extends Monster {
     this.whenHp(
       (hp) => hp <= this.maxHp * 0.7,
       tap(() => {
-        this.healAllLevel15.useWith(this, this);
+        if (this.hp <= this.maxHp * 0.3) {
+          this.healLevel20.useWith(this, this);
+        } else {
+          this.healAllLevel15.useWith(this, this);
+        }
       }),
       this.canUseAgainAfter(60000)
     ).subscribe();
