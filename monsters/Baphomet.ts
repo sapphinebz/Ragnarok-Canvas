@@ -388,7 +388,7 @@ export class Baphomet extends Monster {
   constructor(public canvas: HTMLCanvasElement) {
     super(canvas, baphometSpriteLeft, baphometSpriteRight);
 
-    this.maxHp = 450;
+    this.maxHp = 1000;
     this.hp = this.maxHp;
 
     this.dropItems = [

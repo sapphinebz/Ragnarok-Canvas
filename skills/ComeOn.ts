@@ -1,15 +1,31 @@
-import { forkJoin, from, mergeMap, Subject, takeUntil, timer } from "rxjs";
-import { tap, switchMap, share, repeat } from "rxjs/operators";
+import {
+  AsyncSubject,
+  connectable,
+  forkJoin,
+  from,
+  mergeMap,
+  ReplaySubject,
+  Subject,
+  takeUntil,
+} from "rxjs";
+import { tap, switchMap, repeat, debounceTime } from "rxjs/operators";
 import { Monster } from "../monsters/Monster";
 import { CastingSkill } from "./CastingSkill";
 import * as Field from "..";
 import { randomLocationAroundTarget } from "../utils/random-minmax";
 
 export class ComeOn extends CastingSkill {
+  onCleanup$ = new AsyncSubject<void>();
   onSummon$ = new Subject<Monster[]>();
-  onAllSummonDied$ = this.onSummon$.pipe(
-    switchMap((monsters) => forkJoin(monsters.map((m) => m.onDied$))),
-    share()
+  allSummonDied$ = connectable(
+    this.onSummon$.pipe(
+      switchMap((monsters) => forkJoin(monsters.map((m) => m.onDied$))),
+      takeUntil(this.onCleanup$)
+    ),
+    {
+      resetOnDisconnect: false,
+      connector: () => new ReplaySubject(1),
+    }
   );
 
   constructor(
@@ -20,9 +36,13 @@ export class ComeOn extends CastingSkill {
   ) {
     super();
     this.castingTime = 500;
+
+    this.allSummonDied$.connect();
   }
 
   useWith(user: Monster) {
+    user.onCleanup$.subscribe(this.onCleanup$);
+
     this.casting("รุมโว้ย", user, () => {
       const summonMonsters = this.config.summonMonsters();
       this.onSummon$.next(summonMonsters);
@@ -51,7 +71,7 @@ export class ComeOn extends CastingSkill {
               })
             );
           }),
-          takeUntil(user.onCleanup$)
+          takeUntil(this.onCleanup$)
         )
         .subscribe();
     });
@@ -63,7 +83,7 @@ export class ComeOn extends CastingSkill {
    */
   allSummonDiedCanUseAfter(duration: number) {
     return repeat({
-      delay: () => this.onAllSummonDied$.pipe(switchMap(() => timer(duration))),
+      delay: () => this.allSummonDied$.pipe(debounceTime(duration)),
     });
   }
 }

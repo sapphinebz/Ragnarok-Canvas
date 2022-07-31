@@ -1355,6 +1355,7 @@ export abstract class Monster {
     const hpBelow$ = this.hp$.pipe(filter((hp) => hpPredicate(hp)));
 
     return whenAggressive$.pipe(
+      take(1),
       debounce(() => hpBelow$),
       doEffect,
       (observable) => {
