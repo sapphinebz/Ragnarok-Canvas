@@ -25,9 +25,11 @@ export class HealAll extends CastingSkill {
     this.casting("Heal all", user, () => {
       this.useAudio.play();
       for (const monster of Field.monstersOnField) {
-        const { distance } = distanceBetweenTarget(user, monster);
-        if (distance <= 150) {
-          monster.restoreHp(toMonster.maxHp * 0.05 * this.level);
+        if (!monster.isDied) {
+          const { distance } = distanceBetweenTarget(user, monster);
+          if (distance <= 150) {
+            monster.restoreHp(toMonster.maxHp * 0.05 * this.level);
+          }
         }
       }
     });

@@ -19,7 +19,9 @@ export class Heal extends CastingSkill {
     /** formula Heal */
     this.casting("Heal", monster, () => {
       this.useAudio.play();
-      toMonster.restoreHp(toMonster.maxHp * 0.05 * this.level);
+      if (!toMonster.isDied) {
+        toMonster.restoreHp(toMonster.maxHp * 0.05 * this.level);
+      }
     });
   }
 }

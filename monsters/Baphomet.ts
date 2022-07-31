@@ -367,7 +367,7 @@ export class Baphomet extends Monster {
 
   weaponSprite = { offsetX: 772, offsetY: 822, width: 74, height: 99 };
 
-  healLevel15 = new HealAll(15);
+  healAllLevel15 = new HealAll(15);
   healLevel20 = new Heal(20);
 
   comeOnBaphometJrSkill = new ComeOn({
@@ -402,7 +402,7 @@ export class Baphomet extends Monster {
     this.whenHp(
       (hp) => hp <= this.maxHp * 0.7,
       tap(() => {
-        this.healLevel15.useWith(this, this);
+        this.healAllLevel15.useWith(this, this);
       }),
       this.canUseAgainAfter(60000)
     ).subscribe();
