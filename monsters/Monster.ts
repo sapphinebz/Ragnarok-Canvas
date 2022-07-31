@@ -466,6 +466,7 @@ export abstract class Monster {
               }
               return true;
             }),
+            takeUntil(this.targetItem.item.onCleanUp$),
             tap({
               complete: () => {
                 if (preAction === ACTION.MOVE_TO_STEAL_ITEM) {
@@ -475,7 +476,7 @@ export abstract class Monster {
                 }
               },
             }),
-            takeUntil(this.targetItem.item.onCleanUp$)
+            takeUntil(this.onCleanup$)
           );
         } else if (action === ACTION.ATTACK) {
           // For Monster
