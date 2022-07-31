@@ -398,10 +398,24 @@ export abstract class Monster {
                 this.actionChange$.next(ACTION.RANDOM);
                 return EMPTY;
               }
-              return this.walkingToTarget(
-                target,
-                (distance) => distance <= this.attackRange
-              ).pipe(
+              return defer(() => {
+                const { distance: checkDistance } = distanceBetweenTarget(
+                  target,
+                  {
+                    x: this.x,
+                    y: this.y,
+                    width: this.width,
+                    height: this.height,
+                  }
+                );
+                if (checkDistance <= this.attackRange) {
+                  return this.standing().pipe(map(() => true));
+                }
+                return this.walkingToTarget(
+                  target,
+                  (distance) => distance <= this.attackRange
+                );
+              }).pipe(
                 connect((walking$) => {
                   const nextAttack$ = walking$.pipe(
                     distinctUntilChanged(),
@@ -897,6 +911,8 @@ export abstract class Monster {
               height: this.height,
             });
           if (predicate(distance)) {
+            this.x = moveNextLocation.x;
+            this.y = moveNextLocation.y;
             return true;
           }
 
