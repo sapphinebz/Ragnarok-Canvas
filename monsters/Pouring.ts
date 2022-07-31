@@ -1,8 +1,7 @@
 import { defer, Observable } from "rxjs";
 import { tap } from "rxjs/operators";
 import { AquaMarine } from "../items/AquaMarine";
-import { Jellopy } from "../items/Jellopy";
-import { RedPotion } from "../items/RedPotion";
+import { ConcentrationPotion } from "../items/ConcentrationPotion";
 import { StickyMucus } from "../items/StickyMucus";
 import { WhiteHerb } from "../items/WhiteHerb";
 import { WhitePotion } from "../items/WhitePotion";
@@ -345,6 +344,7 @@ export class Pouring extends Monster {
       [AquaMarine, 20],
       [WhiteHerb, 15],
       [StickyMucus, 15],
+      [ConcentrationPotion, 30],
     ];
 
     if (this.isStealer) {

@@ -25,10 +25,10 @@ import {
   timer,
 } from "rxjs";
 import {
+  audit,
   concatAll,
   concatMap,
   connect,
-  debounce,
   debounceTime,
   distinctUntilChanged,
   endWith,
@@ -1371,7 +1371,7 @@ export abstract class Monster {
 
     return whenAggressive$.pipe(
       take(1),
-      debounce(() => hpBelow$),
+      audit(() => hpBelow$),
       doEffect,
       (observable) => {
         if (canUseAgainCondition) {

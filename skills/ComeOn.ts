@@ -15,17 +15,9 @@ import * as Field from "..";
 import { randomLocationAroundTarget } from "../utils/random-minmax";
 
 export class ComeOn extends CastingSkill {
-  onCleanup$ = new AsyncSubject<void>();
   onSummon$ = new Subject<Monster[]>();
-  allSummonDied$ = connectable(
-    this.onSummon$.pipe(
-      switchMap((monsters) => forkJoin(monsters.map((m) => m.onDied$))),
-      takeUntil(this.onCleanup$)
-    ),
-    {
-      resetOnDisconnect: false,
-      connector: () => new ReplaySubject(1),
-    }
+  onAllSummonDied$ = this.onSummon$.pipe(
+    switchMap((monsters) => forkJoin(monsters.map((m) => m.onDied$)))
   );
 
   constructor(
@@ -36,13 +28,9 @@ export class ComeOn extends CastingSkill {
   ) {
     super();
     this.castingTime = 500;
-
-    this.allSummonDied$.connect();
   }
 
   useWith(user: Monster) {
-    user.onCleanup$.subscribe(this.onCleanup$);
-
     this.casting("รุมโว้ย", user, () => {
       const summonMonsters = this.config.summonMonsters();
       this.onSummon$.next(summonMonsters);
@@ -71,7 +59,7 @@ export class ComeOn extends CastingSkill {
               })
             );
           }),
-          takeUntil(this.onCleanup$)
+          takeUntil(user.onCleanup$)
         )
         .subscribe();
     });
@@ -83,7 +71,7 @@ export class ComeOn extends CastingSkill {
    */
   allSummonDiedCanUseAfter(duration: number) {
     return repeat({
-      delay: () => this.allSummonDied$.pipe(debounceTime(duration)),
+      delay: () => this.onAllSummonDied$.pipe(debounceTime(duration)),
     });
   }
 }
