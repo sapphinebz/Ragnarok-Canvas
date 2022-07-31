@@ -187,7 +187,6 @@ export abstract class Monster {
   onDamageArea$ = new Subject<DamageArea>();
   onReceiveDamage$ = new Subject<DamageNumber>();
   onComboDamage$ = new Subject<number[]>();
-  onTargetWithInAttackRange$ = new Subject<Monster>();
   onRestoreHp$ = new Subject<number>();
   onMoving$ = new Subject<MoveLocation>();
   /**
@@ -408,7 +407,6 @@ export abstract class Monster {
                     distinctUntilChanged(),
                     switchMap((targetWithInAttackRange) => {
                       if (targetWithInAttackRange) {
-                        this.onTargetWithInAttackRange$.next(target);
                         return timer(this.dps).pipe(
                           tap(() => {
                             if (this.aggressiveTarget !== null) {
