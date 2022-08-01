@@ -29,8 +29,8 @@ export class Acidus extends Monster {
   dps = 300;
 
   behaviorActions = this.walkingsAnyDirection(5000, 10000).concat([
-    this.standingDuration(1000, 3000),
-    this.standingDuration(1000, 3000),
+    this.standingDurationBetween(1000, 3000),
+    this.standingDurationBetween(1000, 3000),
   ]);
 
   respawnTimeMin = 10000;

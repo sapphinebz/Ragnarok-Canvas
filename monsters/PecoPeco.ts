@@ -35,9 +35,9 @@ export class Pecopeco extends Monster {
   respawnTimeMax = 15000;
 
   behaviorActions = this.walkingsAnyDirection(1000, 3000).concat([
-    this.standingDuration(3000, 6000),
-    this.standingDuration(3000, 6000),
-    this.standingDuration(3000, 6000),
+    this.standingDurationBetween(3000, 6000),
+    this.standingDurationBetween(3000, 6000),
+    this.standingDurationBetween(3000, 6000),
   ]);
 
   standAudio = new AudioSubject(this, [

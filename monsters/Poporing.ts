@@ -27,8 +27,8 @@ export class Poporing extends Monster {
   dps = 400;
 
   behaviorActions = this.walkingsAnyDirection(3000, 4000).concat([
-    this.standingDuration(3000, 4000),
-    this.standingDuration(2000, 4000),
+    this.standingDurationBetween(3000, 4000),
+    this.standingDurationBetween(2000, 4000),
   ]);
 
   frames: CropImage[][] = [

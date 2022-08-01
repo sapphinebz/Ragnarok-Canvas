@@ -964,7 +964,7 @@ export abstract class Monster {
    * @param max max behavior duration
    * @returns animation standing
    */
-  standingDuration(min: number, max: number) {
+  standingDurationBetween(min: number, max: number) {
     return this.standing().pipe(
       this.emitStandingAggressive(),
       randomEnd(min, max)

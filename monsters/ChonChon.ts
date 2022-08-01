@@ -33,8 +33,8 @@ export class ChonChon extends Monster {
   dps = 300;
 
   behaviorActions = this.walkingsAnyDirection(5000, 6000).concat([
-    this.standingDuration(1000, 6000),
-    this.standingDuration(1000, 6000),
+    this.standingDurationBetween(1000, 6000),
+    this.standingDurationBetween(1000, 6000),
   ]);
 
   frames: CropImage[][] = [

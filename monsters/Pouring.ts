@@ -40,8 +40,8 @@ export class Pouring extends Monster {
   walkingAudio = new AudioSubject(this, loadPoringWalkSound());
 
   behaviorActions = this.walkingsAnyDirection(3000, 5000).concat([
-    this.standingDuration(2000, 5000),
-    this.standingDuration(2000, 5000),
+    this.standingDurationBetween(2000, 5000),
+    this.standingDurationBetween(2000, 5000),
   ]);
 
   frames: CropImage[][] = [
