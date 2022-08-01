@@ -217,7 +217,7 @@ export abstract class Monster {
   /**
    * distance of monster can attack to player
    */
-  attackRange = 0;
+  attackRange = 70;
 
   /**
    * monster auto aggressive to player if player stay within "visionRange"
