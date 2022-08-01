@@ -408,19 +408,18 @@ export abstract class Monster {
                     height: this.height,
                   }
                 );
-                if (checkDistance <= this.attackRange) {
+                if (this.isAttackRange(checkDistance)) {
                   return this.standing().pipe(map(() => true));
                 }
-                return this.walkingToTarget(
-                  target,
-                  (distance) => distance <= this.attackRange
+                return this.walkingToTarget(target, (distance) =>
+                  this.isAttackRange(distance)
                 );
               }).pipe(
                 connect((walking$) => {
                   const nextAttack$ = walking$.pipe(
                     distinctUntilChanged(),
-                    switchMap((targetWithInAttackRange) => {
-                      if (targetWithInAttackRange) {
+                    switchMap((inAttackRange) => {
+                      if (inAttackRange) {
                         return timer(this.dps).pipe(
                           tap(() => {
                             if (this.aggressiveTarget !== null) {
@@ -867,6 +866,12 @@ export abstract class Monster {
     return defer(() => {
       return merge(this.walking().pipe(ignoreElements()), deltaTime()).pipe(
         map((delta) => {
+          const isAlreadyAttackRange = predicate(
+            distanceBetweenTarget(target, this).distance
+          );
+          if (isAlreadyAttackRange) {
+            return true;
+          }
           const currentMoveLocation = { x: this.x, y: this.y };
           let moveNextLocation = { ...currentMoveLocation };
 
@@ -892,17 +897,6 @@ export abstract class Monster {
           } else {
             this.direction = DIRECTION.RIGHT;
           }
-
-          // const targetX = target.x + target.width / 2;
-          // const targetY = target.y + target.height / 2;
-
-          // const sourceX = moveNextLocation.x + this.width / 2;
-          // const sourceY = moveNextLocation.y + this.height / 2;
-
-          // const distance = distanceBetween(
-          //   { x: targetX, y: targetY },
-          //   { x: sourceX, y: sourceY }
-          // );
 
           const { targetX, targetY, sourceX, sourceY, distance } =
             distanceBetweenTarget(target, {
@@ -1405,6 +1399,10 @@ export abstract class Monster {
     }
 
     this.onRestoreHp$.next(Math.round(this.hp - hpBefore));
+  }
+
+  isAttackRange(distance: number) {
+    return distance <= this.attackRange + this.width / 2;
   }
 
   private playCriticalAudio() {
