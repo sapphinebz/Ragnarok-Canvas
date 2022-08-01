@@ -35,6 +35,7 @@ export class Baphomet extends Monster {
   trackRange = 500;
   isAggressiveOnVision = true;
   dps = 300;
+  attackRange = 30;
 
   behaviorActions = this.walkingsAnyDirection(1000, 2000).concat([
     this.standingDuration(3000, 6000),
