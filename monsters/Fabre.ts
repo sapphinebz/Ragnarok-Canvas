@@ -23,6 +23,7 @@ export class Fabre extends Monster {
 
   atk = 25;
   dps = 800;
+  attackRange = 15;
 
   behaviorActions = this.walkingsAnyDirection(3000, 4000).concat([
     this.standingDuration(3000, 4000),
