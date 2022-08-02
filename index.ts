@@ -660,10 +660,13 @@ const onMonsterDropedItems$ = merge(onLoadMonster$, onSummonMonster$).pipe(
 );
 
 // Monster Random Action
-const onMonsterTickRender$ = onLoadMonster$.pipe(
+const onMonsterTickRender$ = merge(onLoadMonster$, onSummonMonster$).pipe(
   mergeMap((monster) => {
-    monster.randomAction();
+    if (!monster.summonBy) {
+      monster.randomAction();
+    }
     monster.autoAggressiveOnVisionTarget(onLoadPlayer$);
+
     return monster.onActionTick$.pipe(takeUntil(monster.onCleanup$));
     // monster.direction = DIRECTION.RIGHT;
     // return monster.walking().pipe(repeat());
