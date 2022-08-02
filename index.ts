@@ -654,8 +654,7 @@ const onMonsterDropedItems$ = merge(onLoadMonster$, onSummonMonster$).pipe(
           playerCanPick$.pipe(ignoreElements()),
           removeUselessItem$.pipe(ignoreElements())
         );
-      }),
-      takeUntil(monster.onCleanup$)
+      })
     )
   )
 );
