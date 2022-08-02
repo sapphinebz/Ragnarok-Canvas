@@ -56,9 +56,8 @@ import { canvasHover, onClickCanvasArea, zIndexMonsters } from "./utils/canvas";
 import { rectanglesIntersect } from "./utils/collision";
 import { randomMinMax } from "./utils/random-minmax";
 import { Poporing } from "./monsters/Poporing";
-import { BaphometJr } from "./monsters/BaphometJr";
-import { Pouring } from "./monsters/Pouring";
 import { requireResurrectChatRoomImage } from "./sprites/require-resurrect-chat-room";
+import { loadResurrectionSkill } from "./sounds/resurrection-skill";
 
 const canvas = document.querySelector<HTMLCanvasElement>("canvas")!;
 const ctx = canvas.getContext("2d")!;
@@ -335,6 +334,9 @@ const removePlayer = (player: Monster) => {
 };
 
 const resurrectPlayer = (player: Monster) => {
+  const audio = loadResurrectionSkill();
+  audio.volume = 0.05;
+  audio.play();
   const newPlayer = new Thief(canvas);
   newPlayer.x = player.x;
   newPlayer.y = player.y;

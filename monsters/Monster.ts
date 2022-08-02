@@ -37,6 +37,7 @@ import {
   mergeAll,
   mergeMap,
   repeat,
+  share,
   takeUntil,
   takeWhile,
   throttleTime,
@@ -138,6 +139,9 @@ export type CropImage = {
 };
 
 export abstract class Monster {
+  onDied$ = new AsyncSubject<void>();
+  isDied = false;
+
   atk = 1;
   maxHp = 20;
   hp$ = new BehaviorSubject<number>(this.maxHp);
@@ -200,6 +204,16 @@ export abstract class Monster {
    */
   aggressiveTarget$ = new BehaviorSubject<Monster | null>(null);
 
+  onAggressiveTargetDied$ = this.aggressiveTarget$.pipe(
+    switchMap((target) => {
+      if (target === null) {
+        return EMPTY;
+      }
+      return target.onDied$;
+    }),
+    share()
+  );
+
   targetItem?: FieldItem;
   /**
    * Class Item stolen
@@ -258,8 +272,6 @@ export abstract class Monster {
     return this.actionChange$.value;
   }
 
-  onDied$ = new AsyncSubject<void>();
-  isDied = false;
   /**
    * on this monster need render
    */
@@ -309,6 +321,10 @@ export abstract class Monster {
           skill.useWith(this);
         }
       }
+    });
+
+    this.onAggressiveTargetDied$.pipe(takeUntil(this.onDied$)).subscribe(() => {
+      this.showHpGauge = false;
     });
 
     this.criticalAttackSound.volume = 0.05;
