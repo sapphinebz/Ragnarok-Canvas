@@ -4,6 +4,7 @@ import {
   distinctUntilChanged,
   switchMap,
   throttleTime,
+  tap,
 } from "rxjs/operators";
 import { Area, Monster } from "../monsters/Monster";
 import { isMouseHoverArea } from "./collision";
@@ -19,7 +20,14 @@ export function canvasHover(canvas: HTMLCanvasElement, area: Area) {
         h: area.h,
       });
     }),
-    distinctUntilChanged()
+    distinctUntilChanged(),
+    tap((isHover) => {
+      if (isHover) {
+        canvas.style.cursor = "pointer";
+      } else {
+        canvas.style.cursor = "default";
+      }
+    })
   );
 }
 

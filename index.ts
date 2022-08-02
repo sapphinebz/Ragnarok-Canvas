@@ -5,6 +5,7 @@ import {
   AsyncSubject,
   BehaviorSubject,
   combineLatest,
+  defer,
   EMPTY,
   from,
   fromEvent,
@@ -13,6 +14,7 @@ import {
   MonoTypeOperatorFunction,
   Observable,
   OperatorFunction,
+  ReplaySubject,
   share,
   startWith,
   Subject,
@@ -23,6 +25,7 @@ import {
 } from "rxjs";
 import {
   connect,
+  debounce,
   debounceTime,
   delay,
   filter,
@@ -55,6 +58,7 @@ import { randomMinMax } from "./utils/random-minmax";
 import { Poporing } from "./monsters/Poporing";
 import { BaphometJr } from "./monsters/BaphometJr";
 import { Pouring } from "./monsters/Pouring";
+import { requireResurrectChatRoomImage } from "./sprites/require-resurrect-chat-room";
 
 const canvas = document.querySelector<HTMLCanvasElement>("canvas")!;
 const ctx = canvas.getContext("2d")!;
@@ -308,7 +312,37 @@ export const removeMonsterFromField = (monster: Monster) => {
  */
 const thief = new Thief(canvas);
 
-const onLoadPlayer$ = new BehaviorSubject<Monster>(thief);
+const onLoadPlayer$ = new ReplaySubject<Monster>(1);
+const players$ = new BehaviorSubject<Monster[]>([]);
+const getAllPlayer = () => {
+  return players$.value;
+};
+
+const addPlayer = (player: Monster) => {
+  player.isPlayer = true;
+  onLoadPlayer$.next(player);
+  players$.next([...players$.value, player]);
+};
+
+const removePlayer = (player: Monster) => {
+  const players = players$.value;
+  const index = players.findIndex((p) => p === player);
+  if (index > -1) {
+    players.splice(index, 1);
+    players$.next([...players$.value]);
+    player.cleanup();
+  }
+};
+
+const resurrectPlayer = (player: Monster) => {
+  const newPlayer = new Thief(canvas);
+  newPlayer.x = player.x;
+  newPlayer.y = player.y;
+  removePlayer(player);
+  addPlayer(newPlayer);
+};
+
+addPlayer(thief);
 
 onLoadPlayer$
   .pipe(
@@ -330,7 +364,8 @@ onLoadPlayer$
               onMonsterDied$.next(monster);
             }
           },
-        })
+        }),
+        takeUntil(player.onCleanup$)
       );
     })
   )
@@ -339,8 +374,6 @@ onLoadPlayer$
 /**
  * GAME
  */
-
-const keyboardController = new KeyboardController(canvas, thief);
 
 const killCount$ = new BehaviorSubject(0);
 
@@ -411,13 +444,6 @@ onLoadedImageSoundToggler$
         w: backgroundSoundTogglerImage.width,
         h: backgroundSoundTogglerImage.height,
       }).pipe(
-        tap((isHover) => {
-          if (isHover) {
-            canvas.style.cursor = "pointer";
-          } else {
-            canvas.style.cursor = "default";
-          }
-        }),
         onClickCanvasArea(canvas),
         map(() => backgroundSoundTogglerImage === audioIsOpenImage)
       );
@@ -442,6 +468,8 @@ onLoadedImageSoundToggler$
     }
   });
 
+const onDrawAfter$ = new Subject<void>();
+
 onCanvasRender$.subscribe(() => {
   for (const fieldItem of fieldItems.value) {
     ctx.drawImage(
@@ -451,9 +479,12 @@ onCanvasRender$.subscribe(() => {
     );
   }
 
-  for (const monster of zIndexMonsters([...monstersOnField, thief])) {
+  for (const monster of zIndexMonsters([
+    ...monstersOnField,
+    ...getAllPlayer(),
+  ])) {
     monster.drawImage();
-    if (monster !== thief) {
+    if (!monster.isPlayer) {
       drawDamage(monster);
     } else {
       drawDamage(monster, { style: "red" });
@@ -468,7 +499,68 @@ onCanvasRender$.subscribe(() => {
     backgroundSoundTogglerImagePosition.x,
     backgroundSoundTogglerImagePosition.y
   );
+
+  if (onDrawAfter$.observed) {
+    onDrawAfter$.next();
+  }
 });
+
+// Display ChatRoom and Resurrection
+onLoadPlayer$
+  .pipe(
+    mergeMap((player) => {
+      return player.onDied$.pipe(
+        delay(1500),
+        switchMap(() => {
+          const displayChatRoom$ = onDrawAfter$.pipe(
+            tap(() => {
+              if (player.direction === DIRECTION.RIGHT) {
+                ctx.drawImage(
+                  requireResurrectChatRoomImage,
+                  player.x - 100,
+                  player.y - 25
+                );
+              } else if (player.direction === DIRECTION.LEFT) {
+                ctx.drawImage(
+                  requireResurrectChatRoomImage,
+                  player.x,
+                  player.y - 25
+                );
+              }
+            })
+          );
+
+          const hoverChatRoom$ = defer(() => {
+            if (player.direction === DIRECTION.RIGHT) {
+              return canvasHover(canvas, {
+                x: player.x - 100,
+                y: player.y - 25,
+                w: requireResurrectChatRoomImage.width,
+                h: requireResurrectChatRoomImage.height,
+              });
+            } else if (player.direction === DIRECTION.LEFT) {
+              return canvasHover(canvas, {
+                x: player.x,
+                y: player.y - 25,
+                w: requireResurrectChatRoomImage.width,
+                h: requireResurrectChatRoomImage.height,
+              });
+            }
+            return EMPTY;
+          }).pipe(
+            onClickCanvasArea(canvas),
+            tap(() => {
+              resurrectPlayer(player);
+            })
+          );
+
+          return merge(displayChatRoom$, hoverChatRoom$);
+        }),
+        takeUntil(player.onCleanup$)
+      );
+    })
+  )
+  .subscribe();
 
 killCount$.subscribe(() => tick());
 
@@ -476,9 +568,19 @@ const onLoadMonster$ = merge(onRespawnMonster$, from(monstersOnField)).pipe(
   shareReplay()
 );
 
-onCanvasMount$.subscribe(() => {
-  keyboardController.start();
-});
+let keyboardController: KeyboardController;
+onLoadPlayer$
+  .pipe(
+    debounce(() => onCanvasMount$),
+    tap((player) => {
+      if (keyboardController) {
+        keyboardController.cleanup();
+      }
+      keyboardController = new KeyboardController(canvas, player);
+      keyboardController.start();
+    })
+  )
+  .subscribe();
 
 onCanvasMount$.pipe(switchMap(() => onLoadMonster$)).subscribe((monster) => {
   monster.randomSpawn();
@@ -540,7 +642,8 @@ const onMonsterDropedItems$ = merge(onLoadMonster$, onSummonMonster$).pipe(
               throttleTime(50),
               checkPlayerCollideItem(player, fieldItem),
               playerUseItem(player, fieldItem),
-              takeUntil(fieldItem.item.onCleanUp$)
+              takeUntil(fieldItem.item.onCleanUp$),
+              takeUntil(player.onCleanup$)
             );
           })
         );
@@ -549,7 +652,8 @@ const onMonsterDropedItems$ = merge(onLoadMonster$, onSummonMonster$).pipe(
           playerCanPick$.pipe(ignoreElements()),
           removeUselessItem$.pipe(ignoreElements())
         );
-      })
+      }),
+      takeUntil(monster.onCleanup$)
     )
   )
 );

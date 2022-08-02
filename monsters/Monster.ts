@@ -159,6 +159,8 @@ export abstract class Monster {
   respawnTimeMin = 5000;
   respawnTimeMax = 20000;
 
+  isPlayer = false;
+
   showHpGauge = false;
 
   // class item/rate
