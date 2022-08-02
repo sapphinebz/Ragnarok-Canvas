@@ -26,7 +26,7 @@ export class BaphometJr extends Monster {
   respawnTimeMax = 25000;
 
   atk = 50;
-  visionRange = 120;
+  visionRange = 250;
   trackRange = 300;
   isAggressiveOnVision = true;
   dps = 300;

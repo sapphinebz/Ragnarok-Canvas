@@ -1,14 +1,11 @@
+import { forkJoin, from, merge, mergeMap, Subject, takeUntil } from "rxjs";
 import {
-  AsyncSubject,
-  connectable,
-  forkJoin,
-  from,
-  mergeMap,
-  ReplaySubject,
-  Subject,
-  takeUntil,
-} from "rxjs";
-import { tap, switchMap, repeat, debounceTime } from "rxjs/operators";
+  tap,
+  switchMap,
+  repeat,
+  debounceTime,
+  ignoreElements,
+} from "rxjs/operators";
 import { Monster } from "../monsters/Monster";
 import { CastingSkill } from "./CastingSkill";
 import * as Field from "..";
@@ -34,6 +31,7 @@ export class ComeOn extends CastingSkill {
     this.casting("รุมโว้ย", user, () => {
       const summonMonsters = this.config.summonMonsters();
       this.onSummon$.next(summonMonsters);
+      const groupAggressiveTarget$ = new Subject<Monster>();
       from(summonMonsters)
         .pipe(
           mergeMap((summonMonster) => {
@@ -50,7 +48,35 @@ export class ComeOn extends CastingSkill {
               player.aggressiveWith(summonMonster);
               summonMonster.faceTo(player);
             }
-            return user.onDied$.pipe(
+
+            const tellFiendsAboutAggressive$ =
+              summonMonster.aggressiveTarget$.pipe(
+                tap((player) => {
+                  if (player) {
+                    groupAggressiveTarget$.next(player);
+                    if (!user.aggressiveTarget) {
+                      player.aggressiveWith(user);
+                      user.faceTo(player);
+                    }
+                  }
+                })
+              );
+
+            const aggressiveWithFriends$ = groupAggressiveTarget$.pipe(
+              tap((player) => {
+                if (!summonMonster.aggressiveTarget) {
+                  player.aggressiveWith(summonMonster);
+                  summonMonster.faceTo(player);
+                }
+              })
+            );
+
+            return merge(
+              tellFiendsAboutAggressive$.pipe(ignoreElements()),
+              aggressiveWithFriends$.pipe(ignoreElements()),
+              user.onDied$
+              // autoToHostAggressive$.pipe(ignoreElements())
+            ).pipe(
               tap(() => {
                 summonMonster.die();
                 setTimeout(() => {
