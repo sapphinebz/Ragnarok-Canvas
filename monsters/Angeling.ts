@@ -16,7 +16,7 @@ import { Pouring } from "./Pouring";
 import { SantaPoring } from "./SantaPoring";
 
 export class Angeling extends Poring {
-  atk = 120;
+  atk = 90;
   speedX = 70;
   speedY = 70;
 
@@ -134,7 +134,7 @@ export class Angeling extends Poring {
       [WhiteHerb, 40],
       [Apple, 70],
       [Apple, 30],
-      [WhitePotion, 15],
+      [WhitePotion, 25],
     ];
 
     this.whenHp(

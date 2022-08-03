@@ -1,5 +1,6 @@
 import { defer, Observable } from "rxjs";
 import { tap } from "rxjs/operators";
+import { ConcentrationPotion } from "../items/ConcentrationPotion";
 import { EvilHorn } from "../items/EvilHorn";
 import { WhiteHerb } from "../items/WhiteHerb";
 import { YggdrasilBerry } from "../items/YggdrasilBerry";
@@ -395,6 +396,7 @@ export class Baphomet extends Monster {
     this.dropItems = [
       [YggdrasilBerry, 10],
       [EvilHorn, 30],
+      [ConcentrationPotion, 15],
       [WhiteHerb, 15],
     ];
 

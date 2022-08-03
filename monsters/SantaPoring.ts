@@ -46,10 +46,10 @@ export class SantaPoring extends Poring {
       .subscribe();
 
     this.dropItems = [
-      [CandyCane, 15],
+      [CandyCane, 25],
       [Apple, 30],
       [RedHerb, 30],
-      [Candy, 15],
+      [Candy, 35],
     ];
 
     this.onDieChangeValueEffect({
