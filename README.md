@@ -16,5 +16,8 @@ https://sapphinebz.github.io/Ragnarok-Canvas/
 ทดลองเล่น กด z, x ตี กดเดิน ลูกศร ซ้าย ขวา บน ล่าง
 https://sapphinebz.github.io/Ragnarok-Canvas/
 
+วิธีรันโปรเจค
+เปิดไฟล์ index.html บน docs ก็เล่นได้เลย
+
 พัฒนาด้วย Thanadit Buthong
 
