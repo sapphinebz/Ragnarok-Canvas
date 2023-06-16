@@ -5,6 +5,12 @@ import {
   take,
   tap,
   throttle as rxThrottle,
+  mergeWith,
+  mergeAll,
+  scan,
+  takeWhile,
+  endWith,
+  distinctUntilChanged,
 } from "rxjs/operators";
 import { createDeltaTime } from "../utils/delta-time";
 import {
@@ -13,6 +19,7 @@ import {
   ReplaySubject,
   Subject,
   connectable,
+  from,
   fromEvent,
 } from "rxjs";
 import { WindowChange, windowResize } from "../utils/window-resize";
@@ -21,6 +28,7 @@ import { fromKeyPress } from "../utils/from-key-press";
 import { fromLoop } from "../utils/from-loop";
 import { fromFrameIndexLoop } from "../utils/from-frame-index-loop";
 import { fromTimer } from "../utils/from-timer";
+import { loadImage } from "../utils/load-image";
 
 export const canvas = document.querySelector<HTMLCanvasElement>("canvas")!;
 export const context = canvas.getContext("2d")!;
@@ -39,14 +47,19 @@ export const deltaTime$ = createDeltaTime().pipe(
 const _windowSize = new ReplaySubject<WindowChange>(1);
 export const windowSize$ = _windowSize.asObservable();
 
+const _requireLoadResources: Observable<any>[] = [windowSize$.pipe(take(1))];
+
 const _onResourceInit = new AsyncSubject<void>();
 export const onResourceInit$ = _onResourceInit.asObservable();
-windowSize$.pipe(take(1)).subscribe({
-  next: () => {
-    _onResourceInit.next();
-    _onResourceInit.complete();
-  },
-});
+
+from(_requireLoadResources)
+  .pipe(mergeAll())
+  .subscribe({
+    complete: () => {
+      _onResourceInit.next();
+      _onResourceInit.complete();
+    },
+  });
 
 connectable(
   windowResize().pipe(
@@ -72,3 +85,18 @@ export const onKeyPress = fromKeyPress(keydown$, keyup$, deltaTime$);
 export const loopFrameIndex = fromFrameIndexLoop(loop);
 export const throttleTime = (duration: number) =>
   rxThrottle(() => loop(duration));
+
+export const loadSprite = (tag: string, image: HTMLImageElement) => {
+  _requireLoadResources.push(loadImage(image));
+};
+
+export const tween = (duration: number) =>
+  deltaTime$.pipe(
+    scan((elaspe, deltaTime) => deltaTime + elaspe, 0),
+    map((elapse) => elapse / duration),
+    takeWhile((ratio) => ratio <= 1),
+    endWith(1),
+    distinctUntilChanged()
+  );
+
+onKeyPress("ArrowRight").pipe(map(() => "ArrowRight"));

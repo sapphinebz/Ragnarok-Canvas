@@ -21,6 +21,7 @@ import {
   switchMap,
   take,
   tap,
+  using,
 } from "rxjs";
 import {
   audit,
@@ -50,7 +51,6 @@ import {
 import { DropItems, FieldItem } from "../items/Item";
 import { Skill, Skills } from "../skills/Skill";
 import { loadCriticalAttack } from "../sounds/critical-attack";
-import { deltaTime } from "../utils/animation";
 import { distanceBetweenTarget } from "../utils/collision";
 import {
   BACKGROUND_CASTING_SPELL_COLOR,
@@ -62,7 +62,7 @@ import { playAudio } from "../utils/play-audio";
 import { randomEnd, randomMinMax } from "../utils/random-minmax";
 import { repeatUntil } from "../utils/repeat-util";
 import { shuffle } from "../utils/shuffle";
-import { loopFrameIndex, wait } from "../cores/core";
+import { deltaTime$, loopFrameIndex, wait } from "../cores/core";
 
 export interface MoveLocation {
   x: number;
@@ -852,12 +852,19 @@ export abstract class Monster {
     this.actionChange$.next(ACTION.HURT);
   }
 
+  deltaWalking() {
+    return using(
+      () => this.walking().subscribe(),
+      () => deltaTime$.pipe(map((t) => t / 1000))
+    );
+  }
+
   walkingToTarget(
     target: TargetLocation,
     predicate: (distance: number) => boolean
   ) {
     return defer(() => {
-      return merge(this.walking().pipe(ignoreElements()), deltaTime()).pipe(
+      return this.deltaWalking().pipe(
         map((delta) => {
           const isAlreadyAttackRange = predicate(
             distanceBetweenTarget(target, this).distance
@@ -1475,7 +1482,7 @@ export abstract class Monster {
       if (faceDirection !== undefined) {
         this.direction = faceDirection;
       }
-      return merge(this.walking().pipe(ignoreElements()), deltaTime()).pipe(
+      return this.deltaWalking().pipe(
         map((delta) => moveOption(delta)),
         (source) => {
           if (stopIfOutOfCanvas) {

@@ -9,7 +9,6 @@ export function fromKeyPress(
   return (key: string) => {
     const _keydown$ = keydown$.pipe(
       filter((event) => {
-        console.log(event);
         return event.key === key;
       })
     );

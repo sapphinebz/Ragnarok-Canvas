@@ -1,8 +1,8 @@
 import { Subscription, takeUntil } from "rxjs";
 import { Monster } from "../monsters/Monster";
 import { loadCastingSpellAudio } from "../sounds/casting-spell";
-import { tween } from "../utils/animation";
 import { Skill } from "./Skill";
+import { tween } from "../cores/core";
 
 export abstract class CastingSkill extends Skill {
   castingTime = 0;

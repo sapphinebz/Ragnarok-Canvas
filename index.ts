@@ -58,6 +58,7 @@ import {
   canvas,
   context,
   deltaTime$,
+  loadSprite,
   loopFrameIndex,
   onKeyPress,
   onResourceInit$,
@@ -65,21 +66,26 @@ import {
   wait,
   windowSize$,
 } from "./cores/core";
+import { thiefLeftSpriteImage } from "./sprites/load-thief-left";
+import { thiefRightSpriteImage } from "./sprites/load-thief-right";
+
+loadSprite("theif", thiefLeftSpriteImage);
+loadSprite("thief", thiefRightSpriteImage);
 
 /**
  * MONSTERS
  */
 // number monster in field & class
 const monstersClass: [any, number][] = [
-  [Acidus, 0],
-  [Poring, 10],
-  [SantaPoring, 0],
-  [Angeling, 1],
-  [Poporing, 0],
-  [Fabre, 7],
-  [Baphomet, 1],
-  [ChonChon, 7],
-  [Pecopeco, 4],
+  // [Acidus, 0],
+  // [Poring, 10],
+  // [SantaPoring, 0],
+  // [Angeling, 1],
+  // [Poporing, 0],
+  // [Fabre, 7],
+  // [Baphomet, 1],
+  // [ChonChon, 7],
+  // [Pecopeco, 4],
 ];
 
 export const onAddFieldItem$ = new Subject<FieldItem>();
