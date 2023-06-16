@@ -11,10 +11,13 @@ import {
   takeWhile,
   endWith,
   distinctUntilChanged,
+  switchMap,
 } from "rxjs/operators";
 import { createDeltaTime } from "../utils/delta-time";
 import {
   AsyncSubject,
+  EMPTY,
+  NEVER,
   Observable,
   ReplaySubject,
   Subject,
@@ -29,6 +32,7 @@ import { fromLoop } from "../utils/from-loop";
 import { fromFrameIndexLoop } from "../utils/from-frame-index-loop";
 import { fromTimer } from "../utils/from-timer";
 import { loadImage } from "../utils/load-image";
+import { visibilityChange } from "../utils/visibility-change";
 
 export const canvas = document.querySelector<HTMLCanvasElement>("canvas")!;
 export const context = canvas.getContext("2d")!;
@@ -36,7 +40,13 @@ export const context = canvas.getContext("2d")!;
 const _onBeforeRender = new Subject<void>();
 export const onBeforeRender$ = _onBeforeRender.asObservable();
 
-export const deltaTime$ = createDeltaTime().pipe(
+export const deltaTime$ = visibilityChange().pipe(
+  switchMap((visibility) => {
+    if (visibility) {
+      return createDeltaTime();
+    }
+    return NEVER;
+  }),
   tap(() => {
     context.clearRect(0, 0, window.innerWidth, window.innerHeight);
     _onBeforeRender.next();
