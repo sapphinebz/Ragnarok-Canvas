@@ -17,6 +17,8 @@ https://sapphinebz.github.io/Ragnarok-Canvas/
 https://sapphinebz.github.io/Ragnarok-Canvas/
 
 วิธีรันโปรเจค
+พิมพ์คำสั่ง npm serve หรือ yarn serve 
+มันจะสร้างไฟล์ docs
 เปิดไฟล์ index.html บน docs ก็เล่นได้เลย
 
 พัฒนาด้วย Thanadit Buthong
