@@ -1,4 +1,4 @@
-import { defer, interval, merge, Observable } from "rxjs";
+import { defer, merge, Observable } from "rxjs";
 import { connect, ignoreElements, tap } from "rxjs/operators";
 import { ConcentrationPotion } from "../items/ConcentrationPotion";
 import { Jellopy } from "../items/Jellopy";
@@ -12,6 +12,7 @@ import { loadChonchonFlyingAudio } from "../sounds/chonchon-flying";
 import { chonchonLeftImage } from "../sprites/chonchon-left-image";
 import { chonchonRightImage } from "../sprites/chonchon-right-image";
 import { CropImage, DIRECTION, Monster } from "./Monster";
+import { loop } from "../cores/core";
 
 export class ChonChon extends Monster {
   x = 100;
@@ -370,7 +371,7 @@ export class ChonChon extends Monster {
 
   flyingVibrateAnimation<T>(delay: number) {
     this.frameY = 0;
-    const update$ = interval(delay).pipe(
+    const update$ = loop(delay).pipe(
       connect((t$) => {
         let marginWidthDirection = 1;
         let marginWidth = -1;

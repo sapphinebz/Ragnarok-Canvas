@@ -7,6 +7,7 @@ import { poringSpriteLeftImage } from "../sprites/load-poring-left";
 import { poringSpriteRightImage } from "../sprites/load-poring-right";
 import { CropImage, DIRECTION } from "./Monster";
 import { Poring } from "./Poring";
+import { loopFrameIndex } from "../cores/core";
 
 export class SantaPoring extends Poring {
   isAggressiveOnVision = false;
@@ -18,7 +19,11 @@ export class SantaPoring extends Poring {
 
   santaHatY = -8;
   santaHatFrameX = 2;
-  santaHatFrames$ = this.timelineFrames(this.walkSpeed * 3, 0, 2).pipe(
+  santaHatFrames$ = loopFrameIndex({
+    delay: this.walkSpeed * 3,
+    minIndex: 0,
+    maxIndex: 2,
+  }).pipe(
     tap({
       next: (frameX) => {
         this.santaHatFrameX = frameX;

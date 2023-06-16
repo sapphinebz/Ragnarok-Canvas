@@ -1,5 +1,6 @@
-import { MonoTypeOperatorFunction, takeUntil, timer } from "rxjs";
+import { MonoTypeOperatorFunction, takeUntil } from "rxjs";
 import { Monster } from "../monsters/Monster";
+import { wait } from "../cores/core";
 
 export function randomMinMax(min: number, max: number) {
   min = Math.ceil(min);
@@ -8,7 +9,7 @@ export function randomMinMax(min: number, max: number) {
 }
 
 export function randomTimer(min: number, max: number) {
-  return timer(randomMinMax(min, max));
+  return wait(randomMinMax(min, max));
 }
 
 export function randomEnd<T>(

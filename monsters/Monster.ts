@@ -8,7 +8,6 @@ import {
   from,
   fromEvent,
   ignoreElements,
-  interval,
   map,
   merge,
   MonoTypeOperatorFunction,
@@ -22,7 +21,6 @@ import {
   switchMap,
   take,
   tap,
-  timer,
 } from "rxjs";
 import {
   audit,
@@ -64,6 +62,7 @@ import { playAudio } from "../utils/play-audio";
 import { randomEnd, randomMinMax } from "../utils/random-minmax";
 import { repeatUntil } from "../utils/repeat-util";
 import { shuffle } from "../utils/shuffle";
+import { loopFrameIndex, wait } from "../cores/core";
 
 export interface MoveLocation {
   x: number;
@@ -356,7 +355,7 @@ export abstract class Monster {
               sum += damage;
               if (index !== damages.length - 1) {
                 return animateComboDamage(sum, this).pipe(
-                  takeUntil(timer(this.delayAnimationAttack))
+                  takeUntil(wait(this.delayAnimationAttack))
                 );
               }
               return animateComboDamage(sum, this);
@@ -438,7 +437,7 @@ export abstract class Monster {
                     distinctUntilChanged(),
                     switchMap((inAttackRange) => {
                       if (inAttackRange) {
-                        return timer(this.dps).pipe(
+                        return wait(this.dps).pipe(
                           tap(() => {
                             if (this.aggressiveTarget !== null) {
                               this.actionChange$.next(ACTION.ATTACK);
@@ -721,7 +720,7 @@ export abstract class Monster {
               if (fieldItems.length === 0) {
                 return EMPTY;
               }
-              return timer(0, 500).pipe(
+              return wait(0, 500).pipe(
                 map(() => {
                   let nearest: FieldItem | null = null;
                   let distance: number = 0;
@@ -821,39 +820,15 @@ export abstract class Monster {
     option: { once: boolean } = { once: false }
   ) {
     this.frameX = minFrameX;
-    return this.timelineFrames(delay, minFrameX, maxFrameX, option).pipe(
+    return loopFrameIndex({
+      delay,
+      minIndex: minFrameX,
+      maxIndex: maxFrameX,
+      once: option.once,
+    }).pipe(
       tap((nextFrame) => {
         this.frameX = nextFrame;
       })
-    );
-  }
-
-  timelineFrames(
-    delay: number,
-    minFrameX: number,
-    maxFrameX: number,
-    option: { once: boolean } = { once: false }
-  ) {
-    const { once } = option;
-    let currentFrameX = minFrameX;
-    return interval(delay).pipe(
-      map(() => currentFrameX + 1),
-      takeWhile((nextFrame) => {
-        if (once && nextFrame > maxFrameX) {
-          return false;
-        }
-        return true;
-      }),
-      map((nextFrame) => {
-        if (nextFrame > maxFrameX) {
-          return minFrameX;
-        }
-        return nextFrame;
-      }),
-      tap((nextFrame) => {
-        currentFrameX = nextFrame;
-      }),
-      startWith(currentFrameX)
     );
   }
 
@@ -1399,7 +1374,7 @@ export abstract class Monster {
    * for Skill Behavior
    */
   canUseAgainAfter(duration: number): OperatorFunction<any, any> {
-    return repeat({ delay: () => timer(duration) });
+    return repeat({ delay: () => wait(duration) });
   }
 
   render() {

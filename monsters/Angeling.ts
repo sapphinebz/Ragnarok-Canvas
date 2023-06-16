@@ -14,6 +14,7 @@ import { Poporing } from "./Poporing";
 import { Poring } from "./Poring";
 import { Pouring } from "./Pouring";
 import { SantaPoring } from "./SantaPoring";
+import { loopFrameIndex } from "../cores/core";
 
 export class Angeling extends Poring {
   atk = 90;
@@ -94,7 +95,11 @@ export class Angeling extends Poring {
   ];
 
   frameXFlip = 1;
-  flipWingFrame$ = this.timelineFrames(this.walkSpeed * 4, 0, 1).pipe(
+  flipWingFrame$ = loopFrameIndex({
+    delay: this.walkSpeed * 4,
+    minIndex: 0,
+    maxIndex: 1,
+  }).pipe(
     tap({
       next: (frameX) => (this.frameXFlip = frameX),
     })

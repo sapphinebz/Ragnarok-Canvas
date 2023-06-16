@@ -1,8 +1,9 @@
-import { EMPTY, timer } from "rxjs";
+import { EMPTY } from "rxjs";
 import { filter, switchMap, takeUntil, tap } from "rxjs/operators";
 import { Monster } from "../monsters/Monster";
 import { randomMinMax } from "../utils/random-minmax";
 import { Skill } from "./Skill";
+import { wait } from "../cores/core";
 
 export class DoubleAttack extends Skill {
   passive: boolean = true;
@@ -22,7 +23,7 @@ export class DoubleAttack extends Skill {
           const randomNumber = randomMinMax(0, 100);
           const doubleAttackRate = 5 * this.level;
           if (randomNumber <= doubleAttackRate) {
-            return timer(monster.delayAnimationAttack).pipe(
+            return wait(monster.delayAnimationAttack).pipe(
               tap(() => {
                 monster.onDamageArea$.next({ ...area, skill: "DoubleAttack" });
                 this.onUse.next();

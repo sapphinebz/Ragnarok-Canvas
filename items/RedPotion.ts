@@ -1,8 +1,8 @@
-import { Monster } from '../monsters/Monster';
-import { loadHealAudio } from '../sounds/heal-effect';
-import { randomMinMax } from '../utils/random-minmax';
-import { redPotionImage } from './images/red-potion-image';
-import { Item } from './Item';
+import { Monster } from "../monsters/Monster";
+import { loadHealAudio } from "../sounds/heal-effect";
+import { randomMinMax } from "../utils/random-minmax";
+import { redPotionImage } from "./images/red-potion-image";
+import { Item } from "./Item";
 
 export class RedPotion extends Item {
   usable = true;
@@ -12,7 +12,7 @@ export class RedPotion extends Item {
     this.useAudio.volume = 0.05;
   }
   useWith(monster: Monster): void {
-    const hp = randomMinMax(45, 65);
+    const hp = randomMinMax(65, 85);
     monster.restoreHp(hp);
     this.useAudio.play();
   }

@@ -15,18 +15,14 @@ import {
   Observable,
   OperatorFunction,
   ReplaySubject,
-  share,
-  startWith,
   Subject,
   switchMap,
   takeWhile,
   tap,
-  timer,
 } from "rxjs";
 import {
   connect,
   debounce,
-  debounceTime,
   delay,
   filter,
   map,
@@ -34,7 +30,6 @@ import {
   shareReplay,
   take,
   takeUntil,
-  throttleTime,
 } from "rxjs/operators";
 import { KeyboardController } from "./gamepad/keyboard-controller";
 import { drawDamage, drawRestoreHp } from "./gamepad/number-drawer";
@@ -58,17 +53,18 @@ import { randomMinMax } from "./utils/random-minmax";
 import { Poporing } from "./monsters/Poporing";
 import { requireResurrectChatRoomImage } from "./sprites/require-resurrect-chat-room";
 import { loadResurrectionSkill } from "./sounds/resurrection-skill";
-
-const canvas = document.querySelector<HTMLCanvasElement>("canvas")!;
-const ctx = canvas.getContext("2d")!;
-
-const onWindowResize$ = fromEvent(window, "resize").pipe(
-  startWith(0),
-  tap(() => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  })
-);
+import { backSlideImage } from "./sprites/back-slide-image";
+import {
+  canvas,
+  context,
+  deltaTime$,
+  loopFrameIndex,
+  onKeyPress,
+  onResourceInit$,
+  throttleTime,
+  wait,
+  windowSize$,
+} from "./cores/core";
 
 /**
  * MONSTERS
@@ -224,7 +220,7 @@ const respawnMonsterRandomTime = (
       return EMPTY;
     }
     const respawnTime = randomMinMax(min, max);
-    return timer(respawnTime).pipe(
+    return wait(respawnTime).pipe(
       tap(() => {
         const Class = getMonsterClass(monster);
         if (Class) {
@@ -302,7 +298,6 @@ export const removeMonsterFromField = (monster: Monster) => {
   if (index > -1) {
     monster.cleanup();
     monstersOnField.splice(index, 1);
-    tick();
   }
 };
 
@@ -392,9 +387,9 @@ const onLoadedImageSoundToggler$ = fromEvent(
 const backgroundSoundTogglerImagePosition = { x: 16, y: 16 };
 
 const drawScore = () => {
-  ctx.textAlign = "center";
-  ctx.font = "bold 24px Arial";
-  ctx.fillStyle = "white";
+  context.textAlign = "center";
+  context.font = "bold 24px Arial";
+  context.fillStyle = "white";
   scoreCanvasXMap.set(
     canvas.width,
     scoreCanvasXMap.get(canvas.width) ?? canvas.width - canvas.width * 0.1
@@ -403,42 +398,18 @@ const drawScore = () => {
     canvas.height,
     scoreCanvasYMap.get(canvas.height) ?? canvas.height * 0.05
   );
-  ctx.fillText(
+  context.fillText(
     `kill: ${killCount$.value}`,
     scoreCanvasXMap.get(canvas.width),
     scoreCanvasYMap.get(canvas.height)
   );
 };
 
-const render$ = new Subject<void>();
-
-// call this function to make render canvas
-const tick = () => {
-  render$.next();
-};
-
-const onCanvasMount$ = new AsyncSubject<void>();
-
-const onCanvasRender$ = onWindowResize$.pipe(
-  switchMap(() => {
-    onCanvasMount$.next();
-    onCanvasMount$.complete();
-
-    return render$.pipe(
-      debounceTime(0, animationFrameScheduler),
-      tap(() => {
-        ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-      })
-    );
-  }),
-  share()
-);
-
 let backgroundMusic: HTMLAudioElement;
 
 onLoadedImageSoundToggler$
   .pipe(
-    switchMap(() => onWindowResize$),
+    switchMap(() => windowSize$),
     switchMap(() => {
       return canvasHover(canvas, {
         x: backgroundSoundTogglerImagePosition.x,
@@ -472,9 +443,9 @@ onLoadedImageSoundToggler$
 
 const onDrawAfter$ = new Subject<void>();
 
-onCanvasRender$.subscribe(() => {
+deltaTime$.subscribe(() => {
   for (const fieldItem of fieldItems.value) {
-    ctx.drawImage(
+    context.drawImage(
       fieldItem.item.image,
       fieldItem.location.x,
       fieldItem.location.y
@@ -496,11 +467,17 @@ onCanvasRender$.subscribe(() => {
 
   drawScore();
 
-  ctx.drawImage(
+  context.drawImage(
     backgroundSoundTogglerImage,
     backgroundSoundTogglerImagePosition.x,
     backgroundSoundTogglerImagePosition.y
   );
+
+  context.drawImage(backSlideImage, 75, 18);
+  context.textAlign = "center";
+  context.font = "normal 18px Arial";
+  context.fillStyle = "white";
+  context.fillText(`C`, 87, 60);
 
   if (onDrawAfter$.observed) {
     onDrawAfter$.next();
@@ -517,13 +494,13 @@ onLoadPlayer$
           const displayChatRoom$ = onDrawAfter$.pipe(
             tap(() => {
               if (player.direction === DIRECTION.RIGHT) {
-                ctx.drawImage(
+                context.drawImage(
                   requireResurrectChatRoomImage,
                   player.x - 100,
                   player.y - 25
                 );
               } else if (player.direction === DIRECTION.LEFT) {
-                ctx.drawImage(
+                context.drawImage(
                   requireResurrectChatRoomImage,
                   player.x,
                   player.y - 25
@@ -564,7 +541,7 @@ onLoadPlayer$
   )
   .subscribe();
 
-killCount$.subscribe(() => tick());
+// killCount$.subscribe(() => tick());
 
 const onLoadMonster$ = merge(onRespawnMonster$, from(monstersOnField)).pipe(
   shareReplay()
@@ -573,7 +550,7 @@ const onLoadMonster$ = merge(onRespawnMonster$, from(monstersOnField)).pipe(
 let keyboardController: KeyboardController;
 onLoadPlayer$
   .pipe(
-    debounce(() => onCanvasMount$),
+    debounce(() => onResourceInit$),
     tap((player) => {
       if (keyboardController) {
         keyboardController.cleanup();
@@ -584,7 +561,7 @@ onLoadPlayer$
   )
   .subscribe();
 
-onCanvasMount$.pipe(switchMap(() => onLoadMonster$)).subscribe((monster) => {
+onResourceInit$.pipe(switchMap(() => onLoadMonster$)).subscribe((monster) => {
   monster.randomSpawn();
 });
 
@@ -624,7 +601,7 @@ const onMonsterDropedItems$ = merge(onLoadMonster$, onSummonMonster$).pipe(
             return fieldItem.item.usable === false;
           }),
           mergeMap((fieldItem) => {
-            return timer(20000).pipe(
+            return wait(20000).pipe(
               tap(() => {
                 removeItemFromField(fieldItem);
               })
@@ -681,4 +658,6 @@ merge(
   onMonsterTickRender$,
   onPlayerTickRender$,
   onMonsterDropedItems$
-).subscribe(() => tick());
+).subscribe(() => {
+  // tick()
+});
