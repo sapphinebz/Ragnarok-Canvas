@@ -6,8 +6,11 @@ https://sapphinebz.github.io/Ragnarok-Canvas/
 ## _technology_
 
 - Javascript
-- RxJS (Javascript Library)
+- RxJS (Javascript Library, State Management)
 - Typescript
+
+Module Bundler
+- Webpack
 
 ![Boppin' Code Channel](https://yt3.ggpht.com/ytc/AKedOLSwF25Vcx5D_EIvdwVdrgNQFUzo6-nwc94Ies6R=s176-c-k-c0x00ffffff-no-rj-mo)
 
