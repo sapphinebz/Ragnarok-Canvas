@@ -954,7 +954,7 @@ export abstract class Monster {
 
   walkingDown(config: WalkingStoppable = { stopIfOutOfCanvas: true }) {
     return this.walkingDirection({
-      faceDirection: DIRECTION.LEFT,
+      faceDirection: this.direction,
       moveOption: (delta: number) => this.moveDown(delta),
       stopIfOutOfCanvas: config.stopIfOutOfCanvas,
     });

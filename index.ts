@@ -32,7 +32,6 @@ import {
   take,
   takeUntil,
 } from "rxjs/operators";
-import { KeyboardController } from "./gamepad/keyboard-controller";
 import { drawDamage, drawRestoreHp } from "./gamepad/number-drawer";
 import { FieldItem } from "./items/Item";
 import { Acidus } from "./monsters/Acidus";
@@ -40,7 +39,13 @@ import { Angeling } from "./monsters/Angeling";
 import { Baphomet } from "./monsters/Baphomet";
 import { ChonChon } from "./monsters/ChonChon";
 import { Fabre } from "./monsters/Fabre";
-import { Area, DamageArea, DIRECTION, Monster } from "./monsters/Monster";
+import {
+  ACTION,
+  Area,
+  DamageArea,
+  DIRECTION,
+  Monster,
+} from "./monsters/Monster";
 import { Pecopeco } from "./monsters/PecoPeco";
 import { Poring } from "./monsters/Poring";
 import { SantaPoring } from "./monsters/SantaPoring";
@@ -60,8 +65,7 @@ import {
   context,
   deltaTime$,
   loadSprite,
-  loopFrameIndex,
-  onKeyPress,
+  onKeyboardControl,
   onResourceInit$,
   throttleTime,
   wait,
@@ -342,6 +346,14 @@ addPlayer(thief);
 
 onLoadPlayer$
   .pipe(
+    switchMap((player) => {
+      return onKeyboardControl(player);
+    })
+  )
+  .subscribe();
+
+onLoadPlayer$
+  .pipe(
     mergeMap((player) => {
       return player.onDamageArea$.pipe(
         onMonstersBeAttacked({
@@ -545,20 +557,6 @@ onLoadPlayer$
 const onLoadMonster$ = merge(onRespawnMonster$, from(monstersOnField)).pipe(
   shareReplay()
 );
-
-let keyboardController: KeyboardController;
-onLoadPlayer$
-  .pipe(
-    debounce(() => onResourceInit$),
-    tap((player) => {
-      if (keyboardController) {
-        keyboardController.cleanup();
-      }
-      keyboardController = new KeyboardController(canvas, player);
-      keyboardController.start();
-    })
-  )
-  .subscribe();
 
 onResourceInit$.pipe(switchMap(() => onLoadMonster$)).subscribe((monster) => {
   monster.randomSpawn();
