@@ -1,6 +1,7 @@
 import "./style.css";
 
 import {
+  AsyncSubject,
   BehaviorSubject,
   combineLatest,
   defer,
@@ -17,8 +18,10 @@ import {
   switchMap,
   takeWhile,
   tap,
+  using,
 } from "rxjs";
 import {
+  audit,
   connect,
   debounce,
   delay,
@@ -188,30 +191,22 @@ const corpseDisappearAfterAnimationEnd = <T>(
   monster: Monster,
   duration: number
 ): OperatorFunction<T, any> => {
-  return (source: Observable<T>) =>
-    new Observable<any>((subscriber) => {
-      let timeoutIndex: any;
-      const subscription = source.subscribe({
-        error: (err) => {
-          subscriber.error(err);
-        },
-        complete: () => {
-          timeoutIndex = setTimeout(() => {
+  return (dieAnimation$: Observable<T>) => {
+    const animateCompleted = new AsyncSubject<any>();
+    return using(
+      () => {
+        return dieAnimation$.subscribe(animateCompleted);
+      },
+      () =>
+        animateCompleted.pipe(
+          audit(() => wait(duration)),
+          map(() => {
             removeMonsterFromField(monster);
-            subscriber.next(monstersOnField);
-            subscriber.complete();
-          }, duration);
-        },
-      });
-      return {
-        unsubscribe: () => {
-          if (timeoutIndex) {
-            clearTimeout(timeoutIndex);
-          }
-          subscription.unsubscribe();
-        },
-      };
-    });
+            return monstersOnField;
+          })
+        )
+    );
+  };
 };
 
 const respawnMonsterRandomTime = (

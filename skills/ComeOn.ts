@@ -10,6 +10,7 @@ import { Monster } from "../monsters/Monster";
 import { CastingSkill } from "./CastingSkill";
 import * as Field from "..";
 import { randomLocationAroundTarget } from "../utils/random-minmax";
+import { wait } from "../cores/core";
 
 export class ComeOn extends CastingSkill {
   onSummon$ = new Subject<Monster[]>();
@@ -79,9 +80,9 @@ export class ComeOn extends CastingSkill {
             ).pipe(
               tap(() => {
                 summonMonster.die();
-                setTimeout(() => {
+                wait(5000).subscribe(() => {
                   Field.removeMonsterFromField(summonMonster);
-                }, 5000);
+                });
               })
             );
           }),

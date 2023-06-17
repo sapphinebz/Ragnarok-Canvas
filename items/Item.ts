@@ -1,5 +1,6 @@
 import { AsyncSubject } from "rxjs";
 import { Monster, MoveLocation } from "../monsters/Monster";
+import { wait } from "../cores/core";
 
 export interface FieldItem {
   class: any;
@@ -47,13 +48,13 @@ export abstract class Item {
     if (!monster.statusEffect.includes(statusEffect)) {
       onEffect();
       monster.statusEffect.push(statusEffect);
-      setTimeout(() => {
+      wait(timeout).subscribe(() => {
         onTimeoutEffect();
         const index = monster.statusEffect.findIndex((e) => e === statusEffect);
         if (index > -1) {
           monster.statusEffect.splice(index, 1);
         }
-      }, timeout);
+      });
     }
   }
 
