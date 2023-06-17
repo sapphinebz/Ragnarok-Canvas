@@ -62,7 +62,7 @@ import { playAudio } from "../utils/play-audio";
 import { randomEnd, randomMinMax } from "../utils/random-minmax";
 import { repeatUntil } from "../utils/repeat-util";
 import { shuffle } from "../utils/shuffle";
-import { deltaTime$, loopFrameIndex, wait } from "../cores/core";
+import { deltaTime$, loopFrameIndex, tween, wait } from "../cores/core";
 
 export interface MoveLocation {
   x: number;
@@ -271,10 +271,6 @@ export abstract class Monster {
     return this.actionChange$.value;
   }
 
-  /**
-   * on this monster need render
-   */
-  onActionTick$ = new Subject<void>();
   drawBefore$ = new Subject<{ frameX: number; frameY: number }>();
   drawImage$ = new Subject<void>();
   drawAfter$ = new Subject<{ frameX: number; frameY: number }>();
@@ -544,23 +540,9 @@ export abstract class Monster {
       takeUntil(this.onDied$)
     );
 
-    action$.pipe(takeUntil(this.onCleanup$)).subscribe(() => {
-      this.render();
-    });
+    action$.pipe(takeUntil(this.onCleanup$)).subscribe();
 
-    this.onDied$
-      .pipe(
-        switchMap(() =>
-          this.dying().pipe(
-            tap({
-              next: () => {
-                this.render();
-              },
-            })
-          )
-        )
-      )
-      .subscribe();
+    this.onDied$.pipe(switchMap(() => this.dying())).subscribe();
 
     // Aggressive do damage to target
     this.aggressiveTarget$
@@ -1290,18 +1272,6 @@ export abstract class Monster {
     }
   }
 
-  tween(duration: number, nextEffect: MonoTypeOperatorFunction<number>) {
-    return animationFrames().pipe(
-      map((event) => event.elapsed / duration),
-      takeWhile((t) => t < 1),
-      endWith(1),
-      nextEffect,
-      tap(() => {
-        this.render();
-      })
-    );
-  }
-
   onDieChangeValueEffect(option: {
     init: () => number;
     targetValue: number;
@@ -1311,8 +1281,7 @@ export abstract class Monster {
     return this.onDied$.pipe(
       switchMap(() => {
         const currentLocation = init();
-        return this.tween(
-          250,
+        return tween(250).pipe(
           tap((t) => {
             const newLocation =
               currentLocation + (targetValue - currentLocation) * t;
@@ -1382,10 +1351,6 @@ export abstract class Monster {
    */
   canUseAgainAfter(duration: number): OperatorFunction<any, any> {
     return repeat({ delay: () => wait(duration) });
-  }
-
-  render() {
-    this.onActionTick$.next();
   }
 
   restoreHp(value: number) {

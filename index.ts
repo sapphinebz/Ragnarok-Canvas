@@ -1,8 +1,6 @@
 import "./style.css";
 
 import {
-  animationFrameScheduler,
-  AsyncSubject,
   BehaviorSubject,
   combineLatest,
   defer,
@@ -643,27 +641,12 @@ const onMonsterDropedItems$ = merge(onLoadMonster$, onSummonMonster$).pipe(
 );
 
 // Monster Random Action
-const onMonsterTickRender$ = merge(onLoadMonster$, onSummonMonster$).pipe(
-  mergeMap((monster) => {
-    if (!monster.summonBy) {
-      monster.randomAction();
-    }
-    monster.autoAggressiveOnVisionTarget(onLoadPlayer$);
 
-    return monster.onActionTick$.pipe(takeUntil(monster.onCleanup$));
-    // monster.direction = DIRECTION.RIGHT;
-    // return monster.walking().pipe(repeat());
-  })
-);
-
-const onPlayerTickRender$ = onLoadPlayer$.pipe(
-  mergeMap((player) => player.onActionTick$.pipe(takeUntil(player.onDied$)))
-);
-
-merge(
-  onMonsterTickRender$,
-  onPlayerTickRender$,
-  onMonsterDropedItems$
-).subscribe(() => {
-  // tick()
+merge(onLoadMonster$, onSummonMonster$).subscribe((monster) => {
+  if (!monster.summonBy) {
+    monster.randomAction();
+  }
+  monster.autoAggressiveOnVisionTarget(onLoadPlayer$);
 });
+
+onMonsterDropedItems$.subscribe();

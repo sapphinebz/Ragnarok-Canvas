@@ -8,6 +8,7 @@ import {
   Monster,
 } from "../monsters/Monster";
 import { loadDamageNumbersImage } from "../sprites/load-damage-numbers";
+import { tween } from "../cores/core";
 
 type CropNumber = { [numberStr: string]: CropImage };
 
@@ -234,8 +235,7 @@ export function animateComboDamage(damage: number, monster: Monster) {
   // push data for rendering
   // look at rendering function "drawRestoreHp"
   monster.comboDamagesDrawFrames.push(drawNumber);
-  const scale = monster.tween(
-    200,
+  const scale = tween(200).pipe(
     tap({
       next: (t) => {
         drawNumber.scale = minScale + (maxScale - minScale) * t;
@@ -247,8 +247,7 @@ export function animateComboDamage(damage: number, monster: Monster) {
     })
   );
 
-  const location = monster.tween(
-    1500,
+  const location = tween(1500).pipe(
     tap({
       next: (t) => {
         drawNumber.location.y = startY - t * 80;
@@ -283,8 +282,7 @@ export function animateRestoreHp(restore: number, monster: Monster) {
   // look at rendering function "drawRestoreHp"
   monster.restoredHpDrawFrames.push(drawNumber);
 
-  return monster.tween(
-    1000,
+  return tween(1000).pipe(
     tap({
       next: (t) => {
         drawNumber.scale = maxScale;
@@ -323,8 +321,7 @@ export function animateMissDamage(monster: Monster) {
   // look at rendering function "drawDamage"
   monster.receivedDamagesDrawFrames.push(drawNumber);
 
-  return monster.tween(
-    1000,
+  return tween(1000).pipe(
     tap({
       next: (t) => {
         drawNumber.scale = maxScale;
@@ -366,8 +363,7 @@ export function animateReceivedDamage(damage: DamageNumber, monster: Monster) {
   // look at rendering function "drawDamage"
   monster.receivedDamagesDrawFrames.push(drawNumber);
 
-  return monster.tween(
-    800,
+  return tween(800).pipe(
     tap({
       next: (t) => {
         drawNumber.scale = maxScale - t * (maxScale - minScale);
