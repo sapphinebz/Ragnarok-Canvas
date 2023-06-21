@@ -28,4 +28,5 @@ https://sapphinebz.github.io/Ragnarok-Canvas/
 
 พัฒนาด้วย Thanadit Buthong
 
+เดี๋ยวว่างๆมาทำต่อ
 
