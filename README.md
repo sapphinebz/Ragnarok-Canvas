@@ -24,5 +24,8 @@ https://sapphinebz.github.io/Ragnarok-Canvas/
 มันจะสร้างไฟล์ docs
 เปิดไฟล์ index.html บน docs ก็เล่นได้เลย
 
+<img width="1095" alt="image" src="https://github.com/sapphinebz/Ragnarok-Canvas/assets/46397355/a2635588-5741-4538-a56d-609b4be6334c">
+
 พัฒนาด้วย Thanadit Buthong
+
 
